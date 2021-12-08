@@ -4,14 +4,20 @@ import { PusherServer } from '../../../lib/pusherServer';
 import { channelName } from '../../../lib/pusherChannel';
 
 type Data = {
-  message: string;
+  message: string | object;
 };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
   const pusher = PusherServer;
-
-  await pusher.trigger(channelName, 'message-event', {
-    message: 'hello world',
+  const { userName, message } = req.body;
+  console.log(req.body, userName, typeof userName);
+  const pushRes = await pusher.trigger(channelName, 'message-event', {
+    message,
+    userName,
   });
-  res.status(200).json({ message: 'Hello!' });
+  if (pushRes.ok) {
+    res.status(200).json({ message: 'sent!' });
+  } else {
+    res.status(500).json({ message: 'looks like an erro' });
+  }
 }
