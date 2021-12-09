@@ -1,8 +1,13 @@
-import '../styles/globals.css'
-import type { AppProps } from 'next/app'
+import '../styles/globals.css';
+import type { AppProps } from 'next/app';
+import { AuthContextProvider } from '../stores/useNetlifyIdentity';
 
 function MyApp({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />
+  return (
+    <AuthContextProvider>
+      <Component {...pageProps} />
+    </AuthContextProvider>
+  );
 }
 
-export default MyApp
+export default MyApp;
