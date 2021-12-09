@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import Pusher from 'pusher-js';
 import { pusherClientOptions } from '../lib/pusherClient';
 import { channelName } from '../lib/pusherChannel';
+import netlifyIdentity from 'netlify-identity-widget';
 
 interface Data {
   userName: string;
@@ -19,6 +20,26 @@ const Home: NextPage = () => {
   const [msgToSend, setMsgToSend] = useState('');
   const [liveChatMessages, setLiveChatMessages] = useState<Data[]>([]);
   const pusherRef = useRef<Pusher>();
+
+  // function login() {
+  //   netlifyIdentity.open('login');
+  // }
+
+  // function logout() {
+  //   netlifyIdentity.logout();
+  //   login();
+  // }
+
+  // useEffect(() => {
+  //   /** Launch login popup if there is no user cookie */
+  //   console.log('here');
+  //   netlifyIdentity.open('login');
+  //   netlifyIdentity.on('init', (user) => {
+  //     if (!user) {
+  //       login();
+  //     }
+  //   });
+  // }, []);
 
   useEffect(() => {
     if (submit !== 'sub' || pusherRef.current == null) return;
@@ -51,6 +72,17 @@ const Home: NextPage = () => {
     if (res.ok) {
       const json = await res.json();
       console.log(json);
+      const response = await fetch('/api/fauna/createmessage', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: msgToSend, userName }),
+      });
+      if (response.ok) {
+        const json = await response.json();
+        console.log(json, 'fauna reply');
+      }
       setMsgToSend('');
     }
   };
