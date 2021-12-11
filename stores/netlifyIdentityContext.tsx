@@ -8,7 +8,7 @@ interface AuthInterface {
   authReady: boolean;
 }
 
-const AuthContext = createContext<AuthInterface | null>({
+const AuthContext = createContext<AuthInterface>({
   user: null,
   login: () => {},
   logout: () => {},
