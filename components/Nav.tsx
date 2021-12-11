@@ -1,7 +1,6 @@
-import { Box, Button, Flex, Heading, Stack } from '@chakra-ui/react';
-import Link from 'next/link';
+import { Box, Button, Flex, Heading, Stack, Text } from '@chakra-ui/react';
 import Image from 'next/image';
-import React, { useContext } from 'react';
+import React, { Fragment, useContext } from 'react';
 import AuthContext from '../stores/netlifyIdentityContext';
 
 import { AiOutlineLogin as LoginIcon, AiOutlineLogout as Logout } from 'react-icons/ai';
@@ -30,16 +29,19 @@ const Nav = () => {
           Boar Coders Bingo
         </Heading>
       </Flex>
-      <Stack direction="row" spacing={4}>
+      <Stack align="center" direction="row" spacing={4}>
         {authReady && !user && (
           <Button onClick={login} leftIcon={<LoginIcon />} colorScheme="teal" variant="solid">
             Login
           </Button>
         )}
+        {user && <Text color="ghostwhite">{user.email}</Text>}
         {user && (
-          <Button onClick={logout} rightIcon={<Logout />} color="red.400" colorScheme="cyan" variant="outline">
-            Logout
-          </Button>
+          <Fragment>
+            <Button onClick={logout} rightIcon={<Logout />} color="red.400" colorScheme="cyan" variant="outline">
+              Logout
+            </Button>
+          </Fragment>
         )}
       </Stack>
     </Flex>
