@@ -22,7 +22,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   try {
     /* parse the string body into a useable JS object */
     const { message, userName }: Message = req.body;
-    console.log('Function `todo-create` invoked', message, userName);
+    console.log('Function `create-message` invoked', message, userName);
     const data = { message, userName };
     /* construct the fauna query */
     const response = await client.query(Create(Collection('chat-messages-collection'), { data }));
