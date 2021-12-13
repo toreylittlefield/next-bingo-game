@@ -1,9 +1,10 @@
-import { Button, Flex, Icon, Input } from '@chakra-ui/react';
+import { Box, Button, Editable, EditableInput, EditablePreview, Flex, Icon, Input } from '@chakra-ui/react';
 import Pusher from 'pusher-js';
-import React, { ForwardedRef, Ref, RefObject, useContext, useState } from 'react';
+import React, { ForwardedRef, Ref, RefObject, useContext, useEffect, useState } from 'react';
 import { pusherClientOptions } from '../lib/pusherClient';
 import AuthContext from '../stores/netlifyIdentityContext';
 import { UserNameStates } from '../types/types';
+import EditableControls from './EditableControls';
 
 const { appId, cluster } = pusherClientOptions;
 
@@ -14,9 +15,12 @@ type PropTypes = {
 
 const SendMessageForm = ({ submit, setSubmit }: PropTypes, pusherRef: ForwardedRef<Pusher | null>) => {
   const { user } = useContext(AuthContext);
-
-  const [userName, setUserName] = useState(user?.email);
+  const [userName, setUserName] = useState(user?.user_metadata.full_name);
   const [msgToSend, setMsgToSend] = useState('');
+
+  useEffect(() => {
+    setUserName(user?.user_metadata.full_name);
+  }, [user?.user_metadata.full_name]);
 
   const handleSendMsgSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -29,7 +33,6 @@ const SendMessageForm = ({ submit, setSubmit }: PropTypes, pusherRef: ForwardedR
     });
     if (res.ok) {
       const json = await res.json();
-      console.log(json);
       const response = await fetch('/api/fauna/createmessage', {
         method: 'POST',
         headers: {
@@ -39,14 +42,12 @@ const SendMessageForm = ({ submit, setSubmit }: PropTypes, pusherRef: ForwardedR
       });
       if (response.ok) {
         const json = await response.json();
-        console.log(json, 'fauna reply');
       }
       setMsgToSend('');
     }
   };
 
-  const handleSubmitName = async (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleSubmitName = async (userName: string) => {
     if (submit !== 'ready') return;
     if (process.env.NODE_ENV === 'development') {
       Pusher.logToConsole = true;
@@ -61,18 +62,7 @@ const SendMessageForm = ({ submit, setSubmit }: PropTypes, pusherRef: ForwardedR
   };
   return (
     <Flex direction="column">
-      <Input
-        id="user-name"
-        name="user-name"
-        disabled={submit !== 'ready'}
-        placeholder="Enter a username"
-        value={userName}
-        onChange={(e) => setUserName(e.target.value)}
-      ></Input>
-      <Button type="button" onClick={handleSubmitName} disabled={submit !== 'ready'}>
-        Submit
-      </Button>
-      <div>
+      <Box>
         <form onSubmit={handleSendMsgSubmit}>
           <Input
             id="chat-message"
@@ -83,7 +73,23 @@ const SendMessageForm = ({ submit, setSubmit }: PropTypes, pusherRef: ForwardedR
           ></Input>
           <Button type="submit">Submit</Button>
         </form>
-      </div>
+      </Box>
+      <Box>
+        <Editable
+          placeholder="Username ⚡️"
+          textAlign="center"
+          value={userName}
+          onChange={(e) => setUserName(e)}
+          fontSize="2xl"
+          isPreviewFocusable={false}
+          onSubmit={handleSubmitName}
+          isDisabled={submit !== 'ready'}
+        >
+          <EditablePreview />
+          <EditableInput />
+          <EditableControls />
+        </Editable>
+      </Box>
     </Flex>
   );
 };
