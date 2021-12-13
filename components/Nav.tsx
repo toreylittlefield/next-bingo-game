@@ -1,9 +1,10 @@
-import { Box, Button, Flex, Heading, Stack, Text } from '@chakra-ui/react';
+import { Box, Button, Flex, Heading, Stack, Text, Tooltip } from '@chakra-ui/react';
 import Image from 'next/image';
 import React, { Fragment, useContext } from 'react';
 import AuthContext from '../stores/netlifyIdentityContext';
 
 import { AiOutlineLogin as LoginIcon, AiOutlineLogout as Logout } from 'react-icons/ai';
+import UserSettings from './UserSettings';
 const Nav = () => {
   const { user, login, logout, authReady } = useContext(AuthContext);
 
@@ -35,7 +36,7 @@ const Nav = () => {
             Login
           </Button>
         )}
-        {user && <Text color="ghostwhite">{user.email}</Text>}
+        {user && <UserSettings user={user} />}
         {user && (
           <Fragment>
             <Button onClick={logout} rightIcon={<Logout />} color="red.400" colorScheme="cyan" variant="outline">
