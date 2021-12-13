@@ -3,7 +3,7 @@ import styles from '../styles/Home.module.css';
 import React, { useEffect, useRef, useState } from 'react';
 import Pusher from 'pusher-js';
 import { channelName } from '../lib/pusherChannel';
-import { Flex } from '@chakra-ui/react';
+import { Container, Flex } from '@chakra-ui/react';
 import { UserNameStates } from '../types/types';
 import SendMessageForm from '../components/SendMessageForm';
 
@@ -26,7 +26,6 @@ const Home: NextPage = () => {
 
     pusher.bind('message-event', function (data: Data) {
       const { message, userName } = data;
-      console.log(data, 'received');
       setLiveChatMessages((prev) => [...prev, { message, userName }]);
     });
 
@@ -48,7 +47,9 @@ const Home: NextPage = () => {
           </div>
         );
       })}
-      <SendMessageForm ref={pusherRef} setSubmit={setSubmit} submit={submit} />
+      <Container maxW="container.sm">
+        <SendMessageForm ref={pusherRef} setSubmit={setSubmit} submit={submit} />
+      </Container>
     </Flex>
   );
 };
