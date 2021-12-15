@@ -1,4 +1,4 @@
-import { Tooltip, Button } from '@chakra-ui/react';
+import { Tooltip, Button, Text, useMediaQuery } from '@chakra-ui/react';
 import { AiOutlineSetting as SettingIcon } from 'react-icons/ai';
 import React from 'react';
 import netlifyIdentity from 'netlify-identity-widget';
@@ -8,10 +8,11 @@ type PropTypeUserSettings = {
 };
 
 const UserSettings = ({ user }: PropTypeUserSettings) => {
+  const [screen480above] = useMediaQuery('(min-width: 480px)');
   return (
     <Tooltip hasArrow label="Change User Settings" bg="blue.600">
       <Button rightIcon={<SettingIcon />} color="ghostwhite" variant="link">
-        {user.email}
+        <Text>{screen480above ? user.email : 'Settings'}</Text>
       </Button>
     </Tooltip>
   );
