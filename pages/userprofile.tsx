@@ -1,5 +1,5 @@
 import { NextPage } from 'next';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import UserSettings from '../components/UserSettings';
 import AuthContext from '../stores/netlifyIdentityContext';
 import netlifyIdentity from 'netlify-identity-widget';
@@ -8,16 +8,22 @@ import { Center, VStack, Spinner, Text } from '@chakra-ui/react';
 
 const UserProfile: NextPage = () => {
   const { user, authReady } = useContext(AuthContext);
+  const [transition, setTransition] = useState(false);
   useEffect(() => {
     if (!authReady) return;
-    if (netlifyIdentity.currentUser() === null || !user?.token?.access_token) {
-      setTimeout(() => {
+    let timerID = setTimeout(() => {
+      if (netlifyIdentity.currentUser() === null || !user?.token?.access_token) {
         Router.push('/');
-      }, 2000);
-    }
+      } else if (netlifyIdentity.currentUser() != null && user.token.access_token != null) {
+        setTransition(true);
+      }
+    }, 300);
+    return () => {
+      if (timerID) clearTimeout(timerID);
+    };
   }, [user, authReady]);
 
-  if (authReady)
+  if ((authReady && !user?.token?.access_token) || !transition)
     return (
       <Center h={'100vh'}>
         <VStack>
@@ -26,7 +32,7 @@ const UserProfile: NextPage = () => {
         </VStack>
       </Center>
     );
-  else {
+  else if (transition) {
     return <UserSettings user={user} />;
   }
 };
