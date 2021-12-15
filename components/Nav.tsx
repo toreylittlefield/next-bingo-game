@@ -5,6 +5,7 @@ import AuthContext from '../stores/netlifyIdentityContext';
 
 import { AiOutlineLogin as LoginIcon, AiOutlineLogout as Logout } from 'react-icons/ai';
 import SettingsButton from './SettingsButton';
+import NextLink from 'next/link';
 
 const Nav = () => {
   const { user, login, logout, authReady } = useContext(AuthContext);
@@ -24,9 +25,16 @@ const Nav = () => {
         mr={5}
         gap={{ base: '0', md: 5 }}
       >
-        <Box w={{ base: '40%', md: 'auto' }}>
-          <Image src="/boar-coders-assets/boarcoders-tshirt_oshejd.png" alt="boar coders logo" width={80} height={80} />
-        </Box>
+        <NextLink href={'/'} passHref>
+          <Box w={{ base: '40%', md: 'auto' }}>
+            <Image
+              src="/boar-coders-assets/boarcoders-tshirt_oshejd.png"
+              alt="boar coders logo"
+              width={80}
+              height={80}
+            />
+          </Box>
+        </NextLink>
         <Heading
           as="h1"
           fontSize={{ base: 'md', md: 'lg' }}
