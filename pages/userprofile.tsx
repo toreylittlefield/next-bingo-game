@@ -34,6 +34,8 @@ const UserProfile: NextPage = () => {
     );
   else if (transition) {
     return <UserSettings user={user} />;
+  } else {
+    return null;
   }
 };
 
