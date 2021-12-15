@@ -11,11 +11,11 @@
   to = "/.netlify/functions/:splat"
   status = 200
 
-[[plugins]]
-  package = "netlify-plugin-cloudinary"
+#[[plugins]]
+ # package = "netlify-plugin-cloudinary"
 
-  [plugins.inputs]
-  cloudName = "boar-images"
+  #[plugins.inputs]
+  #cloudName = "boar-images"
 
   ## (optional) Settings for Netlify Dev
   ## https://github.com/netlify/cli/blob/main/docs/netlify-dev.md#project-detection
