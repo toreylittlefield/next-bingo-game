@@ -25,12 +25,7 @@ const Nav = () => {
         gap={{ base: '0', md: 5 }}
       >
         <Box w={{ base: '40%', md: 'auto' }}>
-          <Image
-            src="/v1639182352/boar-coders-assets/boarcoders-tshirt_oshejd.png"
-            alt="boar coders logo"
-            width={80}
-            height={80}
-          />
+          <Image src="/boar-coders-assets/boarcoders-tshirt_oshejd.png" alt="boar coders logo" width={80} height={80} />
         </Box>
         <Heading
           as="h1"
