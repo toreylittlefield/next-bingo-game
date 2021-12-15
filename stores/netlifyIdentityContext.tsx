@@ -34,7 +34,6 @@ export const AuthContextProvider = ({ children }: Props) => {
     });
     netlifyIdentity.on('logout', () => {
       setUser(null);
-      netlifyIdentity.logout();
       Router.push('/');
       console.log('logout event');
     });
