@@ -7,7 +7,7 @@ type PropTypeUserSettings = {
   user: netlifyIdentity.User;
 };
 
-const UserSettings = ({ user }: PropTypeUserSettings) => {
+const SettingsButton = ({ user }: PropTypeUserSettings) => {
   const [screen480above] = useMediaQuery('(min-width: 480px)');
 
   return (
@@ -19,4 +19,4 @@ const UserSettings = ({ user }: PropTypeUserSettings) => {
   );
 };
 
-export default UserSettings;
+export default SettingsButton;

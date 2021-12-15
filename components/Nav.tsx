@@ -4,7 +4,7 @@ import React, { Fragment, useContext } from 'react';
 import AuthContext from '../stores/netlifyIdentityContext';
 
 import { AiOutlineLogin as LoginIcon, AiOutlineLogout as Logout } from 'react-icons/ai';
-import UserSettings from './UserSettings';
+import SettingsButton from './SettingsButton';
 
 const Nav = () => {
   const { user, login, logout, authReady } = useContext(AuthContext);
@@ -42,7 +42,7 @@ const Nav = () => {
             Login
           </Button>
         )}
-        {user && <UserSettings user={user} />}
+        {user && <SettingsButton user={user} />}
         {user && (
           <Fragment>
             <Button onClick={logout} rightIcon={<Logout />} color="red.400" colorScheme="cyan" variant="outline">
