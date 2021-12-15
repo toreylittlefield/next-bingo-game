@@ -26,7 +26,7 @@ const Nav = () => {
       >
         <Box w={{ base: '40%', md: 'auto' }}>
           <Image
-            src="https://res.cloudinary.com/boar-images/image/upload/v1639182352/boar-coders-assets/boarcoders-tshirt_oshejd.png"
+            src="/v1639182352/boar-coders-assets/boarcoders-tshirt_oshejd.png"
             alt="boar coders logo"
             width={80}
             height={80}

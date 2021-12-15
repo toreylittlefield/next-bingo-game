@@ -9,6 +9,7 @@ type PropTypeUserSettings = {
 
 const UserSettings = ({ user }: PropTypeUserSettings) => {
   const [screen480above] = useMediaQuery('(min-width: 480px)');
+
   return (
     <Tooltip hasArrow label="Change User Settings" bg="blue.600">
       <Button rightIcon={<SettingIcon />} color="ghostwhite" variant="link">
