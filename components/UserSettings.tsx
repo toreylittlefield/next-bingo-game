@@ -1,7 +1,7 @@
 import { FormControl, FormLabel, Grid, GridItem, Input, Text } from '@chakra-ui/react';
 import React, { useReducer } from 'react';
 import { UserProfile } from '../types/types';
-import netlifyIdentity from 'netlify-identity-widget';
+import netlifyIdentity, { netlifyGoTrue } from 'netlify-identity-widget';
 import { Formik, Form, useField } from 'formik';
 import * as Yup from 'yup';
 

@@ -1,14 +1,3 @@
-import * as netlifyIdentity from 'netlify-identity-widget';
-
-type GoTrueProps = {
-  gotrue: GoTrue;
-};
-type netlifyGoTrue = typeof netlifyIdentity & GoTrueProps;
-
-declare module 'netlify-identity-widget' {
-  export default netlifyIdentity as netlifyGoTrue;
-}
-
 declare class Admin {
   constructor(user: User);
 
