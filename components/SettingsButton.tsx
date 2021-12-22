@@ -1,14 +1,10 @@
 import { Tooltip, Button, Text, useMediaQuery } from '@chakra-ui/react';
 import { AiOutlineSetting as SettingIcon } from 'react-icons/ai';
 import React from 'react';
-import netlifyIdentity from 'netlify-identity-widget';
 import NextLink from 'next/link';
+import { UserProfile } from '../types/types';
 
-type PropTypeUserSettings = {
-  user: netlifyIdentity.User;
-};
-
-const SettingsButton = ({ user }: PropTypeUserSettings) => {
+const SettingsButton = ({ user }: UserProfile) => {
   const [screen480above] = useMediaQuery('(min-width: 480px)');
 
   return (

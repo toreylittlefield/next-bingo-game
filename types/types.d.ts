@@ -3,10 +3,12 @@ import GoTrue from './gotrue';
 
 export type UserNameStates = 'loading' | 'sent' | 'ready' | 'sub';
 
-export type UserProfile = netlifyIdentity.User;
-
 declare module 'netlify-identity-widget' {
   declare let gotrue: GoTrue;
 
   export { gotrue };
 }
+
+export type UserProfile = {
+  user: netlifyIdentity.User;
+};
