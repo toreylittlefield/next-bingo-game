@@ -1,15 +1,18 @@
 # example netlify.toml
 [build]
-  command = "next build"
-  functions = "netlify/functions"
-  publish = "out"
+  # command = "next build"
+  functions = "functions"
+  # publish = "out"
 
   ## Uncomment to use this redirect for Single Page Applications like create-react-app.
   ## Not needed for static site generators.
-[[redirects]]
-  from = "/api/pusher/auth"
-  to = "/.netlify/functions/:splat"
-  status = 200
+# [[redirects]]
+  # from = "/api/pusher/auth"
+  # to = "/.netlify/functions/:splat"
+  # status = 200
+  # from = "/api/identity-login"
+  # to = "/.netlify/functions/:splat"
+  # status = 200
 
 #[[plugins]]
  # package = "netlify-plugin-cloudinary"
