@@ -10,10 +10,14 @@ const UserProfile: NextPage = () => {
   const { user, authReady } = useContext(AuthContext);
   const [transition, setTransition] = useState(false);
   useEffect(() => {
-    if (!authReady) return;
+    console.count('is ready?');
+    console.log({ authReady, user });
+    // if (!authReady) return;
     let timerID = setTimeout(() => {
       if (netlifyIdentity.currentUser() === null || !user?.token?.access_token) {
         Router.push('/');
+        netlifyIdentity.open();
+        return;
       } else if (netlifyIdentity.currentUser() != null && user.token.access_token != null) {
         setTransition(true);
       }
