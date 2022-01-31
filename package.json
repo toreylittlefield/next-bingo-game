@@ -14,6 +14,7 @@
     "faunadb": "^4.4.1",
     "formik": "^2.2.9",
     "framer-motion": "^5.4.5",
+    "generate-password": "^1.7.0",
     "netlify-identity-widget": "^1.9.2",
     "next": "12.0.7",
     "pusher": "^5.0.0",
