@@ -32,7 +32,7 @@ const UserProfile: NextPage = () => {
         </VStack>
       </Center>
     );
-  else if (transition) {
+  else if (transition && user) {
     return <UserSettings user={user} />;
   } else {
     return null;

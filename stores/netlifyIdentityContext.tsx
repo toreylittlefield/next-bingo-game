@@ -23,7 +23,7 @@ interface Props {
 type UserType = netlifyIdentity.User | null;
 
 export const AuthContextProvider = ({ children }: Props) => {
-  const [user, setUser] = useState<UserType>(null);
+  const [user, setUser] = useState<UserType | null>(null);
   const [authReady, setAuthReady] = useState(false);
 
   useEffect(() => {
