@@ -20,16 +20,28 @@ interface Props {
   children: React.ReactNode;
 }
 
-type UserType = netlifyIdentity.User | null;
+interface UserType extends netlifyIdentity.User {
+  ['user_metadata']: {
+    username?: string;
+    avatar_url: string;
+    full_name: string;
+  };
+}
 
 export const AuthContextProvider = ({ children }: Props) => {
   const [user, setUser] = useState<UserType | null>(null);
   const [authReady, setAuthReady] = useState(false);
 
   useEffect(() => {
-    netlifyIdentity.on('login', (user) => {
+    netlifyIdentity.on('login', (user: UserType) => {
       setUser(user);
       netlifyIdentity.close();
+      if (!user.user_metadata.username?.trim()) {
+        Router.push('/userprofile');
+        return;
+      } else {
+        Router.push('/rooms');
+      }
       console.log('login event');
     });
     netlifyIdentity.on('logout', () => {
@@ -38,7 +50,7 @@ export const AuthContextProvider = ({ children }: Props) => {
       console.log('logout event');
     });
     netlifyIdentity.on('init', (user) => {
-      setUser(user);
+      // setUser(user);
       setAuthReady(true);
       console.log('init event');
     });
