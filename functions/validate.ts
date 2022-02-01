@@ -2,6 +2,7 @@ import { Handler } from '@netlify/functions';
 import faunadb from 'faunadb';
 import generator from 'generate-password';
 import * as netlifyIdentity from 'netlify-identity-widget';
+import { verify } from 'jsonwebtoken';
 
 type Key = {
   secret: string;
@@ -34,6 +35,27 @@ function obtainToken(user: netlifyIdentity.User, password: string) {
 
 const handler: Handler = async (event, context) => {
   console.log(JSON.stringify({ event, context }, null, 2));
+
+  const sig = event.headers['x-webhook-signature'];
+  if (!sig || !context.clientContext) {
+    return {
+      statusCode: 403,
+      body: JSON.stringify({ message: 'Not Authorized' }),
+    };
+  }
+
+  const res = verify(sig, process.env.WEB_HOOK_SIG as string, function resolve(error, decoded) {
+    if (error) {
+      return {
+        statusCode: 403,
+        body: JSON.stringify({ message: 'Not Authorized' }),
+      };
+    }
+    return decoded;
+  });
+
+  console.log({ res });
+
   //   if (context.clientContext && event.body) {
   //     const { clientContext } = context;
   //     const payload = JSON.parse(event.body);
