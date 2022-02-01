@@ -1,5 +1,5 @@
 import { Handler } from '@netlify/functions';
-import faunadb, { Collection, Create } from 'faunadb';
+import faunadb from 'faunadb';
 import generator from 'generate-password';
 import * as netlifyIdentity from 'netlify-identity-widget';
 
