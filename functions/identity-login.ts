@@ -46,17 +46,20 @@ const handler: Handler = async (event, context) => {
     const user = await createUser(userData, password);
     const key = (await obtainToken(user as netlifyIdentity.User, password)) as Key;
 
+    console.log({ key });
+
     return {
-      statusCode: 302,
-      headers: {
-        Location: '/userprofile',
-        'Cache-Control': 'no-cache',
-      },
+      statusCode: 200,
       body: JSON.stringify({
         app_metadata: {
           faunadb_token: key.secret,
+          roles: ['member'],
           // we discard the credential, and can create a new one if we ever need a new token
           // faunadb_credential : password
+        },
+        user_metadata: {
+          test: true,
+          username: '',
         },
       }),
     };

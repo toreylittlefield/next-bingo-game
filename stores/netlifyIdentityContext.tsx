@@ -49,8 +49,20 @@ export const AuthContextProvider = ({ children }: Props) => {
       Router.push('/');
       console.log('logout event');
     });
-    netlifyIdentity.on('init', (user) => {
-      // setUser(user);
+    netlifyIdentity.on('init', async (user) => {
+      console.log({ user }, 'init user');
+      if (user?.token?.access_token) {
+        await netlifyIdentity.gotrue.currentUser()?.update({
+          data: {
+            test_update: false,
+          },
+        });
+        await netlifyIdentity.refresh(true);
+        const currentUser = netlifyIdentity.currentUser();
+        setUser(currentUser);
+        return;
+      }
+      setUser(user);
       setAuthReady(true);
       console.log('init event');
     });
