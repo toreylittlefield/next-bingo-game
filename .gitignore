@@ -38,3 +38,6 @@ yarn-error.log*
 
 # Local Netlify folder
 .netlify
+
+# sample event
+/functions/events
