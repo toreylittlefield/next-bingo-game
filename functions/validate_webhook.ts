@@ -67,7 +67,16 @@ const handler: Handler = async (event, context) => {
 
   if (event.body && res) {
     const payload = JSON.parse(event.body);
+    const eventType = payload.event;
     const { app_metadata, user_metadata, id } = payload.user as UserType;
+    // wait for login after email validation to create user since netlify id will change it seems
+    if (eventType === 'validate' && !app_metadata.provider) {
+      return {
+        statusCode: 200,
+        body: '',
+      };
+    }
+    // this is a login event most likely
     if (app_metadata.roles?.includes('sub') && app_metadata.faunadb_token) {
       return {
         statusCode: 200,
