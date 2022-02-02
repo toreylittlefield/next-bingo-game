@@ -68,7 +68,7 @@ const handler: Handler = async (event, context) => {
   if (event.body && res) {
     const payload = JSON.parse(event.body);
     const { app_metadata, user_metadata, id } = payload.user as UserType;
-    if (app_metadata.roles.includes('sub') && app_metadata.faunadb_token) {
+    if (app_metadata.roles?.includes('sub') && app_metadata.faunadb_token) {
       return {
         statusCode: 200,
         body: '',
