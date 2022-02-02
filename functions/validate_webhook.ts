@@ -78,6 +78,7 @@ const handler: Handler = async (event, context) => {
     // create user in faunadb
     const user = await createUser(id, PWS);
     const key = (await obtainToken(user, PWS)) as Key;
+    console.log({ user, key });
     return {
       statusCode: 200,
       body: JSON.stringify({
