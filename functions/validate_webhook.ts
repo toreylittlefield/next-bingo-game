@@ -45,7 +45,7 @@ function obtainToken(userId: object, password: string) {
 }
 
 const handler: Handler = async (event, context) => {
-  console.log(JSON.stringify({ event, context }, null, 2));
+  // console.log(JSON.stringify({ event, context }, null, 2));
 
   const sig = event.headers['x-webhook-signature'];
   if (!sig || !context.clientContext) {
@@ -68,9 +68,10 @@ const handler: Handler = async (event, context) => {
   if (event.body && res) {
     const payload = JSON.parse(event.body);
     const eventType = payload.event;
+    console.log({ payload });
     const { app_metadata, user_metadata, id } = payload.user as UserType;
     // wait for login after email validation to create user since netlify id will change it seems
-    if (eventType === 'validate' && !app_metadata.provider) {
+    if (eventType === 'validate' && app_metadata?.provider === 'email') {
       return {
         statusCode: 200,
         body: '',
