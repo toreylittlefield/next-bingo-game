@@ -1,12 +1,19 @@
 import { Handler } from '@netlify/functions';
 import faunadb from 'faunadb';
 import generator from 'generate-password';
-import * as netlifyIdentity from 'netlify-identity-widget';
+import netlifyIdentity from 'netlify-identity-widget';
 import { verify } from 'jsonwebtoken';
 
 type Key = {
   secret: string;
 };
+
+interface UserType extends netlifyIdentity.User {
+  ['app_metadata']: {
+    provider: string;
+    roles: string[];
+  };
+}
 
 /* configure faunaDB Client with our secret */
 const q = faunadb.query;
@@ -53,6 +60,15 @@ const handler: Handler = async (event, context) => {
     }
     return decoded;
   });
+
+  if (event.body) {
+    const user = JSON.parse(event.body).user as UserType;
+    const { user_metadata } = user;
+    return {
+      statusCode: 200,
+      body: JSON.stringify({}),
+    };
+  }
 
   console.log({ res });
 
