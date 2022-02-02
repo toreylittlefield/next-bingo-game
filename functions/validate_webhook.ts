@@ -12,6 +12,7 @@ interface UserType extends netlifyIdentity.User {
   ['app_metadata']: {
     provider: string;
     roles: string[];
+    faunadb_token: string;
   };
 }
 
@@ -21,23 +22,26 @@ const client = new faunadb.Client({
   secret: process.env.FAUNADB_ADMIN_KEY as string,
 });
 
+// PWS
+const PWS = process.env.FAUNADB_PASSWORD as string;
+
 /* create a user in FaunaDB that can connect from the browser */
-function createUser(userData: netlifyIdentity.User, password: string) {
+function createUser(userId: string, password: string) {
   return client.query(
     q.Create(q.Class('users'), {
       credentials: {
         password: password,
       },
       data: {
-        id: userData.id,
-        user_metadata: userData.user_metadata,
+        id: userId,
+        // user_metadata: userData.user_metadata,
       },
     })
   );
 }
 
-function obtainToken(user: netlifyIdentity.User, password: string) {
-  return client.query(q.Login(q.Select('ref', user), { password }));
+function obtainToken(userId: object, password: string) {
+  return client.query(q.Login(q.Select('ref', userId), { password }));
 }
 
 const handler: Handler = async (event, context) => {
@@ -61,48 +65,36 @@ const handler: Handler = async (event, context) => {
     return decoded;
   });
 
-  if (event.body) {
-    const user = JSON.parse(event.body).user as UserType;
-    const { user_metadata } = user;
+  if (event.body && res) {
+    const payload = JSON.parse(event.body);
+    const { app_metadata, user_metadata, id } = payload.user as UserType;
+    if (app_metadata.roles.includes('sub') && app_metadata.faunadb_token) {
+      return {
+        statusCode: 200,
+        body: '',
+      };
+    }
+
+    // create user in faunadb
+    const user = await createUser(id, PWS);
+    const key = (await obtainToken(user, PWS)) as Key;
     return {
       statusCode: 200,
-      body: JSON.stringify({}),
+      body: JSON.stringify({
+        app_metadata: {
+          faunadb_token: key.secret,
+          roles: ['sub'],
+          // we discard the credential, and can create a new one if we ever need a new token
+          // faunadb_credential : password
+        },
+        user_metadata: {
+          ...user_metadata,
+          username: '',
+        },
+      }),
     };
   }
 
-  console.log({ res });
-
-  //   if (context.clientContext && event.body) {
-  //     const { clientContext } = context;
-  //     const payload = JSON.parse(event.body);
-  //     const userData = payload.user;
-  //     console.log(JSON.stringify({ clientContext, userData, payload }, null, 2));
-  //     const password = generator.generate({
-  //       length: 10,
-  //       numbers: true,
-  //     });
-
-  //     const user = await createUser(userData, password);
-  //     const key = (await obtainToken(user as netlifyIdentity.User, password)) as Key;
-
-  //     console.log({ key });
-
-  //     return {
-  //       statusCode: 200,
-  //       body: JSON.stringify({
-  //         app_metadata: {
-  //           faunadb_token: key.secret,
-  //           roles: ['member'],
-  //           // we discard the credential, and can create a new one if we ever need a new token
-  //           // faunadb_credential : password
-  //         },
-  //         user_metadata: {
-  //           test: true,
-  //           username: '',
-  //         },
-  //       }),
-  //     };
-  //   }
   return {
     statusCode: 403,
     body: JSON.stringify({ message: 'Not Authorized' }),
