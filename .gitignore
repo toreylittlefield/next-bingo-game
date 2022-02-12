@@ -41,3 +41,6 @@ yarn-error.log*
 
 # sample event
 /functions/events
+
+# Fauna RC
+.faunarc
