@@ -5,7 +5,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 /* configure faunaDB Client with our secret */
 const q = faunadb.query;
 const client = new faunadb.Client({
-  secret: process.env.FAUNADB_SERVER_KEY as string,
+  secret: process.env.FAUNADB_ADMIN_KEY as string,
 });
 
 type Data = {
