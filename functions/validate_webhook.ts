@@ -28,7 +28,7 @@ const PWS = process.env.FAUNADB_PASSWORD as string;
 /* create a user in FaunaDB that can connect from the browser */
 function createUser(userId: string, password: string) {
   return client.query(
-    q.Create(q.Class('users'), {
+    q.Create(q.Collection('users'), {
       credentials: {
         password: password,
       },
@@ -45,10 +45,11 @@ function obtainToken(userId: object, password: string) {
 }
 
 const handler: Handler = async (event, context) => {
-  // console.log(JSON.stringify({ event, context }, null, 2));
+  console.log(JSON.stringify({ event, context }, null, 2));
 
   const sig = event.headers['x-webhook-signature'];
   if (!sig || !context.clientContext) {
+    console.log('no clientContext', context.clientContext);
     return {
       statusCode: 403,
       body: JSON.stringify({ message: 'Not Authorized' }),
@@ -57,6 +58,7 @@ const handler: Handler = async (event, context) => {
 
   const res = verify(sig, process.env.WEB_HOOK_SIG as string, function resolve(error, decoded) {
     if (error) {
+      console.log('invalid  webhook signature', sig);
       return {
         statusCode: 403,
         body: JSON.stringify({ message: 'Not Authorized' }),
@@ -86,7 +88,14 @@ const handler: Handler = async (event, context) => {
     }
 
     // create user in faunadb
-    const user = await createUser(id, PWS);
+    const user = await createUser(id, PWS).catch((err) => console.log('error creating user', err.message));
+    if (!user) {
+      console.log('fauna create user error 401');
+      return {
+        statusCode: 401,
+        body: 'Not Authorized',
+      };
+    }
     const key = (await obtainToken(user, PWS)) as Key;
     console.log({ user, key });
     return {
@@ -106,6 +115,7 @@ const handler: Handler = async (event, context) => {
     };
   }
 
+  console.log('failed: theres another reason 403');
   return {
     statusCode: 403,
     body: JSON.stringify({ message: 'Not Authorized' }),
