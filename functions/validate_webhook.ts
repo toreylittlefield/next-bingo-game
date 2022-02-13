@@ -1,5 +1,5 @@
 import { Handler } from '@netlify/functions';
-import faunadb from 'faunadb';
+import faunadb, { Create } from 'faunadb';
 import generator from 'generate-password';
 import netlifyIdentity from 'netlify-identity-widget';
 import { verify } from 'jsonwebtoken';
@@ -30,7 +30,7 @@ const PWS = process.env.FAUNADB_PASSWORD as string;
 /* create a user in FaunaDB that can connect from the browser */
 function createUser(userId: string, password: string) {
   return client.query(
-    q.Create(q.Class('users'), {
+    q.Create(q.Collection('users'), {
       credentials: {
         password: password,
       },
@@ -40,6 +40,17 @@ function createUser(userId: string, password: string) {
       },
     })
   );
+  // return client.query(
+  //   q.Create(q.Class('users'), {
+  //     credentials: {
+  //       password: password,
+  //     },
+  //     data: {
+  //       id: userId,
+  //       // user_metadata: userData.user_metadata,
+  //     },
+  //   })
+  // );
 }
 
 function obtainToken(userId: object, password: string) {
