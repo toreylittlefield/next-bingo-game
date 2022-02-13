@@ -101,7 +101,9 @@ const handler: Handler = async (event, context) => {
     }
 
     // create user in faunadb
-    const user = await createUser(id, PWS).catch((err) => console.log('error creating user', err.message));
+    const user = await createUser(id, PWS).catch((err) =>
+      console.log('error creating user', JSON.stringify(err, null, 2), err.message)
+    );
     console.log(JSON.stringify(user, null, 2), 'user creation log');
     if (!user) {
       console.log('fauna create user error 401');
