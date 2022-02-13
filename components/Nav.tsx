@@ -45,7 +45,7 @@ const Nav = () => {
         </Heading>
       </Flex>
       <Stack align={{ base: 'flex-end', md: 'center' }} direction={{ base: 'column', md: 'row' }} spacing={4}>
-        {authReady && !user && (
+        {!user && (
           <Button onClick={login} leftIcon={<LoginIcon />} colorScheme="teal" variant="solid">
             Login
           </Button>
