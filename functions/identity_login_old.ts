@@ -10,12 +10,13 @@ type Key = {
 /* configure faunaDB Client with our secret */
 const q = faunadb.query;
 const client = new faunadb.Client({
-  secret: process.env.FAUNADB_ADMIN_KEY as string,
+  domain: 'db.us.fauna.com',
+  secret: process.env.FAUNADB_SERVER_KEY as string,
 });
 
 /* create a user in FaunaDB that can connect from the browser */
-function createUser(userData: netlifyIdentity.User, password: string) {
-  return client.query(
+async function createUser(userData: netlifyIdentity.User, password: string) {
+  return await client.query(
     q.Create(q.Class('users'), {
       credentials: {
         password: password,

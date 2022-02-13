@@ -19,7 +19,8 @@ interface UserType extends netlifyIdentity.User {
 /* configure faunaDB Client with our secret */
 const q = faunadb.query;
 const client = new faunadb.Client({
-  secret: process.env.FAUNADB_ADMIN_KEY as string,
+  domain: 'db.us.fauna.com',
+  secret: process.env.FAUNADB_SERVER_KEY as string,
 });
 
 // PWS
