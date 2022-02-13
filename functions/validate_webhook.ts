@@ -28,8 +28,8 @@ const client = new faunadb.Client({
 const PWS = process.env.FAUNADB_PASSWORD as string;
 
 /* create a user in FaunaDB that can connect from the browser */
-function createUser(userId: string, password: string) {
-  return client.query(
+async function createUser(userId: string, password: string) {
+  return await client.query(
     q.Create(q.Collection('users'), {
       credentials: {
         password: password,
@@ -102,6 +102,7 @@ const handler: Handler = async (event, context) => {
 
     // create user in faunadb
     const user = await createUser(id, PWS).catch((err) => console.log('error creating user', err.message));
+    console.log(JSON.stringify(user, null, 2), 'user creation log');
     if (!user) {
       console.log('fauna create user error 401');
       return {
