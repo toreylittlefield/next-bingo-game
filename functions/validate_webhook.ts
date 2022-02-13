@@ -30,7 +30,7 @@ const PWS = process.env.FAUNADB_PASSWORD as string;
 /* create a user in FaunaDB that can connect from the browser */
 function createUser(userId: string, password: string) {
   return client.query(
-    q.Create(q.Collection('users'), {
+    q.Create(q.Class('users'), {
       credentials: {
         password: password,
       },
