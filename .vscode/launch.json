@@ -20,9 +20,10 @@
       "type": "node",
       "request": "launch",
       "skipFiles": ["<node_internals>/**"],
-      "outFiles": ["${workspaceFolder}/.netlify/functions-serve/**/*.js"],
-      "program": "${workspaceFolder}/node_modules/netlify-cli/bin/run",
+      "outFiles": [".netlify/functions-serve/**/*.js"],
+      "program": "node_modules/netlify-cli/bin/run",
       "args": ["dev"],
+      "cwd": "${workspaceFolder}/client",
       "console": "integratedTerminal",
       "env": { "BROWSER": "none" },
       "serverReadyAction": {
@@ -39,20 +40,27 @@
       "outFiles": ["${workspaceFolder}/.netlify/functions-serve/**/*.js"],
       "program": "${workspaceFolder}/node_modules/.bin/netlify",
       "args": ["functions:serve"],
+      "cwd": "${workspaceFolder}/client",
       "console": "integratedTerminal"
     },
     {
       "name": "Setup Fauna DB",
-      "program": "${workspaceFolder}/script/dbsetup.ts",
-      "outFiles": [
-        "${workspaceFolder}/**/*.js",
-        "!**/node_modules/**"
-      ],
-      "preLaunchTask": "tsc: build - ${workspaceFolder}/script/tsconfig.json",
+      "program": "dist/index.js",
+      "skipFiles": ["<node_internals>/**"],
+      "outFiles": ["dist/**/*.js", "!**/node_modules/**"],
+      "resolveSourceMapLocations": ["dist/**/*.js", "!**/node_modules/**"],
       "request": "launch",
-
+      "cwd": "${workspaceFolder}/setup-db",
       "type": "pwa-node",
-      "console": "integratedTerminal"
+      "console": "integratedTerminal",
+      "preLaunchTask": {
+        "type": "npm",
+        "script": "start",
+        "path": "setup-db/",
+        "problemMatcher": [],
+        "label": "npm: start - setup-db",
+        "detail": "Compile & Launch App"
+      }
     }
   ]
 }
