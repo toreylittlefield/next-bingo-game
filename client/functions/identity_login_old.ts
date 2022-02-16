@@ -26,7 +26,7 @@ async function createUser(userData: netlifyIdentity.User, password: string) {
         id: userData.id,
         user_metadata: userData.user_metadata,
       },
-    })
+    }),
   );
 }
 

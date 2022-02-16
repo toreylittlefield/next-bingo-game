@@ -1,0 +1,39 @@
+{
+  "name": "setup-db",
+  "version": "1.0.0",
+  "description": "use to setup the fauna database",
+  "main": "./dist/index.js",
+  "type": "module",
+  "scripts": {
+    "clean": "rimraf dist",
+    "compile": "cross-env-shell babel src -d dist --source-maps --extensions '.ts'",
+    "build": "npm run clean && npm run compile",
+    "typecheck": "tsc --p .",
+    "build-typecheck": "npm run typecheck && npm run build",
+    "start": "npm run build-typecheck && node ./dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toreylittlefield/next-bingo-game.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/toreylittlefield/next-bingo-game/issues"
+  },
+  "homepage": "https://github.com/toreylittlefield/next-bingo-game#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.17.3",
+    "@babel/core": "^7.17.4",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-typescript": "^7.16.7",
+    "@types/node": "^17.0.18",
+    "cross-env": "^7.0.3",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.5.5"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.0",
+    "faunadb": "^4.5.2"
+  }
+}

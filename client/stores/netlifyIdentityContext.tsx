@@ -34,6 +34,7 @@ export const AuthContextProvider = ({ children }: Props) => {
 
   useEffect(() => {
     netlifyIdentity.on('login', (user: UserType) => {
+      console.log({ user }, 'user login');
       setUser(user);
       netlifyIdentity.close();
       if (!user.user_metadata.username?.trim()) {
@@ -49,19 +50,20 @@ export const AuthContextProvider = ({ children }: Props) => {
       Router.push('/');
       console.log('logout event');
     });
+
     netlifyIdentity.on('init', async (user) => {
       console.log({ user }, 'init user');
-      if (user?.token?.access_token) {
-        await netlifyIdentity.gotrue.currentUser()?.update({
-          data: {
-            test_update: false,
-          },
-        });
-        await netlifyIdentity.refresh(true);
-        const currentUser = netlifyIdentity.currentUser();
-        setUser(currentUser);
-        return;
-      }
+      // if (user?.token?.access_token) {
+      //   await netlifyIdentity.gotrue.currentUser()?.update({
+      //     data: {
+      //       test_update: false,
+      //     },
+      //   });
+      //   await netlifyIdentity.refresh(true);
+      //   const currentUser = netlifyIdentity.currentUser();
+      //   setUser(currentUser);
+      //   return;
+      // }
       setUser(user);
       setAuthReady(true);
       console.log('init event');

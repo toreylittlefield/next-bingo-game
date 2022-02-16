@@ -1,5 +1,5 @@
 import { Handler } from '@netlify/functions';
-import faunadb, { Create } from 'faunadb';
+import faunadb from 'faunadb';
 import generator from 'generate-password';
 import netlifyIdentity from 'netlify-identity-widget';
 import { verify } from 'jsonwebtoken';
