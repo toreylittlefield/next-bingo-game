@@ -40,6 +40,19 @@
       "program": "${workspaceFolder}/node_modules/.bin/netlify",
       "args": ["functions:serve"],
       "console": "integratedTerminal"
+    },
+    {
+      "name": "Setup Fauna DB",
+      "program": "${workspaceFolder}/script/dbsetup.ts",
+      "outFiles": [
+        "${workspaceFolder}/**/*.js",
+        "!**/node_modules/**"
+      ],
+      "preLaunchTask": "tsc: build - ${workspaceFolder}/script/tsconfig.json",
+      "request": "launch",
+
+      "type": "pwa-node",
+      "console": "integratedTerminal"
     }
   ]
 }
