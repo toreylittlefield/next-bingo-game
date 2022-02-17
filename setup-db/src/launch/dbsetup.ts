@@ -9,19 +9,21 @@ import {
 import { createBoardUDF } from '../fauna/udfs/udfs.js';
 import { handleSetupError } from '../fauna/utils/utils.js';
 
-const q = faunadb.query;
-
 async function setupFaunaDB(key: string) {
   const admin = new faunadb.Client({
     secret: key as string,
   });
   const promises = [
+    /** Create All Indexes & Collections First */
     await handleSetupError(admin.query(createCollections(admin)), 'collections'),
-    await handleSetupError(admin.query(CreateRoleFunctionBingoBoards), 'Role Bingo Boards'),
-    await handleSetupError(admin.query(CreateRoleUserBingoBoards), 'Role Bingo Boards'),
+    /* Create Roles Second */
+    await handleSetupError(admin.query(CreateRoleFunctionBingoBoards), 'Role Function Bingo Boards'),
+    await handleSetupError(admin.query(CreateRoleUserBingoBoards), 'Role Users Bingo Boards'),
+    /** Create UDFs */
     await handleSetupError(admin.query(createBoardUDF), 'create_board UDF'),
-    await handleSetupError(admin.query(UpdateRoleFunctionBingoBoards), 'create_board UDF'),
-    await handleSetupError(admin.query(UpdateRoleUserBingoBoards), 'create_board UDF'),
+    /* Update Roles Last To Attach To Valid Documents / Collections / Indexes/ UDFs with Memberships & Priveleges */
+    await handleSetupError(admin.query(UpdateRoleFunctionBingoBoards), 'Update Role Function Bingo Board'),
+    await handleSetupError(admin.query(UpdateRoleUserBingoBoards), 'Update Role Users Bingo Board'),
   ];
   return await Promise.allSettled(promises);
 }
