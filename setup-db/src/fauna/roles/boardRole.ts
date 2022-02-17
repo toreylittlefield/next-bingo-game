@@ -1,5 +1,6 @@
 import faunadb from 'faunadb';
 import { bingoBoardCollections, usersCollection } from '../collections/collectionnames.js';
+import { indexAllBingoBoardsByRef } from '../indexes/faunaIndexesNames.js';
 import { createBoardUDFname } from '../udfs/udfnames.js';
 import { functionsBingoBoardsRole, userBingoBoardRole } from './rolenames.js';
 const q = faunadb.query;
@@ -99,6 +100,12 @@ export const UpdateRoleFunctionBingoBoards = CreateOrUpdateRole({
         write: true,
         create: true,
         delete: true,
+      },
+    },
+    {
+      resource: Index(indexAllBingoBoardsByRef.name),
+      actions: {
+        read: true,
       },
     },
     {
