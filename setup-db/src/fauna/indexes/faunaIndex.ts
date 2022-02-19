@@ -1,12 +1,27 @@
 import faunadb from 'faunadb';
-import { bingoBoardCollections } from '../collections/collectionnames.js';
-import { indexAllBingoBoardsByRef } from './faunaIndexesNames.js';
+import { accountsCollection, bingoBoardCollections } from '../collections/collectionnames.js';
+import { indexAllAccountsById, indexAllBingoBoardsByRef } from './faunaIndexesNames.js';
 
 const q = faunadb.query;
 
 const { Collection, CreateIndex } = q;
 
-/* Indexes */
+/** Indexes Accounts */
+
+export const CreateIndexByAccountId = CreateIndex({
+  name: indexAllAccountsById.name,
+  source: Collection(accountsCollection.name),
+  // We will search on id
+  terms: [
+    {
+      field: ['data', 'id'],
+    },
+  ],
+  serialized: true,
+  unique: true,
+});
+
+/* Indexes For Boards */
 export const CreateIndexAllBingoBoards = CreateIndex({
   name: indexAllBingoBoardsByRef.name,
   source: Collection(bingoBoardCollections.name),
