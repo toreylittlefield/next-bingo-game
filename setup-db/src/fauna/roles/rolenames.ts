@@ -1,5 +1,9 @@
-export const userBingoBoardRole = {
-  name: 'user_bingo_board_role',
+export const serverAccountRole = {
+  name: 'server',
+};
+
+export const accountsBingoBoardRole = {
+  name: 'accounts_bingo_board_role',
 };
 
 export const functionsBingoBoardsRole = {
