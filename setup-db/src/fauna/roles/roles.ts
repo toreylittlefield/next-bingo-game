@@ -1,15 +1,18 @@
 import faunadb from 'faunadb';
 import { accountsCollection, bingoBoardCollections, usersCollection } from '../collections/collectionnames.js';
 import { indexAllBingoBoardsByRef } from '../indexes/faunaIndexesNames.js';
+import { IsCalledWithAccessToken, IsCalledWithRefreshToken } from '../functions/tokens.js';
 import {
   createBoardUDFname,
   createUserUDFname,
   deleteBoardUDFname,
+  logoutAndDeleteTokensAccountUDFname,
   readBoardUDFname,
+  refreshTokenUDFname,
   updateBoardUDFname,
   updateUserUDFname,
 } from '../udfs/udfnames.js';
-import { functionsBingoBoardsRole, accountsBingoBoardRole } from './rolenames.js';
+import { functionsBingoBoardsRole, accountsBingoBoardRole, refreshTokenRole } from './rolenames.js';
 const q = faunadb.query;
 const {
   Select,
@@ -54,8 +57,17 @@ type RoleType = {
   privileges: Privileges[];
 };
 
+/** Start Roles Defined Here */
+
+/** Bingo Boards UDFs Role */
 const ROLE_FUNCTIONS_BINGO_BOARDS: RoleType = {
   name: functionsBingoBoardsRole.name,
+  membership: [],
+  privileges: [],
+};
+
+const ROLE_REFRESH_TOKENS: RoleType = {
+  name: refreshTokenRole.name,
   membership: [],
   privileges: [],
 };
@@ -63,9 +75,18 @@ const ROLE_FUNCTIONS_BINGO_BOARDS: RoleType = {
 /** FOR THE ACCOUNTS COLLECTION */
 const ROLE_ACCOUNTS_BINGO_BOARDS: RoleType = {
   name: accountsBingoBoardRole.name,
-  membership: [{ resource: Collection(accountsCollection.name) }],
+  membership: [
+    {
+      resource: Collection(accountsCollection.name),
+      // If the token used is an access token or which we'll use a reusable snippet of FQL
+      // returned by 'IsCalledWithAccessToken'
+      predicate: Query(Lambda((ref) => IsCalledWithAccessToken())),
+    },
+  ],
   privileges: [],
 };
+
+/** -----> End Roles Defined Here */
 
 // A convenience function to either create or update a role.
 function CreateOrUpdateRole(obj: RoleType) {
@@ -76,6 +97,7 @@ function CreateOrUpdateRole(obj: RoleType) {
   );
 }
 
+/** Create Roles */
 export const CreateRoleFunctionBingoBoards = CreateOrUpdateRole({
   ...ROLE_FUNCTIONS_BINGO_BOARDS,
 });
@@ -84,8 +106,14 @@ export const CreateRoleAccountsBingoBoards = CreateOrUpdateRole({
   ...ROLE_ACCOUNTS_BINGO_BOARDS,
 });
 
-export const UpdateRoleUserBingoBoards = CreateOrUpdateRole({
+export const CreateRoleRefreshToken = CreateOrUpdateRole({
+  ...ROLE_REFRESH_TOKENS,
+});
+
+/** Update Roles */
+export const UpdateRoleAccountsBingoBoards = CreateOrUpdateRole({
   ...ROLE_ACCOUNTS_BINGO_BOARDS,
+
   privileges: [
     /** ALLOW THE ACCOUNTS COLLECTION TO CALL UDFs */
     /** UDFS for USERs */
@@ -170,6 +198,38 @@ export const UpdateRoleUserBingoBoards = CreateOrUpdateRole({
             )
           )
         ),
+      },
+    },
+  ],
+});
+
+export const UpdateRoleRefreshToken = CreateOrUpdateRole({
+  ...ROLE_REFRESH_TOKENS,
+  membership: [
+    {
+      // The accounts collection gets access
+      resource: Collection(accountsCollection.name),
+      // If the token used is an refresh token
+      predicate: Query(Lambda((ref) => IsCalledWithRefreshToken())),
+    },
+  ],
+  privileges: [
+    // A refresh token can only refresh and there is value in restricting the functionality.
+    // If a malicious actro was able to grab a refresh token from the httpOnly cookie due to some vulnerability:
+    // - the actor can't retrieve data with it
+    // - the actor has to realize he has to exchange it for an access token by calling refresh
+    // - his refresh actions will be detected if or when the browser of the real user initiates a refresh.
+    // In essence, it reduces the ease of getting long-term access significantly if a refresh token does leak.
+    {
+      resource: q.Function(refreshTokenUDFname.name),
+      actions: {
+        call: true,
+      },
+    },
+    {
+      resource: q.Function(logoutAndDeleteTokensAccountUDFname.name),
+      actions: {
+        call: true,
       },
     },
   ],
