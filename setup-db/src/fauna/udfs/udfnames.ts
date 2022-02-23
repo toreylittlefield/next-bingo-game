@@ -25,3 +25,19 @@ export const updateBoardUDFname = {
 export const deleteBoardUDFname = {
   name: 'delete_board',
 };
+
+export const refreshTokenUDFname = {
+  name: 'refresh',
+};
+
+export const registerAccountUDFname = {
+  name: 'register',
+};
+
+export const loginAccountUDFname = {
+  name: 'login',
+};
+
+export const logoutAndDeleteTokensAccountUDFname = {
+  name: 'logout',
+};
