@@ -4,13 +4,19 @@ import {
   CreateRoleAccountsBingoBoards,
   CreateRoleFunctionBingoBoards,
   UpdateRoleFunctionBingoBoards,
-  UpdateRoleUserBingoBoards,
+  UpdateRoleAccountsBingoBoards,
+  CreateRoleRefreshToken,
+  UpdateRoleRefreshToken,
 } from '../fauna/roles/roles.js';
 import {
   createBoardUDF,
+  createRefreshTokenUDF,
   createUserUDF,
   deleteBoardUDF,
+  loginAccountAndCreateUserUDF,
+  logoutDeleteTokensAccountUDF,
   readBoardUDF,
+  registerCreateAccountUDF,
   updateBoardUDF,
   updateUserUDF,
 } from '../fauna/udfs/udfs.js';
@@ -26,7 +32,14 @@ async function setupFaunaDB(key: string) {
     /* Create Roles Second */
     await handleSetupError(admin.query(CreateRoleFunctionBingoBoards), 'Role Function Bingo Boards'),
     await handleSetupError(admin.query(CreateRoleAccountsBingoBoards), 'Role Users Bingo Boards'),
+    await handleSetupError(admin.query(CreateRoleRefreshToken), 'Role Refresh Token'),
     /** Create UDFs */
+    //login, logut, refreshtoken
+    await handleSetupError(admin.query(registerCreateAccountUDF), 'register account UDF'),
+    await handleSetupError(admin.query(loginAccountAndCreateUserUDF), 'login account UDF'),
+    await handleSetupError(admin.query(logoutDeleteTokensAccountUDF), 'logout account and delete tokens UDF'),
+    await handleSetupError(admin.query(createRefreshTokenUDF), 'refresh token UDF'),
+
     // user udfs
     await handleSetupError(admin.query(createUserUDF), 'create_user UDF'),
     await handleSetupError(admin.query(updateUserUDF), 'update_user UDF'),
@@ -38,7 +51,8 @@ async function setupFaunaDB(key: string) {
     /** ------> END Create UDFs */
     /* Update Roles Last To Attach To Valid Documents / Collections / Indexes/ UDFs with Memberships & Priveleges */
     await handleSetupError(admin.query(UpdateRoleFunctionBingoBoards), 'Update Role Function Bingo Board'),
-    await handleSetupError(admin.query(UpdateRoleUserBingoBoards), 'Update Role Users Bingo Board'),
+    await handleSetupError(admin.query(UpdateRoleAccountsBingoBoards), 'Update Role Users Bingo Board'),
+    await handleSetupError(admin.query(UpdateRoleRefreshToken), 'Update Role Refresh Token '),
   ];
   return await Promise.allSettled(promises);
 }
