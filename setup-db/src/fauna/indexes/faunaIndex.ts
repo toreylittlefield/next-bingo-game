@@ -1,10 +1,15 @@
 import faunadb from 'faunadb';
 import { accountsCollection, bingoBoardCollections } from '../collections/collectionnames.js';
-import { indexAllAccountsById, indexAllBingoBoardsByRef } from './faunaIndexesNames.js';
+import {
+  indexAccessTokenByRefreshToken,
+  indexAllAccountsById,
+  indexAllBingoBoardsByRef,
+  indexTokensByInstance,
+} from './faunaIndexesNames.js';
 
 const q = faunadb.query;
 
-const { Collection, CreateIndex } = q;
+const { Collection, CreateIndex, Tokens } = q;
 
 /** Indexes Accounts */
 
@@ -19,6 +24,29 @@ export const CreateIndexByAccountId = CreateIndex({
   ],
   serialized: true,
   unique: true,
+});
+
+export const CreateIndexAccessTokenByRefreshTokenRef = CreateIndex({
+  name: indexAccessTokenByRefreshToken.name,
+  source: Tokens(),
+  terms: [
+    {
+      field: ['data', 'refresh'],
+    },
+  ],
+  unique: true,
+  serialized: true,
+});
+
+export const CreateIndexTokensByInstance = CreateIndex({
+  name: indexTokensByInstance.name,
+  source: Tokens(),
+  terms: [
+    {
+      field: ['instance'],
+    },
+  ],
+  serialized: true,
 });
 
 /* Indexes For Boards */

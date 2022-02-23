@@ -5,3 +5,11 @@ export const indexAllAccountsById = {
 export const indexAllBingoBoardsByRef = {
   name: 'index_all_bingo_boards_by_ref',
 };
+
+export const indexAccessTokenByRefreshToken = {
+  name: 'access_token_by_refresh_token',
+};
+
+export const indexTokensByInstance = {
+  name: 'tokens_by_instance',
+};
