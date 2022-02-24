@@ -3,6 +3,8 @@ import faunadb from 'faunadb';
 import generator from 'generate-password';
 import netlifyIdentity from 'netlify-identity-widget';
 import { verify } from 'jsonwebtoken';
+import fetch from 'node-fetch';
+import { RandomPhotoUnsplash } from '../types/types';
 
 type Key = {
   secret: string;
@@ -25,6 +27,14 @@ interface UserType extends netlifyIdentity.User {
   };
 }
 
+interface UserMetaData extends netlifyIdentity.User {
+  ['user_metadata']: {
+    avatar_url: string;
+    full_name: string;
+    [key: string]: any;
+  };
+}
+
 const FAUNA_COLLECTION_NAMES = {
   accounts: 'accounts',
   users: 'users',
@@ -44,9 +54,10 @@ const serverClient = new faunadb.Client({
 
 // PWS
 const PWS = process.env.FAUNADB_PASSWORD as string;
+const UNSPLASH_CLIENT_KEY = process.env.UNSPLASH_CLIENT_KEY as string;
 
-async function createAccount(userId: string, password: string) {
-  return await serverClient.query(Call('register', userId, password));
+async function createAccount(userId: string, password: string, userName: string, userAlias: string, userIcon: string) {
+  return await serverClient.query(Call('register', userId, password, userName, userAlias, userIcon));
 }
 
 type Login = {
@@ -144,7 +155,32 @@ const handler: Handler = async (event, context) => {
 
     /** Create New Account */
     try {
-      await createAccount(id, PWS);
+      const randomuser = () => ['boarofWar', 'boarCoder', 'codeSmell', 'sniffNation'][Math.floor(Math.random() * 4)];
+      const randomNum = () => Math.random().toString(36).slice(2);
+      const getRandomUser = () => randomuser() + randomNum();
+      const username = getRandomUser();
+
+      const getUserAvatar = async (apiKey: string) => {
+        try {
+          const res = await fetch(
+            `https://api.unsplash.com/photos/random?client_id=${apiKey}&query=boar&content_filter=high`,
+          );
+          if (res.ok) {
+            const json = (await res.json()) as RandomPhotoUnsplash;
+            const thumb = json.urls?.thumb;
+            if (!thumb) throw Error('no thumb');
+            return thumb;
+          }
+          throw Error(res.statusText);
+        } catch (error) {
+          console.error(error);
+          return 'https://images.unsplash.com/photo-1550781088-fe4ae3b87430?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzMDQ4NzR8MHwxfHJhbmRvbXx8fHx8fHx8fDE2NDU2NjI1ODc&ixlib=rb-1.2.1&q=80&w=200';
+        }
+      };
+
+      const userAvatarURL = user_metadata?.avatar_url || (await getUserAvatar(UNSPLASH_CLIENT_KEY));
+
+      await createAccount(id, PWS, user_metadata.full_name, username, userAvatarURL);
       const { account, tokens } = await loginAccountAndGetTokens(id, PWS);
 
       /** Create Document in Accounts for this client */
@@ -161,6 +197,14 @@ const handler: Handler = async (event, context) => {
       // }
       // const key = (await obtainToken(user, PWS)) as Key;
       // console.log({ user, key });
+
+      const user: Pick<UserMetaData, 'user_metadata'> = {
+        user_metadata: {
+          avatar_url: '',
+          full_name: '',
+          ...account,
+        },
+      };
 
       const appMetaData: Pick<UserType, 'app_metadata'> = {
         app_metadata: {
@@ -181,7 +225,7 @@ const handler: Handler = async (event, context) => {
 
       return {
         statusCode: 200,
-        body: JSON.stringify(appMetaData),
+        body: JSON.stringify({ ...appMetaData, ...user }),
       };
     } catch (error) {
       console.error(error);
