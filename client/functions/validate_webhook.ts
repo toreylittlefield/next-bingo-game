@@ -10,7 +10,7 @@ type Key = {
   secret: string;
 };
 
-interface UserType extends netlifyIdentity.User {
+interface NetlifyAppMetaData extends netlifyIdentity.User {
   ['app_metadata']: {
     provider: string;
     roles: string[];
@@ -27,7 +27,7 @@ interface UserType extends netlifyIdentity.User {
   };
 }
 
-interface UserMetaData extends netlifyIdentity.User {
+interface NetlifyUserMetaData extends netlifyIdentity.User {
   ['user_metadata']: {
     avatar_url: string;
     full_name: string;
@@ -35,32 +35,7 @@ interface UserMetaData extends netlifyIdentity.User {
   };
 }
 
-const FAUNA_COLLECTION_NAMES = {
-  accounts: 'accounts',
-  users: 'users',
-};
-
-const NETLIFY_ROLE = 'user_account';
-
-/* configure faunaDB Client with our secret */
-const q = faunadb.query;
-
-const { Call } = q;
-const serverClient = new faunadb.Client({
-  domain: 'db.fauna.com',
-  scheme: 'https',
-  secret: process.env.FAUNADB_SERVER_KEY as string,
-});
-
-// PWS
-const PWS = process.env.FAUNADB_PASSWORD as string;
-const UNSPLASH_CLIENT_KEY = process.env.UNSPLASH_CLIENT_KEY as string;
-
-async function createAccount(userId: string, password: string, userName: string, userAlias: string, userIcon: string) {
-  return await serverClient.query(Call('register', userId, password, userName, userAlias, userIcon));
-}
-
-type Login = {
+interface LoggedInResponse {
   user: {
     data: { name: string; alias: string; icon: string };
   };
@@ -74,10 +49,97 @@ type Login = {
       ttl: { value: string };
     };
   };
+}
+
+type AppMetaData = NetlifyAppMetaData['app_metadata'];
+type UserMetaData = NetlifyUserMetaData['user_metadata'];
+
+type UserAppMetaData = { user_metadata: UserMetaData; app_metadata: AppMetaData };
+
+type UserLoginDataRes = UserAppMetaData | { user_metadata: null; app_metadata: null };
+
+type CombineMetaDataFunction = ({ user, tokens }: LoggedInResponse) => UserAppMetaData;
+
+const FAUNA_COLLECTION_NAMES = {
+  accounts: 'accounts',
+  users: 'users',
 };
 
-async function loginAccountAndGetTokens(userId: string, password: string): Promise<Login> {
-  return await serverClient.query(Call('login', [userId, password]));
+const NETLIFY_ROLE = 'user_account';
+
+/* configure faunaDB Client with our secret */
+const q = faunadb.query;
+
+const { Call } = q;
+
+const serverClient = new faunadb.Client({
+  domain: 'db.fauna.com',
+  scheme: 'https',
+  secret: process.env.FAUNADB_SERVER_KEY as string,
+});
+
+// PWS
+const PWS = process.env.FAUNADB_PASSWORD as string;
+const UNSPLASH_CLIENT_KEY = process.env.UNSPLASH_CLIENT_KEY as string;
+
+function combineMetaData(prevAppMetaData: AppMetaData, prevUserMetaData: UserMetaData) {
+  return function newMetaData({ user, tokens }: LoggedInResponse) {
+    const user_metadata: UserMetaData = {
+      ...prevUserMetaData,
+      ...user,
+      avatar_url: user.data.icon,
+      full_name: user.data.name,
+    };
+
+    const app_metadata: AppMetaData = {
+      ...prevAppMetaData,
+      faunadb_tokens: {
+        accessTokenData: {
+          accessToken: tokens.access.secret,
+          expiration: tokens.access.ttl.value,
+        },
+        refreshTokenData: {
+          refreshToken: tokens.refresh.secret,
+          expiration: tokens.refresh.ttl.value,
+        },
+      },
+    };
+    return { user_metadata, app_metadata };
+  };
+}
+
+async function createAccount(
+  userId: string,
+  password: string,
+  userName: string,
+  userAlias: string,
+  userIcon: string,
+  combineCallback: CombineMetaDataFunction,
+): Promise<UserLoginDataRes> {
+  try {
+    const { user, tokens } = (await serverClient.query(
+      Call('register', userId, password, userName, userAlias, userIcon),
+    )) as LoggedInResponse;
+
+    return combineCallback({ user, tokens });
+  } catch (error) {
+    return { app_metadata: null, user_metadata: null };
+  }
+}
+
+async function loginAccountAndGetTokens(
+  userId: string,
+  password: string,
+  combineCallback: CombineMetaDataFunction,
+): Promise<UserLoginDataRes> {
+  try {
+    const { user, tokens } = (await serverClient.query(Call('login', [userId, password]))) as LoggedInResponse;
+
+    return combineCallback({ user, tokens });
+  } catch (error) {
+    console.error(error);
+    return { app_metadata: null, user_metadata: null };
+  }
 }
 
 /** create a user in FaunaDB that can connect from the browser */
@@ -129,27 +191,40 @@ const handler: Handler = async (event, context) => {
     const payload = JSON.parse(event.body);
     const eventType = payload.event;
     console.log({ payload });
-    const { app_metadata, user_metadata, id } = payload.user as UserType;
+    const { app_metadata: prevAppMetaData, user_metadata: prevUserMetaData, id } = payload.user as NetlifyAppMetaData;
 
     /** email validation event */
-    if (eventType === 'validate' && app_metadata?.provider === 'email') {
+    if (eventType === 'validate' && prevAppMetaData?.provider === 'email') {
       return {
         statusCode: 200,
         body: '',
       };
     }
 
+    const combineMetaDataCallback = combineMetaData(prevAppMetaData, prevUserMetaData);
+
     /** login event, and user should already have a NETLIFY_ROLE in their roles && faunadb refresh && access token */
     if (
-      app_metadata.roles?.includes(NETLIFY_ROLE) &&
-      app_metadata.faunadb_tokens &&
-      app_metadata.faunadb_tokens.accessTokenData.accessToken &&
-      app_metadata.faunadb_tokens.refreshTokenData.refreshToken
+      prevAppMetaData.roles?.includes(NETLIFY_ROLE) &&
+      prevAppMetaData.faunadb_tokens &&
+      prevAppMetaData.faunadb_tokens.accessTokenData.accessToken &&
+      prevAppMetaData.faunadb_tokens.refreshTokenData.refreshToken
     ) {
       //** check refresh && access token expiration */
+      const { app_metadata = null, user_metadata = null } = await loginAccountAndGetTokens(
+        id,
+        PWS,
+        combineMetaDataCallback,
+      );
+      if (!app_metadata || !user_metadata)
+        return {
+          statusCode: 401,
+          body: 'Unauthorized',
+        };
+
       return {
         statusCode: 200,
-        body: '',
+        body: JSON.stringify({ app_metadata, user_metadata }),
       };
     }
 
@@ -178,39 +253,25 @@ const handler: Handler = async (event, context) => {
         }
       };
 
-      const userAvatarURL = user_metadata?.avatar_url || (await getUserAvatar(UNSPLASH_CLIENT_KEY));
+      const userAvatarURL = prevUserMetaData?.avatar_url || (await getUserAvatar(UNSPLASH_CLIENT_KEY));
 
-      await createAccount(id, PWS, user_metadata.full_name, username, userAvatarURL);
-      const { user, tokens } = await loginAccountAndGetTokens(id, PWS);
-
-      const userMetaData: Pick<UserMetaData, 'user_metadata'> = {
-        user_metadata: {
-          avatar_url: user.data.icon,
-          full_name: user.data.name,
-          ...user,
-        },
-      };
-
-      const appMetaData: Pick<UserType, 'app_metadata'> = {
-        app_metadata: {
-          faunadb_tokens: {
-            accessTokenData: {
-              accessToken: tokens.access.secret,
-              expiration: tokens.access.ttl.value,
-            },
-            refreshTokenData: {
-              refreshToken: tokens.refresh.secret,
-              expiration: tokens.refresh.ttl.value,
-            },
-          },
-          roles: [NETLIFY_ROLE],
-          provider: app_metadata.provider,
-        },
-      };
+      const { app_metadata, user_metadata } = await createAccount(
+        id,
+        PWS,
+        prevUserMetaData.full_name || '',
+        username,
+        userAvatarURL,
+        combineMetaDataCallback,
+      );
+      if (!prevAppMetaData || user_metadata)
+        return {
+          statusCode: 401,
+          body: 'Unauthorized',
+        };
 
       return {
         statusCode: 200,
-        body: JSON.stringify({ ...appMetaData, ...userMetaData }),
+        body: JSON.stringify({ app_metadata, user_metadata }),
       };
     } catch (error) {
       console.error(error);
