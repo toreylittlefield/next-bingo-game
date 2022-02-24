@@ -165,6 +165,8 @@ const handler: Handler = async (event, context) => {
   if (event.body && res) {
     const payload = JSON.parse(event.body);
     const eventType = payload.event;
+    console.log('***** Start Event Object ****', JSON.stringify(event), '***** END Event Object ****');
+    console.log('***** Start Payload Object ****', JSON.stringify(payload), '***** END Payload Object ****');
     const { app_metadata: prevAppMetaData, user_metadata: prevUserMetaData, id } = payload.user as NetlifyAppMetaData;
 
     /** email validation event */
