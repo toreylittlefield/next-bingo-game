@@ -9,8 +9,9 @@ import {
   UpdateRoleRefreshToken,
 } from '../fauna/roles/roles.js';
 import {
+  createAccessTokenWithRefreshTokenUDF,
   createBoardUDF,
-  createRefreshTokenUDF,
+  createRefreshAndAccessTokenUDF,
   createUserUDF,
   deleteBoardUDF,
   loginAccountAndCreateUserUDF,
@@ -38,7 +39,11 @@ async function setupFaunaDB(key: string) {
     await handleSetupError(admin.query(registerCreateAccountUDF), 'register account UDF'),
     await handleSetupError(admin.query(loginAccountAndCreateUserUDF), 'login account UDF'),
     await handleSetupError(admin.query(logoutDeleteTokensAccountUDF), 'logout account and delete tokens UDF'),
-    await handleSetupError(admin.query(createRefreshTokenUDF), 'refresh token UDF'),
+    await handleSetupError(admin.query(createRefreshAndAccessTokenUDF), 'create refresh and access token UDF'),
+    await handleSetupError(
+      admin.query(createAccessTokenWithRefreshTokenUDF),
+      'create access token with refresh token only UDF'
+    ),
 
     // user udfs
     await handleSetupError(admin.query(createUserUDF), 'create_user UDF'),
