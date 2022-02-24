@@ -21,6 +21,7 @@ const {
   Delete,
   Paginate,
   And,
+  Map,
 } = q;
 
 export const ACCESS_TOKEN_LIFETIME_SECONDS = 600; // 10 minutes
@@ -51,6 +52,28 @@ export function CreateRefreshToken(accountRef: faunadb.ExprArg, ttlSeconds: numb
     // 8 hours is a good time for refresh tokens.
     ttl: TimeAdd(Now(), ttlSeconds || REFRESH_TOKEN_LIFETIME_SECONDS, 'seconds'),
   });
+}
+
+export function CreateAccessTokenWithRefreshToken(
+  refresh_token: faunadb.ExprArg,
+  instance: faunadb.ExprArg,
+  accessTtlSeconds: number,
+  refreshTtlSeconds: number
+) {
+  return Let(
+    {
+      refresh: Get(refresh_token),
+      deleteOld: Map(
+        Paginate(Match(Index('access_token_by_refresh_token'), Select(['ref'], Var('refresh')))),
+        Lambda(['t'], Delete(Var('t')))
+      ),
+      access: CreateAccessToken(instance, Select(['ref'], Var('refresh')), accessTtlSeconds),
+    },
+    {
+      refresh: Var('refresh'),
+      access: Var('access'),
+    }
+  );
 }
 
 export function CreateAccessAndRefreshToken(
