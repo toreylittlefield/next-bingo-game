@@ -113,7 +113,7 @@ export const registerCreateAccountUDF = CreateOrUpdateFunction({
           }),
           account: Select(['ref'], Var('accountRef')),
         },
-        Var('account')
+        If(Exists(Var('account')), Call(q.Function(loginAccountUDFname.name)), false)
       )
     )
   ),
