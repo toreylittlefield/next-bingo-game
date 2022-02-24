@@ -93,6 +93,7 @@ function combineMetaData(prevAppMetaData: AppMetaData, prevUserMetaData: UserMet
 
     const app_metadata: AppMetaData = {
       ...prevAppMetaData,
+      roles: [NETLIFY_ROLE],
       faunadb_tokens: {
         accessTokenData: {
           accessToken: tokens.access.secret,
@@ -162,8 +163,6 @@ function obtainToken(userId: object, password: string) {
 }
 
 const handler: Handler = async (event, context) => {
-  console.log(JSON.stringify({ event, context }, null, 2));
-
   /** Check webhook signature && clientContext */
   const sig = event.headers['x-webhook-signature'];
   if (!sig || !context.clientContext) {
@@ -190,7 +189,6 @@ const handler: Handler = async (event, context) => {
   if (event.body && res) {
     const payload = JSON.parse(event.body);
     const eventType = payload.event;
-    console.log({ payload });
     const { app_metadata: prevAppMetaData, user_metadata: prevUserMetaData, id } = payload.user as NetlifyAppMetaData;
 
     /** email validation event */
@@ -216,7 +214,9 @@ const handler: Handler = async (event, context) => {
         PWS,
         combineMetaDataCallback,
       );
-      if (!app_metadata || !user_metadata)
+      console.log({ app_metadata, user_metadata }, 'login account data');
+
+      if (!app_metadata?.faunadb_tokens)
         return {
           statusCode: 401,
           body: 'Unauthorized',
@@ -263,7 +263,10 @@ const handler: Handler = async (event, context) => {
         userAvatarURL,
         combineMetaDataCallback,
       );
-      if (!prevAppMetaData || user_metadata)
+
+      console.log({ app_metadata, user_metadata }, 'create account data');
+
+      if (!app_metadata?.faunadb_tokens)
         return {
           statusCode: 401,
           body: 'Unauthorized',
