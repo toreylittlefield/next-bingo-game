@@ -61,8 +61,8 @@ async function createAccount(userId: string, password: string, userName: string,
 }
 
 type Login = {
-  account: {
-    data: { id: string };
+  user: {
+    data: { name: string; alias: string; icon: string };
   };
   tokens: {
     refresh: {
@@ -181,28 +181,13 @@ const handler: Handler = async (event, context) => {
       const userAvatarURL = user_metadata?.avatar_url || (await getUserAvatar(UNSPLASH_CLIENT_KEY));
 
       await createAccount(id, PWS, user_metadata.full_name, username, userAvatarURL);
-      const { account, tokens } = await loginAccountAndGetTokens(id, PWS);
+      const { user, tokens } = await loginAccountAndGetTokens(id, PWS);
 
-      /** Create Document in Accounts for this client */
-      // const user = await createUser(id, PWS).catch((err) =>
-      //   console.log('error creating user', JSON.stringify(err, null, 2), err.message),
-      // );
-      // console.log(JSON.stringify(user, null, 2), 'user creation log');
-      // if (!user) {
-      //   console.log('fauna create user error 401');
-      //   return {
-      //     statusCode: 401,
-      //     body: 'Not Authorized',
-      //   };
-      // }
-      // const key = (await obtainToken(user, PWS)) as Key;
-      // console.log({ user, key });
-
-      const user: Pick<UserMetaData, 'user_metadata'> = {
+      const userMetaData: Pick<UserMetaData, 'user_metadata'> = {
         user_metadata: {
-          avatar_url: '',
-          full_name: '',
-          ...account,
+          avatar_url: user.data.icon,
+          full_name: user.data.name,
+          ...user,
         },
       };
 
@@ -225,7 +210,7 @@ const handler: Handler = async (event, context) => {
 
       return {
         statusCode: 200,
-        body: JSON.stringify({ ...appMetaData, ...user }),
+        body: JSON.stringify({ ...appMetaData, ...userMetaData }),
       };
     } catch (error) {
       console.error(error);
