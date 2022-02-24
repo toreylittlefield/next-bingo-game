@@ -3,8 +3,6 @@ import { bingoBoardCollections, usersCollection } from '../collections/collectio
 const q = faunadb.query;
 const { Var, Ref, Now, Select, Get, Delete, CurrentIdentity, Let, Create, Collection, Update, Paginate, Documents } = q;
 
-export function createAccount() {}
-
 /** USER FUNCTIONS */
 export function createUser(name: faunadb.Expr, alias: faunadb.Expr, icon: faunadb.Expr): faunadb.Expr {
   const FQLStatement = Let(
