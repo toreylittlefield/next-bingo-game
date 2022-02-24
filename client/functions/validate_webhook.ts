@@ -254,7 +254,7 @@ const handler: Handler = async (event, context) => {
 
       return {
         statusCode: 200,
-        body: JSON.stringify({ app_metadata };),
+        body: JSON.stringify({ app_metadata }),
       };
     } catch (error) {
       console.error(error);
