@@ -83,30 +83,29 @@ const PWS = process.env.FAUNADB_PASSWORD as string;
 const UNSPLASH_CLIENT_KEY = process.env.UNSPLASH_CLIENT_KEY as string;
 
 function combineMetaData(prevAppMetaData: AppMetaData, prevUserMetaData: UserMetaData) {
-  return function newMetaData({ user, tokens }: LoggedInResponse) {
-    const user_metadata: UserMetaData = {
-      ...prevUserMetaData,
-      alias: user.data.alias,
-      avatar_url: user.data.icon,
-      full_name: user.data.name,
-    };
-
-    const app_metadata: AppMetaData = {
-      ...prevAppMetaData,
-      roles: [NETLIFY_ROLE],
-      faunadb_tokens: {
-        accessTokenData: {
-          accessToken: tokens.access.secret,
-          expiration: tokens.access.ttl.value,
-        },
-        refreshTokenData: {
-          refreshToken: tokens.refresh.secret,
-          expiration: tokens.refresh.ttl.value,
+  return function newMetaData({ user, tokens }: LoggedInResponse): UserAppMetaData {
+    return {
+      app_metadata: {
+        ...prevAppMetaData,
+        roles: [NETLIFY_ROLE],
+        faunadb_tokens: {
+          accessTokenData: {
+            accessToken: tokens.access.secret,
+            expiration: tokens.access.ttl.value,
+          },
+          refreshTokenData: {
+            refreshToken: tokens.refresh.secret,
+            expiration: tokens.refresh.ttl.value,
+          },
         },
       },
+      user_metadata: {
+        ...prevUserMetaData,
+        alias: user.data.alias,
+        avatar_url: user.data.icon,
+        full_name: user.data.name,
+      },
     };
-    console.log({ user_metadata, app_metadata }, '----> COMBINE METADATA <----');
-    return { user_metadata, app_metadata };
   };
 }
 
@@ -268,9 +267,7 @@ const handler: Handler = async (event, context) => {
         username,
         userAvatarURL,
         combineMetaDataCallback,
-      );
-
-      console.log({ app_metadata, user_metadata }, 'create account data');
+      ).catch((err) => console.log(err, 'error creating new account'));
 
       if (!app_metadata?.faunadb_tokens)
         return {
