@@ -37,7 +37,9 @@ interface NetlifyUserMetaData extends netlifyIdentity.User {
 
 interface LoggedInResponse {
   user: {
-    data: { name: string; alias: string; icon: string };
+    name: string;
+    alias: string;
+    icon: string;
   };
   tokens: {
     refresh: {
@@ -101,9 +103,9 @@ function combineMetaData(prevAppMetaData: AppMetaData, prevUserMetaData: UserMet
       },
       user_metadata: {
         ...prevUserMetaData,
-        alias: user.data.alias,
-        avatar_url: user.data.icon,
-        full_name: user.data.name,
+        alias: user.alias,
+        avatar_url: user.icon,
+        full_name: user.name,
       },
     };
   };
@@ -118,16 +120,10 @@ async function createAccount(
   combineCallback: CombineMetaDataFunction,
 ): Promise<UserLoginDataRes> {
   try {
-    const res = (await serverClient.query(
+    const { user, tokens } = (await serverClient.query(
       Call('register', userId, password, userName, userAlias, userIcon),
     )) as LoggedInResponse;
-
-    const { user, tokens } = res;
-    console.log({ user, tokens }, '---> create account, user & login registration');
-    const result = combineCallback({ user, tokens });
-    console.log(JSON.stringify(result, null, 2), 'result of combined function');
-    const { app_metadata, user_metadata } = result;
-    return { app_metadata: app_metadata, user_metadata: user_metadata };
+    return combineCallback({ user, tokens });
   } catch (error) {
     return { app_metadata: null, user_metadata: null };
   }
@@ -219,7 +215,6 @@ const handler: Handler = async (event, context) => {
         PWS,
         combineMetaDataCallback,
       );
-      console.log({ app_metadata, user_metadata }, 'login account data');
 
       if (!app_metadata?.faunadb_tokens)
         return {
@@ -267,13 +262,14 @@ const handler: Handler = async (event, context) => {
         username,
         userAvatarURL,
         combineMetaDataCallback,
-      ).catch((err) => console.log(err, 'error creating new account'))) as any;
+      )) as UserLoginDataRes;
 
-      if (!app_metadata?.faunadb_tokens)
+      if (!app_metadata?.faunadb_tokens) {
         return {
           statusCode: 401,
           body: 'Unauthorized',
         };
+      }
 
       return {
         statusCode: 200,
