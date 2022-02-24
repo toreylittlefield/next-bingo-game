@@ -205,7 +205,7 @@ const handler: Handler = async (event, context) => {
 
       return {
         statusCode: 200,
-        body: JSON.stringify({ ...app_metadata, ...user_metadata }),
+        body: JSON.stringify({ app_metadata, user_metadata }),
       };
     }
 
@@ -245,18 +245,17 @@ const handler: Handler = async (event, context) => {
         combineMetaDataCallback,
       )) as UserLoginDataRes;
 
-      console.log(JSON.stringify({ app_metadata, user_metadata }, null, 2), 'create account response');
-
       if (!app_metadata?.faunadb_tokens) {
         return {
           statusCode: 401,
           body: 'Unauthorized',
         };
       }
-
+      const accountAppUserData = { app_metadata, user_metadata };
+      console.log(JSON.stringify(accountAppUserData, null, 2), 'create account response');
       return {
         statusCode: 200,
-        body: JSON.stringify({ ...app_metadata, ...user_metadata }),
+        body: JSON.stringify(accountAppUserData),
       };
     } catch (error) {
       console.error(error);
