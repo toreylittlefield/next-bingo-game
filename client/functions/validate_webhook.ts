@@ -260,14 +260,14 @@ const handler: Handler = async (event, context) => {
 
       const userAvatarURL = prevUserMetaData?.avatar_url || (await getUserAvatar(UNSPLASH_CLIENT_KEY));
 
-      const { app_metadata, user_metadata } = await createAccount(
+      const { app_metadata, user_metadata } = (await createAccount(
         id,
         PWS,
         prevUserMetaData.full_name || '',
         username,
         userAvatarURL,
         combineMetaDataCallback,
-      ).catch((err) => console.log(err, 'error creating new account'));
+      ).catch((err) => console.log(err, 'error creating new account'))) as any;
 
       if (!app_metadata?.faunadb_tokens)
         return {
