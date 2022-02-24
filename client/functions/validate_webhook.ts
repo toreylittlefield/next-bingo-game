@@ -86,7 +86,7 @@ function combineMetaData(prevAppMetaData: AppMetaData, prevUserMetaData: UserMet
   return function newMetaData({ user, tokens }: LoggedInResponse) {
     const user_metadata: UserMetaData = {
       ...prevUserMetaData,
-      ...user,
+      alias: user.data.alias,
       avatar_url: user.data.icon,
       full_name: user.data.name,
     };
@@ -125,7 +125,10 @@ async function createAccount(
 
     const { user, tokens } = res;
     console.log({ user, tokens }, '---> create account, user & login registration');
-    return combineCallback({ user, tokens });
+    const result = combineCallback({ user, tokens });
+    console.log(JSON.stringify(result, null, 2), 'result of combined function');
+    const { app_metadata, user_metadata } = result;
+    return { app_metadata: app_metadata, user_metadata: user_metadata };
   } catch (error) {
     return { app_metadata: null, user_metadata: null };
   }
