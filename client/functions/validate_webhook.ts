@@ -1,30 +1,32 @@
-import { Handler } from '@netlify/functions';
+import { Handler, HandlerEvent, HandlerResponse } from '@netlify/functions';
 import { verify } from 'jsonwebtoken';
-import { combineMetaData, getRandomUserName, getUserAvatar } from './utils/utils';
+import { combineMetaData, getRandomUserName, getUserAvatar, hasValidFaunaTokens } from './utils/utils';
 import { NETLIFY_ROLE, PWS, UNSPLASH_CLIENT_KEY } from './constants/constants';
 import { loginAccountAndGetTokens } from './faunaApi/login';
 import { createAccount } from './faunaApi/registerAccount';
 import { NetlifyAppMetaData } from '../types/types';
 
-const handler: Handler = async (event, context) => {
+/** - returns 403 statusCode Not Authorized */
+function notAuthorizedHandlerResponse(): HandlerResponse {
+  return {
+    statusCode: 403,
+    body: JSON.stringify({ message: 'Not Authorized' }),
+  };
+}
+
+const handler: Handler = async (event: HandlerEvent, context) => {
   /** Check webhook signature && clientContext */
   const sig = event.headers['x-webhook-signature'];
   if (!sig || !context.clientContext) {
     console.log('no clientContext', context.clientContext);
-    return {
-      statusCode: 403,
-      body: JSON.stringify({ message: 'Not Authorized' }),
-    };
+    return notAuthorizedHandlerResponse();
   }
 
   /** Verify the webhook JWT signature */
   const res = verify(sig, process.env.WEB_HOOK_SIG as string, function resolve(error, decoded) {
     if (error) {
       console.log('invalid  webhook signature', sig);
-      return {
-        statusCode: 403,
-        body: JSON.stringify({ message: 'Not Authorized' }),
-      };
+      return notAuthorizedHandlerResponse();
     }
     return decoded;
   });
@@ -54,18 +56,8 @@ const handler: Handler = async (event, context) => {
       prevAppMetaData.faunadb_tokens.refreshTokenData.refreshToken
     ) {
       //** check refresh && access token expiration */
-      const { app_metadata = null } = await loginAccountAndGetTokens(id, PWS, combineMetaDataCallback);
-
-      if (!app_metadata?.faunadb_tokens)
-        return {
-          statusCode: 401,
-          body: 'Unauthorized',
-        };
-
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ app_metadata }),
-      };
+      const { app_metadata } = await loginAccountAndGetTokens(id, PWS, combineMetaDataCallback);
+      return hasValidFaunaTokens(app_metadata);
     }
 
     if (eventType === 'signup') {
@@ -82,17 +74,7 @@ const handler: Handler = async (event, context) => {
           combineMetaDataCallback,
         );
 
-        if (!app_metadata?.faunadb_tokens) {
-          return {
-            statusCode: 401,
-            body: 'Unauthorized',
-          };
-        }
-
-        return {
-          statusCode: 200,
-          body: JSON.stringify({ app_metadata }),
-        };
+        return hasValidFaunaTokens(app_metadata);
       } catch (error) {
         console.error(error);
         return {
@@ -103,11 +85,7 @@ const handler: Handler = async (event, context) => {
     }
   }
 
-  console.log('failed: theres another reason 403');
-  return {
-    statusCode: 403,
-    body: JSON.stringify({ message: 'Not Authorized' }),
-  };
+  return notAuthorizedHandlerResponse();
 };
 
 export { handler };
