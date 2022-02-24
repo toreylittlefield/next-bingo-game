@@ -105,6 +105,7 @@ function combineMetaData(prevAppMetaData: AppMetaData, prevUserMetaData: UserMet
         },
       },
     };
+    console.log({ user_metadata, app_metadata }, '----> COMBINE METADATA <----');
     return { user_metadata, app_metadata };
   };
 }
@@ -122,9 +123,8 @@ async function createAccount(
       Call('register', userId, password, userName, userAlias, userIcon),
     )) as LoggedInResponse;
 
-    console.log({ res }, '---> create account, user & login registration');
-
     const { user, tokens } = res;
+    console.log({ user, tokens }, '---> create account, user & login registration');
     return combineCallback({ user, tokens });
   } catch (error) {
     return { app_metadata: null, user_metadata: null };
