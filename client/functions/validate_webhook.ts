@@ -144,25 +144,6 @@ async function loginAccountAndGetTokens(
   }
 }
 
-/** create a user in FaunaDB that can connect from the browser */
-async function createUser(userId: string, password: string) {
-  return await serverClient.query(
-    q.Create(q.Collection(FAUNA_COLLECTION_NAMES.accounts), {
-      credentials: {
-        password: password,
-      },
-      data: {
-        id: userId,
-        // user_metadata: userData.user_metadata,
-      },
-    }),
-  );
-}
-
-function obtainToken(userId: object, password: string) {
-  return serverClient.query(q.Login(q.Select('ref', userId), { password }));
-}
-
 const handler: Handler = async (event, context) => {
   /** Check webhook signature && clientContext */
   const sig = event.headers['x-webhook-signature'];
@@ -224,7 +205,7 @@ const handler: Handler = async (event, context) => {
 
       return {
         statusCode: 200,
-        body: JSON.stringify({ app_metadata, user_metadata }),
+        body: JSON.stringify({ ...app_metadata, ...user_metadata }),
       };
     }
 
@@ -264,6 +245,8 @@ const handler: Handler = async (event, context) => {
         combineMetaDataCallback,
       )) as UserLoginDataRes;
 
+      console.log(JSON.stringify({ app_metadata, user_metadata }, null, 2), 'create account response');
+
       if (!app_metadata?.faunadb_tokens) {
         return {
           statusCode: 401,
@@ -273,7 +256,7 @@ const handler: Handler = async (event, context) => {
 
       return {
         statusCode: 200,
-        body: JSON.stringify({ app_metadata, user_metadata }),
+        body: JSON.stringify({ ...app_metadata, ...user_metadata }),
       };
     } catch (error) {
       console.error(error);
