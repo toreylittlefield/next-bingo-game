@@ -1,7 +1,23 @@
-import { FormControl, FormLabel, Grid, GridItem, Input, Text } from '@chakra-ui/react';
-import React, { useReducer } from 'react';
+import {
+  Button,
+  ComponentWithAs,
+  FormControl,
+  FormControlProps,
+  FormErrorMessage,
+  FormErrorMessageProps,
+  FormHelperText,
+  FormLabel,
+  FormLabelProps,
+  Grid,
+  GridItem,
+  HelpTextProps,
+  Input,
+  InputProps,
+  Text,
+} from '@chakra-ui/react';
+import React, { FC, useReducer, useContext } from 'react';
 import netlifyIdentity from 'netlify-identity-widget';
-import { Formik, Form, useField } from 'formik';
+import { Formik, Form, useField, FormikProps, FieldHookConfig } from 'formik';
 import * as Yup from 'yup';
 import { UserProfile } from '../types/types';
 
@@ -59,16 +75,33 @@ const UserSettings = ({ user }: UserProfile) => {
 
   const handlerUserNameInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     dispatch({ type: 'UPDATE_USERNAME', payload: event.target.value });
-    if (netlifyIdentity.currentUser()?.user_metadata) {
-      netlifyIdentity.gotrue
-        .currentUser()
-        ?.update({
-          data: {
-            username: state.formData.username,
-          },
-        })
-        .then((user) => console.log(user));
-    }
+  };
+
+  interface BaseProps extends FormControlProps {
+    name: string;
+    label?: string;
+    labelProps?: FormLabelProps;
+    helperText?: string;
+    helperTextProps?: HelpTextProps;
+    errorMessageProps?: FormErrorMessageProps;
+  }
+
+  type InputControlProps = BaseProps & { inputProps?: InputProps };
+
+  const CustomInput: FC<InputControlProps> = (props: InputControlProps) => {
+    const { name, label, inputProps, labelProps, helperText, helperTextProps, errorMessageProps, ...rest } = props;
+    const [field, { error, touched }, helper] = useField(name);
+    return (
+      <FormControl isInvalid={!!error && touched} isRequired {...rest}>
+        <FormLabel htmlFor={name} {...labelProps}>
+          {label}
+        </FormLabel>
+
+        <Input {...field} {...inputProps} label={label} name={name} />
+        {error && <FormErrorMessage {...errorMessageProps}>{error}</FormErrorMessage>}
+        {helperText && <FormHelperText {...helperTextProps}>{helperText}</FormHelperText>}
+      </FormControl>
+    );
   };
 
   return (
@@ -87,27 +120,39 @@ const UserSettings = ({ user }: UserProfile) => {
           }}
           validationSchema={Yup.object({
             firstName: Yup.string().max(15, 'Must be 15 characters or less').required('Required'),
-            lastName: Yup.string().max(20, 'Must be 20 characters or less').required('Required'),
-            email: Yup.string().email('Invalid email address').required('Required'),
-            acceptedTerms: Yup.boolean()
-              .required('Required')
-              .oneOf([true], 'You must accept the terms and conditions.'),
-            jobType: Yup.string()
-              .oneOf(['designer', 'development', 'product', 'other'], 'Invalid Job Type')
-              .required('Required'),
+            // lastName: Yup.string().max(20, 'Must be 20 characters or less').required('Required'),
+            // email: Yup.string().email('Invalid email address').required('Required'),
+            // acceptedTerms: Yup.boolean()
+            //   .required('Required')
+            //   .oneOf([true], 'You must accept the terms and conditions.'),
+            // jobType: Yup.string()
+            //   .oneOf(['designer', 'development', 'product', 'other'], 'Invalid Job Type')
+            //   .required('Required'),
           })}
-          onSubmit={(values, { setSubmitting }) => {
-            setTimeout(() => {
-              alert(JSON.stringify(values, null, 2));
+          onSubmit={async (values, { setSubmitting }) => {
+            console.log('submit!');
+            alert(JSON.stringify(values, null, 2));
+            try {
+              const res = await fetch('/api/fauna/updateuserprofile', {
+                headers: {
+                  Authorization: `Bearer ${user.token?.access_token}`,
+                },
+              });
+              if (res.ok) {
+                const json = await res.json();
+                console.log({ json });
+              }
+              throw Error(res.statusText);
+            } catch (error) {
+              console.error(error);
+            } finally {
               setSubmitting(false);
-            }, 400);
+            }
           }}
         >
           <Form>
-            <FormControl id="first-name" isRequired>
-              <FormLabel>First name</FormLabel>
-              <Input placeholder="First name" value={formData.username} onChange={handlerUserNameInput} />
-            </FormControl>
+            <CustomInput placeholder="First name" label="First name" name="firstName" />
+            <Button type="submit">Save</Button>
           </Form>
         </Formik>
       </GridItem>
