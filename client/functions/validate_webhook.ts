@@ -56,7 +56,7 @@ interface LoggedInResponse {
 type AppMetaData = NetlifyAppMetaData['app_metadata'];
 type UserMetaData = NetlifyUserMetaData['user_metadata'];
 
-type UserAppMetaData = { user_metadata: UserMetaData; app_metadata: AppMetaData };
+type UserAppMetaData = { app_metadata: AppMetaData & { user_metadata: UserMetaData } };
 
 type UserLoginDataRes = UserAppMetaData | { user_metadata: null; app_metadata: null };
 
@@ -100,12 +100,12 @@ function combineMetaData(prevAppMetaData: AppMetaData, prevUserMetaData: UserMet
             expiration: tokens.refresh.ttl.value,
           },
         },
-      },
-      user_metadata: {
-        ...prevUserMetaData,
-        alias: user.alias,
-        avatar_url: user.icon,
-        full_name: user.name,
+        user_metadata: {
+          ...prevUserMetaData,
+          alias: user.alias,
+          avatar_url: user.icon,
+          full_name: user.name,
+        },
       },
     };
   };
@@ -191,11 +191,7 @@ const handler: Handler = async (event, context) => {
       prevAppMetaData.faunadb_tokens.refreshTokenData.refreshToken
     ) {
       //** check refresh && access token expiration */
-      const { app_metadata = null, user_metadata = null } = await loginAccountAndGetTokens(
-        id,
-        PWS,
-        combineMetaDataCallback,
-      );
+      const { app_metadata = null } = await loginAccountAndGetTokens(id, PWS, combineMetaDataCallback);
 
       if (!app_metadata?.faunadb_tokens)
         return {
@@ -236,7 +232,7 @@ const handler: Handler = async (event, context) => {
 
       const userAvatarURL = prevUserMetaData?.avatar_url || (await getUserAvatar(UNSPLASH_CLIENT_KEY));
 
-      const { app_metadata, user_metadata } = (await createAccount(
+      const { app_metadata } = (await createAccount(
         id,
         PWS,
         prevUserMetaData.full_name || '',
