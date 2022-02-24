@@ -56,7 +56,7 @@ interface LoggedInResponse {
 type AppMetaData = NetlifyAppMetaData['app_metadata'];
 type UserMetaData = NetlifyUserMetaData['user_metadata'];
 
-type UserAppMetaData = { app_metadata: AppMetaData & { user_metadata: UserMetaData } };
+type UserAppMetaData = { app_metadata: AppMetaData };
 
 type UserLoginDataRes = UserAppMetaData | { user_metadata: null; app_metadata: null };
 
@@ -99,12 +99,6 @@ function combineMetaData(prevAppMetaData: AppMetaData, prevUserMetaData: UserMet
             refreshToken: tokens.refresh.secret,
             expiration: tokens.refresh.ttl.value,
           },
-        },
-        user_metadata: {
-          ...prevUserMetaData,
-          alias: user.alias,
-          avatar_url: user.icon,
-          full_name: user.name,
         },
       },
     };
