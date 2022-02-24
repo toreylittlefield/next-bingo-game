@@ -124,3 +124,55 @@ export interface Social {
   twitterUsername?: string;
   paypalEmail?: null;
 }
+
+export interface NetlifyAppMetaData extends netlifyIdentity.User {
+  ['app_metadata']: {
+    provider: string;
+    roles: string[];
+    faunadb_tokens: {
+      accessTokenData: {
+        expiration: string | Date;
+        accessToken: string;
+      };
+      refreshTokenData: {
+        expiration: string | Date;
+        refreshToken: string;
+      };
+    };
+  };
+}
+
+export interface NetlifyUserMetaData extends netlifyIdentity.User {
+  ['user_metadata']: {
+    avatar_url: string;
+    full_name: string;
+    [key: string]: any;
+  };
+}
+
+export interface LoggedInResponse {
+  user: {
+    name: string;
+    alias: string;
+    icon: string;
+  };
+  tokens: {
+    refresh: {
+      secret: string;
+      ttl: { value: string };
+    };
+    access: {
+      secret: string;
+      ttl: { value: string };
+    };
+  };
+}
+
+export type AppMetaData = NetlifyAppMetaData['app_metadata'];
+export type UserMetaData = NetlifyUserMetaData['user_metadata'];
+
+export type UserAppMetaData = { app_metadata: AppMetaData };
+
+export type UserLoginDataRes = UserAppMetaData | { app_metadata: null };
+
+export type CombineMetaDataFunction = ({ user, tokens }: LoggedInResponse) => UserAppMetaData;
