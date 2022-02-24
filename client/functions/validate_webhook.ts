@@ -118,10 +118,13 @@ async function createAccount(
   combineCallback: CombineMetaDataFunction,
 ): Promise<UserLoginDataRes> {
   try {
-    const { user, tokens } = (await serverClient.query(
+    const res = (await serverClient.query(
       Call('register', userId, password, userName, userAlias, userIcon),
     )) as LoggedInResponse;
 
+    console.log({ res }, '---> create account, user & login registration');
+
+    const { user, tokens } = res;
     return combineCallback({ user, tokens });
   } catch (error) {
     return { app_metadata: null, user_metadata: null };
