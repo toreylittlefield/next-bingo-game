@@ -8,7 +8,7 @@ import {
   deleteBoardUDFname,
   logoutAndDeleteTokensAccountUDFname,
   readBoardUDFname,
-  refreshTokenUDFname,
+  createRefreshAndAccessTokenUDFname,
   updateBoardUDFname,
   updateUserUDFname,
 } from '../udfs/udfnames.js';
@@ -75,14 +75,7 @@ const ROLE_REFRESH_TOKENS: RoleType = {
 /** FOR THE ACCOUNTS COLLECTION */
 const ROLE_ACCOUNTS_BINGO_BOARDS: RoleType = {
   name: accountsBingoBoardRole.name,
-  membership: [
-    {
-      resource: Collection(accountsCollection.name),
-      // If the token used is an access token or which we'll use a reusable snippet of FQL
-      // returned by 'IsCalledWithAccessToken'
-      predicate: Query(Lambda((ref) => IsCalledWithAccessToken())),
-    },
-  ],
+  membership: [],
   privileges: [],
 };
 
@@ -98,19 +91,112 @@ function CreateOrUpdateRole(obj: RoleType) {
 }
 
 /** Create Roles */
+
+/** UDFs ROLE */
 export const CreateRoleFunctionBingoBoards = CreateOrUpdateRole({
   ...ROLE_FUNCTIONS_BINGO_BOARDS,
 });
 
+/** ACCOUNTS ROLE */
 export const CreateRoleAccountsBingoBoards = CreateOrUpdateRole({
   ...ROLE_ACCOUNTS_BINGO_BOARDS,
+  membership: [
+    {
+      resource: Collection(accountsCollection.name),
+      // If the token used is an access token or which we'll use a reusable snippet of FQL
+      // returned by 'IsCalledWithAccessToken'
+      predicate: Query(Lambda((ref) => IsCalledWithAccessToken())),
+    },
+  ],
 });
 
+/** REFRESH ROLE */
 export const CreateRoleRefreshToken = CreateOrUpdateRole({
   ...ROLE_REFRESH_TOKENS,
+  membership: [
+    {
+      // The accounts collection gets access
+      resource: Collection(accountsCollection.name),
+      // If the token used is an refresh token
+      predicate: Query(Lambda((ref) => IsCalledWithRefreshToken())),
+    },
+  ],
 });
 
 /** Update Roles */
+export const UpdateRoleFunctionBingoBoards = CreateOrUpdateRole({
+  ...ROLE_FUNCTIONS_BINGO_BOARDS,
+  privileges: [
+    {
+      resource: Collection(accountsCollection.name),
+      actions: {
+        read: true,
+      },
+    },
+    {
+      resource: Collection(usersCollection.name),
+      actions: {
+        read: true,
+        write: true,
+        create: true,
+      },
+    },
+    {
+      resource: Collection(bingoBoardCollections.name),
+      actions: {
+        read: true,
+        write: true,
+        create: true,
+        delete: true,
+      },
+    },
+    {
+      resource: Index(indexAllBingoBoardsByRef.name),
+      actions: {
+        read: true,
+      },
+    },
+    // UDFs for the USERS
+    {
+      resource: q.Function(createUserUDFname.name),
+      actions: {
+        call: true,
+      },
+    },
+    {
+      resource: q.Function(updateUserUDFname.name),
+      actions: {
+        call: true,
+      },
+    },
+    // UDFs to for manipulating the BOARDS
+    {
+      resource: q.Function(createBoardUDFname.name),
+      actions: {
+        call: true,
+      },
+    },
+    {
+      resource: q.Function(readBoardUDFname.name),
+      actions: {
+        call: true,
+      },
+    },
+    {
+      resource: q.Function(updateBoardUDFname.name),
+      actions: {
+        call: true,
+      },
+    },
+    {
+      resource: q.Function(deleteBoardUDFname.name),
+      actions: {
+        call: true,
+      },
+    },
+  ],
+});
+
 export const UpdateRoleAccountsBingoBoards = CreateOrUpdateRole({
   ...ROLE_ACCOUNTS_BINGO_BOARDS,
 
@@ -205,14 +291,6 @@ export const UpdateRoleAccountsBingoBoards = CreateOrUpdateRole({
 
 export const UpdateRoleRefreshToken = CreateOrUpdateRole({
   ...ROLE_REFRESH_TOKENS,
-  membership: [
-    {
-      // The accounts collection gets access
-      resource: Collection(accountsCollection.name),
-      // If the token used is an refresh token
-      predicate: Query(Lambda((ref) => IsCalledWithRefreshToken())),
-    },
-  ],
   privileges: [
     // A refresh token can only refresh and there is value in restricting the functionality.
     // If a malicious actro was able to grab a refresh token from the httpOnly cookie due to some vulnerability:
@@ -221,86 +299,13 @@ export const UpdateRoleRefreshToken = CreateOrUpdateRole({
     // - his refresh actions will be detected if or when the browser of the real user initiates a refresh.
     // In essence, it reduces the ease of getting long-term access significantly if a refresh token does leak.
     {
-      resource: q.Function(refreshTokenUDFname.name),
+      resource: q.Function(createRefreshAndAccessTokenUDFname.name),
       actions: {
         call: true,
       },
     },
     {
       resource: q.Function(logoutAndDeleteTokensAccountUDFname.name),
-      actions: {
-        call: true,
-      },
-    },
-  ],
-});
-
-export const UpdateRoleFunctionBingoBoards = CreateOrUpdateRole({
-  ...ROLE_FUNCTIONS_BINGO_BOARDS,
-  privileges: [
-    {
-      resource: Collection(accountsCollection.name),
-      actions: {
-        read: true,
-      },
-    },
-    {
-      resource: Collection(usersCollection.name),
-      actions: {
-        read: true,
-        write: true,
-        create: true,
-      },
-    },
-    {
-      resource: Collection(bingoBoardCollections.name),
-      actions: {
-        read: true,
-        write: true,
-        create: true,
-        delete: true,
-      },
-    },
-    {
-      resource: Index(indexAllBingoBoardsByRef.name),
-      actions: {
-        read: true,
-      },
-    },
-    // UDFs for the USERS
-    {
-      resource: q.Function(createUserUDFname.name),
-      actions: {
-        call: true,
-      },
-    },
-    {
-      resource: q.Function(updateUserUDFname.name),
-      actions: {
-        call: true,
-      },
-    },
-    // UDFs to for manipulating the BOARDS
-    {
-      resource: q.Function(createBoardUDFname.name),
-      actions: {
-        call: true,
-      },
-    },
-    {
-      resource: q.Function(readBoardUDFname.name),
-      actions: {
-        call: true,
-      },
-    },
-    {
-      resource: q.Function(updateBoardUDFname.name),
-      actions: {
-        call: true,
-      },
-    },
-    {
-      resource: q.Function(deleteBoardUDFname.name),
       actions: {
         call: true,
       },
