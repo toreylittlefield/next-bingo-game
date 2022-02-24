@@ -4,6 +4,7 @@ import { LoginAccount } from '../functions/login.js';
 import {
   ACCESS_TOKEN_LIFETIME_SECONDS,
   CreateAccessAndRefreshToken,
+  CreateAccessTokenWithRefreshToken,
   REFRESH_TOKEN_LIFETIME_SECONDS,
 } from '../functions/tokens.js';
 import { createBoard, createUser, deleteBoard, readAllBoards, updateBoard, UpdateUser } from '../queries/boards.js';
@@ -15,10 +16,11 @@ import {
   loginAccountUDFname,
   logoutAndDeleteTokensAccountUDFname,
   readBoardUDFname,
-  refreshTokenUDFname,
+  createRefreshAndAccessTokenUDFname,
   registerAccountUDFname,
   updateBoardUDFname,
   updateUserUDFname,
+  createAccessTokenWithRefreshTokenUDFName,
 } from './udfnames.js';
 const q = faunadb.query;
 const {
@@ -36,6 +38,8 @@ const {
   CreateFunction,
   Role,
   CurrentIdentity,
+  Let,
+  Call,
 } = q;
 
 // A convenience function to either create or update a function.
@@ -53,9 +57,26 @@ function CreateOrUpdateFunction(obj: UDF) {
   );
 }
 
-/** REFRESH TOKEN */
-export const createRefreshTokenUDF = CreateOrUpdateFunction({
-  name: refreshTokenUDFname.name,
+/** REFRESH & ACCESS TOKEN */
+export const createAccessTokenWithRefreshTokenUDF = CreateOrUpdateFunction({
+  name: createAccessTokenWithRefreshTokenUDFName.name,
+  body: Query(
+    Lambda(['refresh_token'], {
+      tokens: CreateAccessTokenWithRefreshToken(
+        Var('refresh_token'),
+        CurrentIdentity(),
+        ACCESS_TOKEN_LIFETIME_SECONDS,
+        REFRESH_TOKEN_LIFETIME_SECONDS
+      ),
+      account: Get(CurrentIdentity()),
+    })
+  ),
+  role: serverAccountRole.name,
+  // only the server can create the account & user
+});
+
+export const createRefreshAndAccessTokenUDF = CreateOrUpdateFunction({
+  name: createRefreshAndAccessTokenUDFname.name,
   body: Query(
     Lambda([], {
       tokens: CreateAccessAndRefreshToken(
@@ -75,16 +96,25 @@ export const registerCreateAccountUDF = CreateOrUpdateFunction({
   name: registerAccountUDFname.name,
   body: Query(
     Lambda(
-      ['id', 'password'],
-      Create(Collection(accountsCollection.name), {
-        // credentials is a special field, the contents will never be returned
-        // and will be encrypted. { password: ... } is the only format it currently accepts.
-        credentials: { password: Var('password') },
-        // everything you want to store in the document should be scoped under 'data'
-        data: {
+      ['id', 'password', 'name', 'alias', 'icon'],
+      Let(
+        {
+          userRef: Call(q.Function(createUserUDFname.name), [Var('name'), Var('alias'), Var('icon')]),
+          user: Select(['ref'], Var('userRef')),
           id: Var('id'),
+          accountRef: Create(Collection(accountsCollection.name), {
+            credentials: {
+              password: Var('password'),
+            },
+            data: {
+              id: Var('id'),
+              user: Var('user'),
+            },
+          }),
+          account: Select(['ref'], Var('accountRef')),
         },
-      })
+        Var('account')
+      )
     )
   ),
   role: serverAccountRole.name,
