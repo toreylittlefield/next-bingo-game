@@ -205,7 +205,7 @@ const handler: Handler = async (event, context) => {
 
       return {
         statusCode: 200,
-        body: JSON.stringify({ app_metadata, user_metadata }),
+        body: JSON.stringify({ app_metadata }),
       };
     }
 
@@ -251,11 +251,10 @@ const handler: Handler = async (event, context) => {
           body: 'Unauthorized',
         };
       }
-      const accountAppUserData = { app_metadata, user_metadata };
-      console.log(JSON.stringify(accountAppUserData, null, 2), 'create account response');
+
       return {
         statusCode: 200,
-        body: JSON.stringify(accountAppUserData),
+        body: JSON.stringify({ app_metadata };),
       };
     } catch (error) {
       console.error(error);
