@@ -49,10 +49,11 @@ function CreateTokensForAccount(
       // Verify whether our login credentials are correct with Identify.
       // Then we make an access and refresh in case authentication succeeded.
       tokens: CreateAccessAndRefreshToken(Var('accountRef'), accessTtlSeconds, refreshTtlSeconds),
+      user: Get(Select(['data', 'user'], Var('account'))),
     },
     {
       tokens: Var('tokens'),
-      account: Var('account'),
+      user: Var('user'),
     }
   );
 }
