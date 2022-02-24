@@ -1,11 +1,21 @@
-import { AppMetaData, LoggedInResponse, RandomPhotoUnsplash, UserAppMetaData, UserMetaData } from '../../types/types';
+import {
+  AppMetaData,
+  LoggedInResponse,
+  RandomPhotoUnsplash,
+  UserAppMetaData,
+  UserLoginDataRes,
+  UserMetaData,
+} from '../../types/types';
 import fetch from 'node-fetch';
 import { NETLIFY_ROLE } from '../constants/constants';
+import { HandlerResponse } from '@netlify/functions';
 
 const randomuser = () => ['boarofWar', 'boarCoder', 'codeSmell', 'sniffNation'][Math.floor(Math.random() * 4)];
 const randomNum = () => Math.random().toString(36).slice(2);
-export const getRandomUserName = () => randomuser() + randomNum();
+/** select a random user name from a list */
+export const getRandomUserName = () => `${randomuser()}_${randomNum()}🐗`;
 
+/** - fetchs a random thumbnail image of a boar from unsplash */
 export const getUserAvatar = async (apiKey: string) => {
   try {
     const res = await fetch(
@@ -43,4 +53,30 @@ export function combineMetaData(prevAppMetaData: AppMetaData, prevUserMetaData?:
       },
     };
   };
+}
+
+/**
+ * - if faunadb_tokens then return statusCode 200
+ * - else return 403 for unauthorized
+ */
+export function hasValidFaunaTokens(app_metadata: UserLoginDataRes['app_metadata']): HandlerResponse {
+  if (!app_metadata?.faunadb_tokens)
+    return {
+      statusCode: 403,
+      body: 'Forbidden',
+    };
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ app_metadata }),
+  };
+}
+
+export function isTokenExpired(ttl: string | number) {
+  let timestamp = ttl;
+  if (typeof timestamp === 'string') {
+    timestamp = Date.parse(timestamp);
+  }
+  if (Date.now() >= timestamp) return false;
+  return true;
 }
