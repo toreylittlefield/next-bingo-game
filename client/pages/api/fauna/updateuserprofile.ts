@@ -32,6 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     //     context: { clientContext },
     //   },
     // } = req;
+    //@ts-ignore
     return res.status(200).json({ message: JSON.stringify(req.netlifyFunctionParams) });
   } catch (error) {
     console.log('error', error);
