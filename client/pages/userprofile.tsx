@@ -46,7 +46,19 @@ export const getServerSideProps: GetServerSideProps = withNetlifySession(async f
   context,
   user,
 }) {
-  return returnUserOrLogin(user);
+  if (!user) {
+    return {
+      redirect: {
+        destination: `/login`,
+        permanent: true,
+      },
+    };
+  }
+  return {
+    props: {
+      user,
+    },
+  };
 });
 
 export default UserProfile;
