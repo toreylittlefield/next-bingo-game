@@ -1,5 +1,5 @@
 import faunadb from 'faunadb';
-import { FAUNADB_SERVER_KEY } from '../constants/constants';
+import { FAUNADB_SERVER_KEY } from '../../lib/constants/constants';
 
 /** configure faunaDB Client with our secret */
 export const serverClient = new faunadb.Client({

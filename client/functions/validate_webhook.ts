@@ -1,7 +1,7 @@
 import { Handler, HandlerEvent, HandlerResponse } from '@netlify/functions';
 import { verify } from 'jsonwebtoken';
 import { combineMetaData, getRandomUserName, getUserAvatar, hasValidFaunaTokens } from './utils/utils';
-import { NETLIFY_ROLE, PWS, UNSPLASH_CLIENT_KEY } from './constants/constants';
+import { NETLIFY_ROLE, PWS, UNSPLASH_CLIENT_KEY } from '../lib/constants/constants';
 import { loginAccountAndGetTokens } from './faunaApi/login';
 import { createAccount } from './faunaApi/registerAccount';
 import { NetlifyAppMetaData } from '../types/types';

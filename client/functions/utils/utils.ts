@@ -7,7 +7,7 @@ import {
   UserMetaData,
 } from '../../types/types';
 import fetch from 'node-fetch';
-import { NETLIFY_ROLE } from '../constants/constants';
+import { NETLIFY_ROLE } from '../../lib/constants/constants';
 import { HandlerResponse } from '@netlify/functions';
 
 const randomuser = () => ['boarofWar', 'boarCoder', 'codeSmell', 'sniffNation'][Math.floor(Math.random() * 4)];
