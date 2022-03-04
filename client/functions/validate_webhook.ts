@@ -26,7 +26,7 @@ const handler: Handler = async (event: HandlerEvent, context) => {
   const res = verify(sig, process.env.WEB_HOOK_SIG as string, function resolve(error, decoded) {
     if (error) {
       console.log('invalid  webhook signature', sig);
-      return notAuthorizedHandlerResponse();
+      return undefined;
     }
     return decoded;
   });
