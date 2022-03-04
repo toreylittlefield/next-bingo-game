@@ -48,21 +48,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     //     context: { clientContext },
     //   },
     // } = req;
-    let readReq: Record<string, string> = {};
-    for (let key of Object.values(req)) {
-      if (typeof key !== 'function') {
-        readReq[key] = key;
-      }
-    }
     console.log(
+      '******************* START UPDATE USER PROFILE *******************',
+
       JSON.stringify({
-        rawHeaders: req.rawHeaders,
-        cookies: req.cookies,
+        req,
+        // rawHeaders: req.rawHeaders,
+        // cookies: req.cookies,
         //@ts-expect-error
         netlifyFunctionParams: req.netlifyFunctionParams,
-        headers: req.headers,
-        readReq,
+        // headers: req.headers,
+        // readReq,
       }),
+      '******************* END UPDATE USER PROFILE *******************',
     );
     //@ts-expect-error
     return res.status(200).json({ message: JSON.stringify(req.netlifyFunctionParams) });

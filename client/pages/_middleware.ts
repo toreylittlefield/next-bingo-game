@@ -2,27 +2,31 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(req: NextRequest) {
   //   const basicAuth = req.headers.get('authorization');
-  let readReq: Record<string, string> = {};
-  for (let key of Object.values(req)) {
-    if (typeof key !== 'function') {
-      readReq[key] = key;
-    }
-  }
+  // let readReq: Record<string, NextRequest> = {};
+  // let reqKeys = Object.keys(req) as [keyof NextRequest];
+  // reqKeys.forEach((key: keyof NextRequest) => {
+  //   if (typeof key === 'boolean' || typeof key === 'object' || typeof key === 'number' || typeof key === 'string') {
+  //     readReq[key] = req[key];
+  //   }
+  // });
   console.log(
+    '******************* START MIDDLE WARE *******************',
     JSON.stringify({
-      readReq,
-      body: req.body,
+      // readReq,
+      // body: req.body,
       // cache: req.cache,
       // credentials: req.credentials,
       // destination: req.destination,
       // integrity: req.integrity,
-      headers: req.headers,
+      // headers: req.headers,
       // mode: req.mode,
       // redirect: req.redirect,
       // method: req.method,
+      req,
       //@ts-expect-error
       netlifyFunctionParams: req.netlifyFunctionParams,
     }),
+    '******************* END MIDDLE WARE *******************',
   );
 
   //   if (basicAuth) {
