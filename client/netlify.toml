@@ -3,7 +3,7 @@
   # command = "next build"
   base='client'
   functions = "functions"
-  # publish = "out"
+  publish = ".next"
 # [dev]
 #   publish=".next"
   ## Uncomment to use this redirect for Single Page Applications like create-react-app.
