@@ -17,9 +17,9 @@ export function middleware(req: NextRequest) {
       // destination: req.destination,
       // integrity: req.integrity,
       headers: req.headers,
-      mode: req.mode,
-      redirect: req.redirect,
-      method: req.method,
+      // mode: req.mode,
+      // redirect: req.redirect,
+      // method: req.method,
       //@ts-expect-error
       netlifyFunctionParams: req.netlifyFunctionParams,
     }),
