@@ -1,10 +1,11 @@
-import { NextPage } from 'next';
+import { GetServerSideProps, NextPage } from 'next';
 import React, { useContext, useEffect, useState } from 'react';
 import UserSettings from '../components/UserSettings';
 import AuthContext from '../stores/netlifyIdentityContext';
 import netlifyIdentity from 'netlify-identity-widget';
 import Router from 'next/router';
 import { Center, VStack, Spinner, Text } from '@chakra-ui/react';
+import { getNetlifyUserSession } from '../lib/auth/withNetlifySession';
 
 const UserProfile: NextPage = () => {
   const { user, authReady } = useContext(AuthContext);
@@ -40,5 +41,7 @@ const UserProfile: NextPage = () => {
     return null;
   }
 };
+
+export const getServerSideProps: GetServerSideProps = getNetlifyUserSession;
 
 export default UserProfile;
