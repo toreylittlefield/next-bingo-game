@@ -1,4 +1,4 @@
-import { GetServerSideProps, GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
+import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
 import { NetlifyAppMetaData } from '../../types/types';
 import { NETLIFY_SITE_URL } from '../constants/constants';
 
