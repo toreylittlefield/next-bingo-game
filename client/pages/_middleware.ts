@@ -2,10 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(req: NextRequest) {
   //   const basicAuth = req.headers.get('authorization');
+  let readReq: Record<string, string> = {};
+  for (let key of Object.values(req)) {
+    if (typeof key !== 'function') {
+      readReq[key] = key;
+    }
+  }
   console.log(
     JSON.stringify({
+      readReq,
       body: req.body,
-      cache: req.cache,
+      // cache: req.cache,
       credentials: req.credentials,
       destination: req.destination,
       headers: req.headers,
