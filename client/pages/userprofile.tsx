@@ -5,7 +5,7 @@ import AuthContext from '../stores/netlifyIdentityContext';
 import netlifyIdentity from 'netlify-identity-widget';
 import Router from 'next/router';
 import { Center, VStack, Spinner, Text } from '@chakra-ui/react';
-import { getNetlifyUserSession, returnUserOrLogin, withNetlifySession } from '../lib/auth/withNetlifySession';
+import { getNetlifyUserSession } from '../lib/auth/withNetlifySession';
 
 const UserProfile: NextPage = () => {
   const { user, authReady } = useContext(AuthContext);
@@ -42,23 +42,6 @@ const UserProfile: NextPage = () => {
   }
 };
 
-export const getServerSideProps: GetServerSideProps = withNetlifySession(async function getIdentitySession({
-  context,
-  user,
-}) {
-  if (!user) {
-    return {
-      redirect: {
-        destination: `/login`,
-        permanent: true,
-      },
-    };
-  }
-  return {
-    props: {
-      user,
-    },
-  };
-});
+export const getServerSideProps: GetServerSideProps = getNetlifyUserSession;
 
 export default UserProfile;
