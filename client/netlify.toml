@@ -15,8 +15,6 @@
   # from = "/api/identity-login"
   # to = "/.netlify/functions/:splat"
   # status = 200
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
 
 #[[plugins]]
  # package = "netlify-plugin-cloudinary"
