@@ -25,8 +25,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     /* parse the string body into a useable JS object */
     // const { message, userName }: Message = req.body;
     // console.log(req);
-    console.log(req);
-    return res.status(200).json({ message: JSON.stringify('hi!') });
+    // console.log(req.netlifyFunctionParams);
+    // const {
+    //   //@ts-ignore
+    //   netlifyFunctionParams: {
+    //     context: { clientContext },
+    //   },
+    // } = req;
+    return res.status(200).json({ message: JSON.stringify(req.netlifyFunctionParams) });
   } catch (error) {
     console.log('error', error);
     res.status(400).json({ message: JSON.stringify(error) });
