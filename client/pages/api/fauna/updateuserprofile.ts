@@ -22,6 +22,22 @@ interface Message {
 /* export our lambda function as named "handler" export */
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
   try {
+    const {
+      aborted,
+      body,
+      complete,
+      cookies,
+      env,
+      destroyed,
+      headers,
+      httpVersion,
+      httpVersionMajor,
+      httpVersionMinor,
+      socket,
+      query,
+      rawHeaders,
+      rawTrailers,
+    } = req;
     /* parse the string body into a useable JS object */
     // const { message, userName }: Message = req.body;
     // console.log(req);
@@ -32,6 +48,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     //     context: { clientContext },
     //   },
     // } = req;
+    let readReq: Record<string, string> = {};
+    for (let key of Object.values(req)) {
+      if (typeof key !== 'function') {
+        readReq[key] = key;
+      }
+    }
     console.log(
       JSON.stringify({
         rawHeaders: req.rawHeaders,
@@ -39,6 +61,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         //@ts-expect-error
         netlifyFunctionParams: req.netlifyFunctionParams,
         headers: req.headers,
+        readReq,
       }),
     );
     //@ts-expect-error
