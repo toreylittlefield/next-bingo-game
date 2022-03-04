@@ -32,10 +32,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     //     context: { clientContext },
     //   },
     // } = req;
-    //@ts-expect-error
     console.log({
       rawHeaders: req.rawHeaders,
       cookies: req.cookies,
+      //@ts-expect-error
       netlifyFunctionParams: req.netlifyFunctionParams,
       headers: req.headers,
     });
