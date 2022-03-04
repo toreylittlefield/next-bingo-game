@@ -32,13 +32,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     //     context: { clientContext },
     //   },
     // } = req;
-    console.log({
-      rawHeaders: req.rawHeaders,
-      cookies: req.cookies,
-      //@ts-expect-error
-      netlifyFunctionParams: req.netlifyFunctionParams,
-      headers: req.headers,
-    });
+    console.log(
+      JSON.stringify({
+        rawHeaders: req.rawHeaders,
+        cookies: req.cookies,
+        //@ts-expect-error
+        netlifyFunctionParams: req.netlifyFunctionParams,
+        headers: req.headers,
+      }),
+    );
     //@ts-expect-error
     return res.status(200).json({ message: JSON.stringify(req.netlifyFunctionParams) });
   } catch (error) {
