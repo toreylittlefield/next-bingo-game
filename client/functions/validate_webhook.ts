@@ -16,16 +16,16 @@ function notAuthorizedHandlerResponse(): HandlerResponse {
 
 const handler: Handler = async (event: HandlerEvent, context) => {
   /** Check webhook signature && clientContext */
-  const sig = event.headers['x-webhook-signature'];
-  if (!sig || !context.clientContext) {
+  const webhookSignature = event.headers['x-webhook-signature'];
+  if (!webhookSignature || !context.clientContext) {
     console.log('no clientContext', context.clientContext);
     return notAuthorizedHandlerResponse();
   }
 
   /** Verify the webhook JWT signature */
-  const res = verify(sig, process.env.WEB_HOOK_SIG as string, function resolve(error, decoded) {
+  const res = verify(webhookSignature, process.env.WEB_HOOK_SIG as string, function resolve(error, decoded) {
     if (error) {
-      console.log('invalid  webhook signature', sig);
+      console.log('invalid  webhook signature', webhookSignature);
       return undefined;
     }
     return decoded;
