@@ -59,27 +59,7 @@ const handler: Handler = async (event: HandlerEvent, context) => {
       //** check refresh && access token expiration */
       const { app_metadata } = await loginAccountAndGetTokens(id, PWS, combineMetaDataCallback);
 
-      const response = hasValidFaunaTokens(app_metadata);
-      if (response.statusCode !== 200) return response;
-      const hour = 3600000;
-      const oneWeek = 7 * 24 * hour;
-      const fn_jwt = cookie.serialize(
-        'fn_jwt',
-        JSON.stringify(app_metadata?.faunadb_tokens.refreshTokenData.refreshToken),
-        {
-          secure: true,
-          httpOnly: true,
-          path: '/',
-          maxAge: oneWeek,
-        },
-      );
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ app_metadata }),
-        headers: {
-          'Set-Cookie': fn_jwt,
-        },
-      };
+      return hasValidFaunaTokens(app_metadata);
     }
 
     if (eventType === 'signup') {
