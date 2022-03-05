@@ -6,7 +6,7 @@ export const middleware: NextMiddleware = async (req, event) => {
   const basicAuth = req.headers.get('authorization');
   const token = req?.cookies?.[`nf-jwt`];
   console.log(Array.from(req.headers.entries()), '****** HEADERS *******');
-  console.log(JSON.stringify({cookies: req.cookies}), '******* cookies! *****'
+  console.log(JSON.stringify({ cookies: req.cookies }), '******* cookies! *****');
   try {
     var user;
     const userRes = await fetch(`${NETLIFY_SITE_URL}/.netlify/identity/user`, {
