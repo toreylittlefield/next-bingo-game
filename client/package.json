@@ -12,6 +12,7 @@
     "@chakra-ui/react": "^1.7.3",
     "@emotion/react": "^11.7.0",
     "@emotion/styled": "^11.6.0",
+    "cookie": "^0.4.2",
     "faunadb": "^4.4.1",
     "formik": "^2.2.9",
     "framer-motion": "^5.4.5",
@@ -29,6 +30,7 @@
   },
   "devDependencies": {
     "@netlify/functions": "^0.11.0",
+    "@types/cookie": "^0.4.1",
     "@types/jsonwebtoken": "^8.5.8",
     "@types/netlify-identity-widget": "^1.9.2",
     "@types/node": "16.11.12",
