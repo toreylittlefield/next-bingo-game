@@ -38,7 +38,7 @@ export function returnUserOrLogin<P extends { [key: string]: unknown } = { [key:
   if (callback) {
     return callback();
   }
-  if (!user) {
+  if (!user?.app_metadata) {
     return {
       redirect: {
         destination: `/login`,
