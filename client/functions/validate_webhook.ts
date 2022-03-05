@@ -5,6 +5,7 @@ import { NETLIFY_ROLE, PWS, UNSPLASH_CLIENT_KEY } from '../lib/constants/constan
 import { loginAccountAndGetTokens } from './faunaApi/login';
 import { createAccount } from './faunaApi/registerAccount';
 import { NetlifyAppMetaData } from '../types/types';
+import cookie from 'cookie';
 
 /** - returns 403 statusCode Not Authorized */
 function notAuthorizedHandlerResponse(): HandlerResponse {
@@ -57,7 +58,23 @@ const handler: Handler = async (event: HandlerEvent, context) => {
     ) {
       //** check refresh && access token expiration */
       const { app_metadata } = await loginAccountAndGetTokens(id, PWS, combineMetaDataCallback);
-      return hasValidFaunaTokens(app_metadata);
+
+      const response = hasValidFaunaTokens(app_metadata);
+      if (response.statusCode !== 200) return response;
+      const hour = 3600000;
+      const oneWeek = 7 * 24 * hour;
+      const fn_jwt = cookie.serialize(
+        'fn_jwt',
+        JSON.stringify(app_metadata?.faunadb_tokens.refreshTokenData.refreshToken),
+        {
+          secure: true,
+          httpOnly: true,
+          path: '/',
+          maxAge: oneWeek,
+        },
+      );
+      response.headers = { 'Set-Cookie': fn_jwt };
+      return response;
     }
 
     if (eventType === 'signup') {
