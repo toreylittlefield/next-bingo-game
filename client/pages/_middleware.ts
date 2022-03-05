@@ -4,6 +4,10 @@ import { NETLIFY_SITE_URL } from '../lib/constants/constants';
 
 export const middleware: NextMiddleware = async (req, event) => {
   const basicAuth = req.headers.get('authorization');
+  const { pathname } = req.nextUrl;
+  if (pathname === '/' || pathname === '/login') {
+    return NextResponse.next();
+  }
   const token = req?.cookies?.[`nf_jwt`];
   console.log(Array.from(req.headers.entries()), '****** HEADERS *******');
   console.log(JSON.stringify({ cookies: req.cookies }), '******* cookies! *****');
