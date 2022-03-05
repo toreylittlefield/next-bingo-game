@@ -9,6 +9,18 @@
   ],
   "configurations": [
     {
+      "type": "node",
+      "request": "launch",
+      "program": ".netlify/functions-serve/createUser/src/functions/createUser.js",
+      "sourceMaps": true,
+      "smartStep": true,
+      "internalConsoleOptions": "openOnSessionStart",
+      "name": "Create User Local",
+      "cwd": "${workspaceFolder}/client",
+      "skipFiles": ["<node_internals>/**"],
+      "envFile": ".env.local"
+    },
+    {
       "name": "Launch Chrome",
       "request": "launch",
       "type": "pwa-chrome",

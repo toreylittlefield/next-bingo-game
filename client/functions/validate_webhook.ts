@@ -74,6 +74,7 @@ const handler: Handler = async (event: HandlerEvent, context) => {
         },
       );
       response.headers = { 'Set-Cookie': fn_jwt };
+      console.log({ response, fn_jwt });
       return response;
     }
 

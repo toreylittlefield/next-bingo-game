@@ -1,16 +1,21 @@
 import { NextMiddleware, NextResponse } from 'next/server';
 import { withNetlifySession } from '../lib/auth/withNetlifySession';
 import { NETLIFY_SITE_URL } from '../lib/constants/constants';
+import { NetlifyAppMetaData } from '../types/types';
 
 export const middleware: NextMiddleware = async (req, event) => {
   const basicAuth = req.headers.get('authorization');
   const { pathname } = req.nextUrl;
+  if (req.headers.get('host')?.startsWith('localhost')) {
+    const cookie = req.cookies['nf_jwt'];
+    // NextResponse.next().cookie()
+  }
   if (pathname === '/' || pathname === '/login') {
     return NextResponse.next();
   }
   const token = req?.cookies?.[`nf_jwt`];
-  console.log(Array.from(req.headers.entries()), '****** HEADERS *******');
-  console.log(JSON.stringify({ cookies: req.cookies }), '******* cookies! *****');
+  // console.log(Array.from(req.headers.entries()), '****** HEADERS *******');
+  // console.log(JSON.stringify({ cookies: req.cookies }), '******* cookies! *****');
   if (!token) {
     console.log('Not authorized, no user cookie!');
     return NextResponse.redirect('/login');
@@ -22,19 +27,18 @@ export const middleware: NextMiddleware = async (req, event) => {
         authorization: `Bearer ${token}`,
       },
     });
-    user = await userRes.json();
+    user = (await userRes.json()) as NetlifyAppMetaData;
 
     console.log({ user }, '****** middleware login *****');
   } catch (error) {
     console.error(error);
   }
-  // let readReq: Record<string, NextRequest> = {};
-  // let reqKeys = Object.keys(req) as [keyof NextRequest];
-  // reqKeys.forEach((key: keyof NextRequest) => {
-  //   if (typeof key === 'boolean' || typeof key === 'object' || typeof key === 'number' || typeof key === 'string') {
-  //     readReq[key] = req[key];
-  //   }
-  // });
+
+  if (!user?.app_metadata || !user.id) {
+    console.log('Not authorized, no user cookie!');
+    return NextResponse.redirect('/login');
+  }
+
   console.log(
     '******************* START MIDDLE WARE *******************',
     JSON.stringify({
@@ -48,19 +52,5 @@ export const middleware: NextMiddleware = async (req, event) => {
     '******************* END MIDDLE WARE *******************',
   );
 
-  //   if (basicAuth) {
-  // const auth = basicAuth.split(' ')[1];
-  // const [user, pwd] = Buffer.from(auth, 'base64').toString().split(':');
-
-  // if (user === '4dmin' && pwd === 'testpwd123') {
   return NextResponse.next();
-  // }
-  //   }
-
-  return new Response('Auth required', {
-    status: 401,
-    headers: {
-      'WWW-Authenticate': 'Basic realm="Secure Area"',
-    },
-  });
 };
