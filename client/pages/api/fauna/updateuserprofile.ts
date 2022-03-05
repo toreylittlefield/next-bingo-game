@@ -60,13 +60,7 @@ const handler: NextApiHandler = async (req, res) => {
         env,
         destroyed,
         headers,
-        httpVersion,
-        httpVersionMajor,
-        httpVersionMinor,
-        socket,
         query,
-        rawHeaders,
-        rawTrailers,
         method,
         //@ts-expect-error
         context: req.context,
