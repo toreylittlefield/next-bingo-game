@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextMiddleware, NextResponse } from 'next/server';
 
-export function middleware(req: NextRequest) {
-  //   const basicAuth = req.headers.get('authorization');
+export const middleware: NextMiddleware = (req, event) => {
+  const basicAuth = req.headers.get('authorization');
   // let readReq: Record<string, NextRequest> = {};
   // let reqKeys = Object.keys(req) as [keyof NextRequest];
   // reqKeys.forEach((key: keyof NextRequest) => {
@@ -12,6 +12,7 @@ export function middleware(req: NextRequest) {
   console.log(
     '******************* START MIDDLE WARE *******************',
     JSON.stringify({
+      basicAuth,
       // readReq,
       // body: req.body,
       // cache: req.cache,
@@ -22,6 +23,7 @@ export function middleware(req: NextRequest) {
       // mode: req.mode,
       // redirect: req.redirect,
       // method: req.method,
+      event,
       req,
       //@ts-expect-error
       netlifyFunctionParams: req.netlifyFunctionParams,
@@ -44,4 +46,4 @@ export function middleware(req: NextRequest) {
       'WWW-Authenticate': 'Basic realm="Secure Area"',
     },
   });
-}
+};

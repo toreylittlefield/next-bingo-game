@@ -1,6 +1,6 @@
 /* code from functions/todos-create.js */
 import faunadb, { Collection, Create } from 'faunadb'; /* Import faunaDB sdk */
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiHandler } from 'next';
 
 /* configure faunaDB Client with our secret */
 const q = faunadb.query;
@@ -20,7 +20,7 @@ interface Message {
 }
 
 /* export our lambda function as named "handler" export */
-export default async function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
+const handler: NextApiHandler = async (req, res) => {
   try {
     const {
       aborted,
@@ -37,6 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       query,
       rawHeaders,
       rawTrailers,
+      method,
     } = req;
     /* parse the string body into a useable JS object */
     // const { message, userName }: Message = req.body;
@@ -52,7 +53,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       '******************* START UPDATE USER PROFILE *******************',
 
       JSON.stringify({
-        req,
+        aborted,
+        body,
+        complete,
+        cookies,
+        env,
+        destroyed,
+        headers,
+        httpVersion,
+        httpVersionMajor,
+        httpVersionMinor,
+        socket,
+        query,
+        rawHeaders,
+        rawTrailers,
+        method,
+        //@ts-expect-error
+        context: req.context,
         // rawHeaders: req.rawHeaders,
         // cookies: req.cookies,
         //@ts-expect-error
@@ -68,4 +85,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     console.log('error', error);
     res.status(400).json({ message: JSON.stringify(error) });
   }
-}
+};
+
+export default handler;
