@@ -1,7 +1,23 @@
 import { NextMiddleware, NextResponse } from 'next/server';
+import { withNetlifySession } from '../lib/auth/withNetlifySession';
+import { NETLIFY_SITE_URL } from '../lib/constants/constants';
 
-export const middleware: NextMiddleware = (req, event) => {
+export const middleware: NextMiddleware = async (req, event) => {
   const basicAuth = req.headers.get('authorization');
+  const token = req?.cookies?.[`nf-jwt`];
+  console.log(Array.from(req.headers.entries()))
+  try {
+    var user;
+    const userRes = await fetch(`${NETLIFY_SITE_URL}/.netlify/identity/user`, {
+      headers: {
+        authorization: `Bearer ${token}`,
+      },
+    });
+    user = await userRes.json();
+    console.log({ user }, '****** middleware login *****');
+  } catch (error) {
+    console.error(error);
+  }
   // let readReq: Record<string, NextRequest> = {};
   // let reqKeys = Object.keys(req) as [keyof NextRequest];
   // reqKeys.forEach((key: keyof NextRequest) => {
@@ -13,6 +29,7 @@ export const middleware: NextMiddleware = (req, event) => {
     '******************* START MIDDLE WARE *******************',
     JSON.stringify({
       basicAuth,
+      user
       // readReq,
       // body: req.body,
       // cache: req.cache,
