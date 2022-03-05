@@ -13,7 +13,7 @@ export function withNetlifySession<P extends { [key: string]: unknown } = { [key
   options?: any,
 ) {
   return async function getSSPWrappedNetlifySession(context: GetServerSidePropsContext) {
-    const token = context.req?.cookies?.[`nf-jwt`];
+    const token = context.req?.cookies?.[`nf_jwt`];
     try {
       var user;
       const userRes = await fetch(`${NETLIFY_SITE_URL}/.netlify/identity/user`, {
@@ -34,6 +34,7 @@ export function returnUserOrLogin<P extends { [key: string]: unknown } = { [key:
   user: NetlifyAppMetaData | undefined,
   callback?: (key?: P) => GetServerSidePropsResult<P> | Promise<GetServerSidePropsResult<P>>,
 ) {
+  console.log('with netlify session *****', { user }, 'with netlify session *****');
   if (callback) {
     return callback();
   }
