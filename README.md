@@ -78,6 +78,10 @@
 
 [![Product Name Screen Shot][product-screenshot]](https://example.com)
 
+[![Architectural Diagram][cloud-craft-image]](https://app.cloudcraft.co/view/a448ab57-939a-4379-850b-15b4273e4ae4?key=f8e4f7cd-1b29-481c-b107-3e28bad0dc6f&interactive=true&embed=true)
+
+[![Architectural Diagram Interactive Version - Cloud Craft][cloud-craft-embed]](https://app.cloudcraft.co/view/a448ab57-939a-4379-850b-15b4273e4ae4?key=f8e4f7cd-1b29-481c-b107-3e28bad0dc6f&interactive=true&embed=true)
+
 Here's a blank template to get started: To avoid retyping too much info. Do a search and replace with your text editor for the following: `github_username`, `next-bingo-game`, `twitter_handle`, `linkedin_username`, `email`, `email_client`, `project_title`, `project_description`
 
 <p align="right">(<a href="#top">back to top</a>)</p>
@@ -211,6 +215,8 @@ Project Link: [https://github.com/github_username/repo_name](https://github.com/
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/toreylittlefield
 [product-screenshot]: images/screenshot.png
+[cloud-craft-embed]: https://app.cloudcraft.co/view/a448ab57-939a-4379-850b-15b4273e4ae4?key=f8e4f7cd-1b29-481c-b107-3e28bad0dc6f&interactive=true&embed=true
+[cloud-craft-image]: https://app.cloudcraft.co/view/a448ab57-939a-4379-850b-15b4273e4ae4?key=f8e4f7cd-1b29-481c-b107-3e28bad0dc6f&interactive=true&embed=true
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
