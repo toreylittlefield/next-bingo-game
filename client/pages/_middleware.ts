@@ -15,6 +15,10 @@ export const middleware: NextMiddleware = async (req, event) => {
       },
     });
     user = await userRes.json();
+    if (!user) {
+      console.log('Not authorized, no user cookie!');
+      NextResponse.redirect('/login');
+    }
     console.log({ user }, '****** middleware login *****');
   } catch (error) {
     console.error(error);
