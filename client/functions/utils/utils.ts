@@ -69,6 +69,7 @@ export function hasValidFaunaTokens(app_metadata: UserLoginDataRes['app_metadata
   return {
     statusCode: 200,
     body: JSON.stringify({ app_metadata }),
+    headers: {},
   };
 }
 
