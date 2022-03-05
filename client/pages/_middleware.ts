@@ -5,7 +5,7 @@ import { NETLIFY_SITE_URL } from '../lib/constants/constants';
 export const middleware: NextMiddleware = async (req, event) => {
   const basicAuth = req.headers.get('authorization');
   const token = req?.cookies?.[`nf-jwt`];
-  console.log(Array.from(req.headers.entries()))
+  console.log(Array.from(req.headers.entries()));
   try {
     var user;
     const userRes = await fetch(`${NETLIFY_SITE_URL}/.netlify/identity/user`, {
@@ -29,17 +29,7 @@ export const middleware: NextMiddleware = async (req, event) => {
     '******************* START MIDDLE WARE *******************',
     JSON.stringify({
       basicAuth,
-      user
-      // readReq,
-      // body: req.body,
-      // cache: req.cache,
-      // credentials: req.credentials,
-      // destination: req.destination,
-      // integrity: req.integrity,
-      // headers: req.headers,
-      // mode: req.mode,
-      // redirect: req.redirect,
-      // method: req.method,
+      user,
       event,
       req,
       //@ts-expect-error
