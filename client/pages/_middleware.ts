@@ -9,7 +9,7 @@ export const middleware: NextMiddleware = async (req, event) => {
   console.log(JSON.stringify({ cookies: req.cookies }), '******* cookies! *****');
   if (!token) {
     console.log('Not authorized, no user cookie!');
-    NextResponse.redirect('/login');
+    return NextResponse.redirect('/login');
   }
   try {
     var user;
