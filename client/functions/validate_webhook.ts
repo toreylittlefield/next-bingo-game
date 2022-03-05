@@ -73,9 +73,13 @@ const handler: Handler = async (event: HandlerEvent, context) => {
           maxAge: oneWeek,
         },
       );
-      response.headers = { 'Set-Cookie': fn_jwt };
-      console.log({ response, fn_jwt });
-      return response;
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ app_metadata }),
+        headers: {
+          'Set-Cookie': fn_jwt,
+        },
+      };
     }
 
     if (eventType === 'signup') {
