@@ -7,6 +7,10 @@ export const middleware: NextMiddleware = async (req, event) => {
   const token = req?.cookies?.[`nf_jwt`];
   console.log(Array.from(req.headers.entries()), '****** HEADERS *******');
   console.log(JSON.stringify({ cookies: req.cookies }), '******* cookies! *****');
+  if (!token) {
+    console.log('Not authorized, no user cookie!');
+    NextResponse.redirect('/login');
+  }
   try {
     var user;
     const userRes = await fetch(`${NETLIFY_SITE_URL}/.netlify/identity/user`, {
@@ -15,10 +19,7 @@ export const middleware: NextMiddleware = async (req, event) => {
       },
     });
     user = await userRes.json();
-    if (!user) {
-      console.log('Not authorized, no user cookie!');
-      NextResponse.redirect('/login');
-    }
+
     console.log({ user }, '****** middleware login *****');
   } catch (error) {
     console.error(error);
