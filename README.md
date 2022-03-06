@@ -216,7 +216,7 @@ Project Link: [https://github.com/github_username/repo_name](https://github.com/
 [linkedin-url]: https://linkedin.com/in/toreylittlefield
 [product-screenshot]: images/screenshot.png
 [cloud-craft-embed]: https://app.cloudcraft.co/view/a448ab57-939a-4379-850b-15b4273e4ae4?key=f8e4f7cd-1b29-481c-b107-3e28bad0dc6f&interactive=true&embed=true
-[cloud-craft-image]: https://app.cloudcraft.co/view/a448ab57-939a-4379-850b-15b4273e4ae4?key=f8e4f7cd-1b29-481c-b107-3e28bad0dc6f&interactive=true&embed=true
+[cloud-craft-image]: ./assets/architectural_diagram.svg
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
