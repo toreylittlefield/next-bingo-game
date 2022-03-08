@@ -4,6 +4,15 @@
   base='client'
   functions = "functions"
   publish = ".next"
+
+[dev]
+  [[headers]]
+    for = "/*"
+    [headers.values]
+      Set-Cookie = "testcookie=testcookie"
+      X-XSS-Protection = "1; mode=block"
+
+
 # [dev]
 #   publish=".next"
   ## Uncomment to use this redirect for Single Page Applications like create-react-app.
