@@ -22,7 +22,7 @@
     "generate-password": "^1.7.0",
     "jsonwebtoken": "^8.5.1",
     "netlify-identity-widget": "^1.9.2",
-    "next": "12.0.7",
+    "next": "12.1.0",
     "node-fetch": "^3.2.0",
     "pusher": "^5.0.0",
     "pusher-js": "^7.0.3",
