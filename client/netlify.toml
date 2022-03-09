@@ -5,6 +5,9 @@
   functions = "functions"
   publish = ".next"
 
+[dev]
+ envFiles = ['.env.local, .env.development.local']
+
 # [context.deploy-preview]
 #   [[headers]]
 #     for = "/*"
