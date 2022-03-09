@@ -1,3 +1,5 @@
+import type { Handler } from '@netlify/functions';
+import type { Context } from '@netlify/functions/dist/function/context';
 import * as netlifyIdentity from 'netlify-identity-widget';
 import GoTrue from './gotrue';
 
@@ -176,3 +178,16 @@ export type UserAppMetaData = { app_metadata: AppMetaData };
 export type UserLoginDataRes = UserAppMetaData | { app_metadata: null };
 
 export type CombineMetaDataFunction = ({ user, tokens }: LoggedInResponse) => UserAppMetaData;
+
+export interface CustomContext extends Context {
+  ['clientContext']: {
+    user?: NetlifyAppMetaData;
+    custom?: {
+      netlify: string;
+    };
+    identity?: {
+      url: string;
+      token: string;
+    };
+  };
+}
