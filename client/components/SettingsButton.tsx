@@ -8,7 +8,7 @@ const SettingsButton = ({ user }: UserProfile) => {
   const [screen480above] = useMediaQuery('(min-width: 480px)');
 
   return (
-    <NextLink href={'/userprofile'} passHref>
+    <NextLink href={`settings/userprofile?username=${user.user_metadata.full_name}`} passHref>
       <Button rightIcon={<SettingIcon />} color="ghostwhite" variant="link">
         <Tooltip hasArrow label="Change User Settings" bg="blue.600">
           <Text>{screen480above ? user.email : 'Settings'}</Text>
