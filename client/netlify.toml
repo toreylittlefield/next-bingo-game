@@ -5,12 +5,12 @@
   functions = "functions"
   publish = ".next"
 
-[dev]
-  [[headers]]
-    for = "/*"
-    [headers.values]
-      Set-Cookie = "testcookie=testcookie"
-      X-XSS-Protection = "1; mode=block"
+# [context.deploy-preview]
+#   [[headers]]
+#     for = "/*"
+#     [headers.values]
+#       Set-Cookie = "testcookie=testcookie; Secure; HttpOnly; HttpOnly; Path=/"
+#       X-XSS-Protection = "1; mode=block"
 
 
 # [dev]
