@@ -69,7 +69,6 @@ export function hasValidFaunaTokens(app_metadata: UserLoginDataRes['app_metadata
   return {
     statusCode: 200,
     body: JSON.stringify({ app_metadata }),
-    headers: {},
   };
 }
 
@@ -80,4 +79,12 @@ export function isTokenExpired(ttl: string | number) {
   }
   if (Date.now() >= timestamp) return false;
   return true;
+}
+
+/** - returns 403 statusCode Not Authorized */
+export function notAuthorizedHandlerResponse(): HandlerResponse {
+  return {
+    statusCode: 403,
+    body: JSON.stringify({ message: 'Not Authorized' }),
+  };
 }
