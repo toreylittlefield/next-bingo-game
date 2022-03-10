@@ -40,12 +40,7 @@ export const AuthContextProvider = ({ children }: Props) => {
       const user = u as NetlifyAppMetaData;
       setUser(user);
       netlifyIdentity.close();
-      // if (!user.user_metadata.username?.trim()) {
-      //   Router.push('/userprofile');
-      //   return;
-      // } else {
-      //   Router.push('/rooms');
-      // }
+      Router.push('/userprofile/me?userprofile' + user.user_metadata.full_name);
     });
     netlifyIdentity.on('logout', () => {
       setUser(null);
@@ -62,6 +57,10 @@ export const AuthContextProvider = ({ children }: Props) => {
       console.log('init event');
     });
 
+    netlifyIdentity.on('close', () => {
+      Router.push('/');
+    });
+
     // init netlify identity connection
     netlifyIdentity.init();
 
@@ -71,7 +70,11 @@ export const AuthContextProvider = ({ children }: Props) => {
   }, []);
 
   const login = () => {
+    let isOpen = false;
+    if (isOpen) return;
+    Router.push('/login');
     netlifyIdentity.open();
+    isOpen = true;
   };
 
   const logout = () => {
