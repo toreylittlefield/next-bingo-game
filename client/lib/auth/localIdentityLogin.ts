@@ -64,7 +64,7 @@ async function getLocalTestCookie(req: NextRequest, cookieAccessToken: string) {
       const token = await getIdentityForLocalTesting();
       return {
         token,
-        setLocalCookie: function setLocalCookie(res: NextResponse) {
+        set: function setLocalCookie(res: NextResponse) {
           if (token?.access_token) {
             cookieAccessToken = token.access_token;
             const date = new Date();

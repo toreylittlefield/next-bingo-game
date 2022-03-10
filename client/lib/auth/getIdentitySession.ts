@@ -8,9 +8,9 @@ export async function getIdentitySession(req: NextRequest) {
   let cookieAccessToken = req.cookies['nf_jwt'];
 
   if (!cookieAccessToken) {
-    var setLocalTestCookie = await getLocalTestCookie(req, cookieAccessToken);
-    if (setLocalTestCookie?.token) {
-      cookieAccessToken = setLocalTestCookie.token.access_token;
+    var localTestCookie = await getLocalTestCookie(req, cookieAccessToken);
+    if (localTestCookie?.token) {
+      cookieAccessToken = localTestCookie.token.access_token;
     }
   }
 
@@ -23,5 +23,5 @@ export async function getIdentitySession(req: NextRequest) {
     }
   }
 
-  return { user, cookieAccessToken, setLocalTestCookie };
+  return { user, cookieAccessToken, localTestCookie };
 }

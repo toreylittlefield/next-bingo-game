@@ -4,13 +4,13 @@ import { getIdentitySession } from '../../lib/auth/getIdentitySession';
 import { NETLIFY_SITE_URL } from '../../lib/constants/constants';
 
 const authIdentityMiddleware: NextMiddleware = async (req, event) => {
-  const { user, setLocalTestCookie } = await getIdentitySession(req);
+  const { user, localTestCookie } = await getIdentitySession(req);
 
   if (!user) return NextResponse.redirect(`${NETLIFY_SITE_URL}/login`);
 
   const res = NextResponse.next();
-  if (setLocalTestCookie?.token) {
-    setLocalTestCookie.setLocalCookie(res);
+  if (localTestCookie?.token) {
+    localTestCookie.set(res);
   }
 
   return res;
