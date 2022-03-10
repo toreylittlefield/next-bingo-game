@@ -25,8 +25,8 @@ const Nav = () => {
         mr={5}
         gap={{ base: '0', md: 5 }}
       >
-        <NextLink href={'/'} passHref>
-          <Box w={{ base: '40%', md: 'auto' }}>
+        <NextLink href={'/'} passHref shallow>
+          <Box w={{ base: '40%', md: 'auto' }} cursor="pointer">
             <Image
               src="/boar-coders-assets/boarcoders-tshirt_oshejd.png"
               alt="boar coders logo"
