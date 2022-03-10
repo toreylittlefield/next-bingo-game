@@ -16,8 +16,7 @@ export async function getIdentitySession(req: NextRequest) {
 
   if (cookieAccessToken) {
     var user = await verifyIdentity(cookieAccessToken);
-
-    if (!user || !user.token?.access_token || !user.app_metadata.roles.includes(NETLIFY_ROLE)) {
+    if (!user || !user.id || !user.app_metadata.roles.includes(NETLIFY_ROLE)) {
       console.log('Not authorized, no user cookie!');
       user = undefined;
     }
