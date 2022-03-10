@@ -34,7 +34,7 @@ export interface RandomPhotoUnsplash {
   currentUserCollections?: any[];
   sponsorship?: null;
   topicSubmissions?: TopicSubmissions;
-  user?: User;
+  user?: UserUnsplash;
   exif?: Exif;
   location?: Location;
   views?: number;
@@ -82,7 +82,7 @@ export interface Urls {
   smallS3?: string;
 }
 
-export interface User {
+export interface UserUnsplash {
   id?: string;
   updatedAt?: Date;
   username?: string;
@@ -181,13 +181,47 @@ export type CombineMetaDataFunction = ({ user, tokens }: LoggedInResponse) => Us
 
 export interface CustomContext extends Context {
   ['clientContext']: {
-    user?: NetlifyAppMetaData;
-    custom?: {
-      netlify: string;
-    };
-    identity?: {
-      url: string;
-      token: string;
-    };
+    identity: Identity;
+    user: ClientContextUser;
   };
+}
+
+interface ClientContextUser {
+  exp: number;
+  sub: string;
+  email: string;
+  app_metadata: Appmetadata;
+  user_metadata: Usermetadata;
+}
+
+interface Usermetadata {
+  full_name: string;
+  avatar_url: string;
+  [key: string]: any;
+}
+
+interface Appmetadata {
+  faunadb_tokens: Faunadbtokens;
+  provider: string;
+  roles: string[];
+}
+
+interface Faunadbtokens {
+  accessTokenData: AccessTokenData;
+  refreshTokenData: RefreshTokenData;
+}
+
+interface RefreshTokenData {
+  expiration: string;
+  refreshToken: string;
+}
+
+interface AccessTokenData {
+  accessToken: string;
+  expiration: string;
+}
+
+interface Identity {
+  url: string;
+  token: string;
 }
