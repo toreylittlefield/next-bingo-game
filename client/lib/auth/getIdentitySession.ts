@@ -7,13 +7,11 @@ import { verifyIdentity } from './verifyIndentity';
 export async function getIdentitySession(req: NextRequest) {
   let cookieAccessToken = req.cookies['nf_jwt'];
 
-  const setLocalTestCookie = await getLocalTestCookie(req, cookieAccessToken);
-  if (setLocalTestCookie?.token) {
-    cookieAccessToken = setLocalTestCookie.token.access_token;
-  }
-
   if (!cookieAccessToken) {
-    console.log('Not authorized, no user cookie!');
+    var setLocalTestCookie = await getLocalTestCookie(req, cookieAccessToken);
+    if (setLocalTestCookie?.token) {
+      cookieAccessToken = setLocalTestCookie.token.access_token;
+    }
   }
 
   if (cookieAccessToken) {
