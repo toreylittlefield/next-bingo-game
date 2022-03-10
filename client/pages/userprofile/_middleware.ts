@@ -6,7 +6,8 @@ import { NETLIFY_SITE_URL } from '../../lib/constants/constants';
 const authIdentityMiddleware: NextMiddleware = async (req, event) => {
   const { user, localTestCookie } = await getIdentitySession(req);
 
-  if (!user) return NextResponse.redirect(`${NETLIFY_SITE_URL}/login`);
+  let url = process.env.NODE_ENV === 'development' ? 'http://localhost:8888' : NETLIFY_SITE_URL;
+  if (!user) return NextResponse.redirect(`${url}/login`);
 
   const res = NextResponse.next();
   if (localTestCookie?.token) {
