@@ -1,5 +1,5 @@
 /** NETLIFY SITE URL */
-export const NETLIFY_SITE_URL = process.env.NETLIFY_SITE_URL as string;
+export const NETLIFY_SITE_URL = process.env.URL as string;
 
 /** FAUNA PWS */
 export const PWS = process.env.FAUNADB_PASSWORD as string;
