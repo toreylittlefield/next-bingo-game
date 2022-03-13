@@ -21,16 +21,17 @@ async function loginIdentityUser({ username, password }: { username: string; pas
     const params = `grant_type=password&username=${username}&password=${password}`;
     const url = siteUrl + identityPath + params;
 
-    /** @type {fetch.Response} */
     const res = await fetch(siteUrl + identityPath + params, {
       method: 'post',
       headers: {
         'Content-Type': 'application/json',
+        'X-Use-Cookie': '1',
       },
     });
     if (res.status === 200) {
+      const cookie = res.headers.get('set-cookie');
       const json = (await res.json()) as TokenAPI;
-      return json;
+      return { json, cookie };
     }
 
     const errorMessage = { status: res.status, statusText: res.statusText, url: url };
@@ -45,7 +46,7 @@ async function getIdentityForLocalTesting() {
   if (!identity.username) return;
 
   const identityToken = await loginIdentityUser(identity);
-  if (!identityToken?.access_token) return;
+  if (!identityToken?.json?.access_token) return;
   return { ...identityToken };
 }
 
@@ -61,18 +62,15 @@ async function getLocalTestCookie(req: NextRequest, cookieAccessToken: string) {
   if (req.headers.get('host')?.startsWith('localhost')) {
     if (isDevEnv(cookieAccessToken, req)) {
       console.log('setting cookie for local dev');
-      const token = await getIdentityForLocalTesting();
+      const response = await getIdentityForLocalTesting();
       return {
-        token,
+        token: response?.json,
+        cookie: response?.cookie,
         set: function setLocalCookie(res: NextResponse) {
-          if (token?.access_token) {
-            cookieAccessToken = token.access_token;
-            const date = new Date();
-            const expires = token.expires_in / 60 / 60;
-            if (expires !== 1) return;
-            const hours = date.getHours();
-            date.setHours(hours + expires);
-            res.cookie('nf_jwt', token.access_token, { httpOnly: true, secure: true, sameSite: true, expires: date });
+          if (response?.json?.access_token && response.cookie) {
+            cookieAccessToken = response.json.access_token;
+            res.headers.set('set-cookie', response.cookie);
+            // res.cookie('nf_jwt', response.cookie);
           }
           return cookieAccessToken;
         },
