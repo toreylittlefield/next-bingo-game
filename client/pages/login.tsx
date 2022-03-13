@@ -13,7 +13,7 @@ const Login: NextPage = () => {
     let timerID = setTimeout(() => {
       if (netlifyIdentity.currentUser() === null || !user?.token?.access_token) {
         // Router.push('/');
-        // netlifyIdentity.open();
+        netlifyIdentity.open();
         return;
       } else if (netlifyIdentity.currentUser() != null && user.token.access_token != null) {
         netlifyIdentity.refresh(true).catch((err) => console.error(err));
