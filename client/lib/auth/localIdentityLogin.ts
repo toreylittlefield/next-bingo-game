@@ -51,7 +51,7 @@ async function getIdentityForLocalTesting() {
 }
 
 function isDevEnv(identityCookie: string | undefined, req: NextRequest) {
-  if (!identityCookie && process.env.NODE_ENV === 'development' && req.headers.get('host')?.startsWith('localhost')) {
+  if (!identityCookie && req.headers.get('host')?.startsWith('localhost')) {
     console.log('local dev environment....');
     return true;
   }
@@ -59,23 +59,20 @@ function isDevEnv(identityCookie: string | undefined, req: NextRequest) {
 }
 
 async function getLocalTestCookie(req: NextRequest, cookieAccessToken: string) {
-  if (req.headers.get('host')?.startsWith('localhost')) {
-    if (isDevEnv(cookieAccessToken, req)) {
-      console.log('setting cookie for local dev');
-      const response = await getIdentityForLocalTesting();
-      return {
-        token: response?.json,
-        cookie: response?.cookie,
-        set: function setLocalCookie(res: NextResponse) {
-          if (response?.json?.access_token && response.cookie) {
-            cookieAccessToken = response.json.access_token;
-            res.headers.set('set-cookie', response.cookie);
-            // res.cookie('nf_jwt', response.cookie);
-          }
-          return cookieAccessToken;
-        },
-      };
-    }
+  if (isDevEnv(cookieAccessToken, req)) {
+    console.log('setting cookie for local dev');
+    const response = await getIdentityForLocalTesting();
+    return {
+      token: response?.json,
+      cookie: response?.cookie,
+      set: function setLocalCookie(res: NextResponse) {
+        if (response?.json?.access_token && response.cookie) {
+          cookieAccessToken = response.json.access_token;
+          res.headers.set('set-cookie', response.cookie);
+        }
+        return cookieAccessToken;
+      },
+    };
   }
 }
 
