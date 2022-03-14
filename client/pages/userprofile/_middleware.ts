@@ -7,7 +7,7 @@ const authIdentityMiddleware: NextMiddleware = async (req, event) => {
   const { user, localTestCookie } = await getIdentitySession(req);
 
   let url = process.env.NODE_ENV === 'development' ? 'http://localhost:8888' : NETLIFY_SITE_URL;
-  if (!user) return NextResponse.redirect(`${url}/login`);
+  if (!user) return NextResponse.redirect(`${url}/logout`);
 
   const res = NextResponse.next();
   if (localTestCookie?.token) {
