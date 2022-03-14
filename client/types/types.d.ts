@@ -225,3 +225,36 @@ interface Identity {
   url: string;
   token: string;
 }
+
+interface NfJwtCookie {
+  exp: number;
+  sub: string;
+  email: string;
+  app_metadata: Appmetadata;
+  user_metadata: Usermetadata;
+}
+
+interface Usermetadata {
+  full_name: string;
+}
+
+interface Appmetadata {
+  faunadb_tokens: ?Faunadbtokens;
+  provider: string;
+  roles: string[];
+}
+
+interface Faunadbtokens {
+  accessTokenData: AccessTokenData;
+  refreshTokenData: RefreshTokenData;
+}
+
+interface RefreshTokenData {
+  expiration: string;
+  refreshToken: string;
+}
+
+interface AccessTokenData {
+  accessToken: string;
+  expiration: string;
+}
