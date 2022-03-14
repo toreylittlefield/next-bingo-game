@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import AuthContext from '../stores/netlifyIdentityContext';
 import netlifyIdentity from 'netlify-identity-widget';
 import { Center, VStack, Spinner, Text } from '@chakra-ui/react';
+import Router from 'next/router';
 
 const Login: NextPage = () => {
   const { user, authReady } = useContext(AuthContext);
@@ -11,14 +12,11 @@ const Login: NextPage = () => {
   useEffect(() => {
     // if (!authReady) return;
     let timerID = setTimeout(() => {
-      if (netlifyIdentity.currentUser() === null || !user?.token?.access_token) {
-        // Router.push('/');
-        netlifyIdentity.open();
-        return;
-      } else if (netlifyIdentity.currentUser() != null && user.token.access_token != null) {
-        netlifyIdentity.refresh(true).catch((err) => console.error(err));
+      if (netlifyIdentity.currentUser() != null && user?.token?.access_token != null) {
+        Router.push('/');
         setTransition(true);
       }
+      netlifyIdentity.open();
     }, 300);
     return () => {
       if (timerID) clearTimeout(timerID);
