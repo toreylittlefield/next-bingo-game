@@ -10,11 +10,6 @@ import fetch from 'node-fetch';
 import { NETLIFY_ROLE } from '../../lib/constants/constants';
 import { HandlerResponse } from '@netlify/functions';
 
-const randomuser = () => ['boarofWar', 'boarCoder', 'codeSmell', 'sniffNation'][Math.floor(Math.random() * 4)];
-const randomNum = () => Math.random().toString(36).slice(2);
-/** select a random user name from a list */
-export const getRandomUserName = () => `${randomuser()}_${randomNum()}🐗`;
-
 /** - fetchs a random thumbnail image of a boar from unsplash */
 export const getUserAvatar = async (apiKey: string) => {
   try {
