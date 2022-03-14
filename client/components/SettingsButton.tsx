@@ -14,6 +14,7 @@ const SettingsButton = ({ user }: UserProfile) => {
         query: { userprofile: user.user_metadata.full_name },
       }}
       passHref
+      shallow={false}
     >
       <Button rightIcon={<SettingIcon />} color="ghostwhite" variant="link">
         <Tooltip hasArrow label="Change User Settings" bg="blue.600">
