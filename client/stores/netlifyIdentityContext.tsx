@@ -1,8 +1,8 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useRef } from 'react';
 import netlifyIdentity from 'netlify-identity-widget';
-import Router from 'next/router';
 import type { NetlifyAppMetaData } from '../types/types';
-
+import Router, { useRouter } from 'next/router';
+import { getRandomUserName } from '../lib/utils/utils';
 interface AuthInterface {
   user: NetlifyAppMetaData | null;
   login: () => void;
@@ -32,6 +32,20 @@ interface UserType extends netlifyIdentity.User {
 export const AuthContextProvider = ({ children }: Props) => {
   const [user, setUser] = useState<NetlifyAppMetaData | null>(null);
   const [authReady, setAuthReady] = useState(false);
+  const { push, isReady, asPath } = useRouter();
+  const urlHistoryRef = useRef<string>();
+
+  useEffect(() => {
+    if (!user?.user_metadata.full_name || !user?.token?.access_token || !isReady) return;
+
+    if (asPath === '/' && urlHistoryRef.current === '/login') {
+      push({
+        pathname: '/userprofile/me/[me]',
+        query: { userprofile: user.user_metadata.full_name },
+      });
+    }
+    urlHistoryRef.current = asPath;
+  }, [isReady, push, asPath, user]);
 
   useEffect(() => {
     /** fires when users logs in or visits page or has gotrue in local storage */
@@ -40,7 +54,7 @@ export const AuthContextProvider = ({ children }: Props) => {
       const user = u as NetlifyAppMetaData;
       setUser(user);
       netlifyIdentity.close();
-      Router.push('/userprofile/me?userprofile' + user.user_metadata.full_name);
+      // Router.push('/userprofile/me?userprofile' + user.user_metadata.full_name);
     });
     netlifyIdentity.on('logout', () => {
       setUser(null);
@@ -62,7 +76,7 @@ export const AuthContextProvider = ({ children }: Props) => {
     });
 
     // init netlify identity connection
-    netlifyIdentity.init();
+    netlifyIdentity.init({ logo: false, namePlaceholder: getRandomUserName() });
 
     return () => {
       netlifyIdentity.off('login');
@@ -70,15 +84,12 @@ export const AuthContextProvider = ({ children }: Props) => {
   }, []);
 
   const login = () => {
-    let isOpen = false;
-    if (isOpen) return;
     Router.push('/login');
-    netlifyIdentity.open();
-    isOpen = true;
   };
 
   const logout = () => {
     netlifyIdentity.logout();
+    netlifyIdentity;
   };
 
   const context = { user, login, logout, authReady };
