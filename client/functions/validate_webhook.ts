@@ -1,19 +1,11 @@
-import { Handler, HandlerEvent, HandlerResponse } from '@netlify/functions';
+import { Handler, HandlerEvent } from '@netlify/functions';
 import { verify } from 'jsonwebtoken';
-import { combineMetaData, getRandomUserName, getUserAvatar, hasValidFaunaTokens } from './utils/utils';
+import { combineMetaData, getUserAvatar, hasValidFaunaTokens, notAuthorizedHandlerResponse } from './utils/utils';
 import { NETLIFY_ROLE, PWS, UNSPLASH_CLIENT_KEY } from '../lib/constants/constants';
 import { loginAccountAndGetTokens } from './faunaApi/login';
 import { createAccount } from './faunaApi/registerAccount';
-import { NetlifyAppMetaData } from '../types/types';
-import cookie from 'cookie';
-
-/** - returns 403 statusCode Not Authorized */
-function notAuthorizedHandlerResponse(): HandlerResponse {
-  return {
-    statusCode: 403,
-    body: JSON.stringify({ message: 'Not Authorized' }),
-  };
-}
+import type { NetlifyAppMetaData } from '../types/types';
+import { getRandomUserName } from '../lib/utils/utils';
 
 const handler: Handler = async (event: HandlerEvent, context) => {
   /** Check webhook signature && clientContext */
