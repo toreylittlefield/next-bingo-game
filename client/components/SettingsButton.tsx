@@ -11,10 +11,9 @@ const SettingsButton = ({ user }: UserProfile) => {
     <NextLink
       href={{
         pathname: 'userprofile/me/[userprofile]',
-        query: { userprofile: user.user_metadata.full_name },
+        search: `userprofile=${user.user_metadata.full_name}`,
       }}
       passHref
-      shallow={false}
     >
       <Button rightIcon={<SettingIcon />} color="ghostwhite" variant="link">
         <Tooltip hasArrow label="Change User Settings" bg="blue.600">
