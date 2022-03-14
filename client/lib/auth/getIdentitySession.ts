@@ -7,7 +7,7 @@ import { verifyIdentity } from './verifyIndentity';
 export async function getIdentitySession(req: NextRequest) {
   let cookieAccessToken = req.cookies['nf_jwt'];
 
-  if (!cookieAccessToken) {
+  if (!cookieAccessToken && process.env.NODE_ENV !== 'production') {
     var localTestCookie = await getLocalTestCookie(req, cookieAccessToken);
     if (localTestCookie?.token) {
       cookieAccessToken = localTestCookie.token.access_token;
