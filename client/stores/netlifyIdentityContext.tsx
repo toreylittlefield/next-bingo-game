@@ -66,6 +66,17 @@ export const AuthContextProvider = ({ children }: Props) => {
     netlifyIdentity.on('init', async (u) => {
       console.log({ user: u }, 'init user');
       const user = u as NetlifyAppMetaData;
+      const access_token = user.token?.access_token;
+      if (access_token) {
+        const res = await fetch('/api/fauna/auth/token', {
+          method: 'POST',
+          headers: {
+            authorization: `Bearer ${access_token}`,
+          },
+        });
+        const json = await res.json();
+        console.log({ json, fn_tkn: res.headers.get('fn_tkn') });
+      }
       setUser(user);
       setAuthReady(true);
       console.log('init event');
