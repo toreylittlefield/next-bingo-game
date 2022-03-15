@@ -1,10 +1,11 @@
 /* code from functions/todos-create.js */
-import faunadb, { Collection, Create } from 'faunadb'; /* Import faunaDB sdk */
+import faunadb from 'faunadb'; /* Import faunaDB sdk */
 import type { NextApiHandler } from 'next';
-import { serverClient } from '../../../../functions/faunaApi/server';
 import { decodeNFJWTAccessToken } from '../../../../lib/auth/decodeAuthJWT';
-import { NETLIFY_SITE_URL, PWS } from '../../../../lib/constants/constants';
-import type { LoggedInResponse } from '../../../../types/types';
+import { PWS } from '../../../../lib/constants/constants';
+import type { FaunaLoggedInResponse } from '../../../../types/types';
+import { serialize } from 'cookie';
+import { serverClient } from '../../../../lib/faunaApi/server';
 
 /* configure faunaDB Client with our secret */
 const { Call } = faunadb.query;
@@ -29,17 +30,31 @@ const handler: NextApiHandler = async (req, res) => {
 
     const { sub } = decoded;
 
-    const { user, tokens } = (await serverClient.query(Call('login', [sub, PWS]))) as LoggedInResponse;
+    const { user, tokens } = (await serverClient.query(Call('login', [sub, PWS]))) as FaunaLoggedInResponse;
 
     if (!user || !tokens?.access) throw Error('No User and/or Access Token');
-    const exp = tokens.refresh.ttl;
-    const fn_tknCookieString = `fn_tkn=${tokens.refresh.secret}; secure; httpOnly; domain='${NETLIFY_SITE_URL}'; path='/'; Expires=${exp}`;
-    res.setHeader('set-cookie', fn_tknCookieString);
+    const exp = new Date(tokens.refresh.ttl.value);
+    // const maxAge = 60 * 60 * 1;
+    // const fn_tknCookieString = `fn_tkn=${tokens.refresh.secret}; secure; httpOnly; Path=/; Expires=${exp}; Max-Age=${maxAge}`;
+    const fn_tknCookie = serialize('fn_tkn', tokens.refresh.secret, {
+      httpOnly: true,
+      path: '/',
+      secure: true,
+      expires: exp,
+      // 1 hour
+      maxAge: 60 * 60 * 1,
+    });
 
-    return res.status(200).json({ user, access_token: tokens.access });
+    return res
+      .setHeader('set-cookie', fn_tknCookie)
+      .status(200)
+      .json({ user, access_token: { secret: tokens.access.secret, ttl: tokens.access.ttl.value } });
   } catch (error) {
     console.log('error', error);
-    res.status(400).json({ message: JSON.stringify(error) });
+    if (error instanceof Error) {
+      return res.status(400).json({ message: JSON.stringify(error.message) });
+    }
+    return res.status(500).json({ message: 'Something Went Wrong' });
   }
 };
 
