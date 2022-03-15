@@ -1,8 +1,7 @@
 import { Handler, HandlerEvent } from '@netlify/functions';
 import { verify } from 'jsonwebtoken';
-import { combineMetaData, getUserAvatar, hasValidFaunaTokens, notAuthorizedHandlerResponse } from './utils/utils';
+import { getUserAvatar, hasValidRole, notAuthorizedHandlerResponse } from './utils/utils';
 import { NETLIFY_ROLE, PWS, UNSPLASH_CLIENT_KEY } from '../lib/constants/constants';
-import { loginAccountAndGetTokens } from './faunaApi/login';
 import { createAccount } from './faunaApi/registerAccount';
 import type { NetlifyAppMetaData } from '../types/types';
 import { getRandomUserName } from '../lib/utils/utils';
@@ -28,7 +27,7 @@ const handler: Handler = async (event: HandlerEvent, context) => {
   if (event.body && res) {
     const payload = JSON.parse(event.body);
     const eventType = payload.event;
-    const { app_metadata: prevAppMetaData, user_metadata: prevUserMetaData, id } = payload.user as NetlifyAppMetaData;
+    const { app_metadata, user_metadata, id } = payload.user as NetlifyAppMetaData;
 
     /** account validation event */
     if (eventType === 'validate') {
@@ -38,37 +37,22 @@ const handler: Handler = async (event: HandlerEvent, context) => {
       };
     }
 
-    const combineMetaDataCallback = combineMetaData(prevAppMetaData, prevUserMetaData);
-
     /** login event, and user should already have a NETLIFY_ROLE in their roles && faunadb refresh && access token */
-    if (
-      eventType === 'login' &&
-      prevAppMetaData.roles?.includes(NETLIFY_ROLE) &&
-      prevAppMetaData.faunadb_tokens &&
-      prevAppMetaData.faunadb_tokens.accessTokenData.accessToken &&
-      prevAppMetaData.faunadb_tokens.refreshTokenData.refreshToken
-    ) {
-      //** check refresh && access token expiration */
-      const { app_metadata } = await loginAccountAndGetTokens(id, PWS, combineMetaDataCallback);
-
-      return hasValidFaunaTokens(app_metadata);
+    if (eventType === 'login') {
+      return hasValidRole(app_metadata);
     }
 
     if (eventType === 'signup') {
       /** Create New Account */
       try {
-        const userAvatarURL = prevUserMetaData?.avatar_url || (await getUserAvatar(UNSPLASH_CLIENT_KEY));
+        const userAvatarURL = user_metadata?.avatar_url || (await getUserAvatar(UNSPLASH_CLIENT_KEY));
 
-        const { app_metadata } = await createAccount(
-          id,
-          PWS,
-          prevUserMetaData.full_name || '',
-          getRandomUserName(),
-          userAvatarURL,
-          combineMetaDataCallback,
-        );
+        const account = await createAccount(id, PWS, user_metadata.full_name || '', getRandomUserName(), userAvatarURL);
+        if (account?.id && account.user) {
+          app_metadata.roles.push(NETLIFY_ROLE);
+        }
 
-        return hasValidFaunaTokens(app_metadata);
+        return hasValidRole(app_metadata);
       } catch (error) {
         console.error(error);
         return {
