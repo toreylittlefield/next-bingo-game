@@ -12,7 +12,7 @@ const UserProfile: NextPage = () => {
 
   useEffect(() => {
     if (!isReady || !user?.user_metadata.full_name) return;
-    if (location.pathname === `/userprofile/me/${user.user_metadata.full_name}`) return;
+    if (location.pathname === decodeURIComponent(`/userprofile/me/${user.user_metadata.full_name}`)) return;
     replace(
       {
         query: { userprofile: user.user_metadata.full_name },
