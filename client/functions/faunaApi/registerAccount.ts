@@ -1,6 +1,6 @@
 import { serverClient } from './server';
 import faunadb from 'faunadb';
-import { CombineMetaDataFunction, LoggedInResponse, UserLoginDataRes } from '../../types/types';
+import type { FaunaCreateAccountResponse } from '../../types/types';
 const { Call } = faunadb.query;
 
 export async function createAccount(
@@ -9,14 +9,13 @@ export async function createAccount(
   userName: string,
   userAlias: string,
   userIcon: string,
-  combineCallback: CombineMetaDataFunction,
-): Promise<UserLoginDataRes> {
+): Promise<FaunaCreateAccountResponse | undefined> {
   try {
-    const { user, tokens } = (await serverClient.query(
+    const { user, id } = (await serverClient.query(
       Call('register', userId, password, userName, userAlias, userIcon),
-    )) as LoggedInResponse;
-    return combineCallback({ user, tokens });
+    )) as FaunaCreateAccountResponse;
+    return { user, id };
   } catch (error) {
-    return { app_metadata: null };
+    return undefined;
   }
 }
