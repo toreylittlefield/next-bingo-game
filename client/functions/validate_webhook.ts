@@ -27,7 +27,7 @@ const handler: Handler = async (event: HandlerEvent, context) => {
   if (event.body && res) {
     const payload = JSON.parse(event.body);
     const eventType = payload.event;
-    console.dir(payload, { colors: true, breakLength: 2 });
+    console.dir(payload, { colors: true });
     const { app_metadata, user_metadata, id } = payload.user as NetlifyAppMetaData;
 
     /** account validation event */
@@ -56,7 +56,11 @@ const handler: Handler = async (event: HandlerEvent, context) => {
           userAvatarURL,
         );
         if (account?.id && account.user) {
-          app_metadata.roles.push(NETLIFY_ROLE);
+          if ('roles' in app_metadata) {
+            app_metadata.roles.push(NETLIFY_ROLE);
+          } else {
+            app_metadata.roles = [NETLIFY_ROLE];
+          }
         }
 
         return hasValidRole(app_metadata);
