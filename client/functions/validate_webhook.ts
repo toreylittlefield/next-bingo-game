@@ -40,7 +40,7 @@ const handler: Handler = async (event: HandlerEvent, context) => {
 
     /** login event, and user should already have a NETLIFY_ROLE in their roles && faunadb refresh && access token */
     if (eventType === 'login') {
-      return hasValidRole(app_metadata);
+      return hasValidRole({ app_metadata, user_metadata });
     }
 
     if (eventType === 'signup') {
@@ -56,8 +56,8 @@ const handler: Handler = async (event: HandlerEvent, context) => {
           userAvatarURL,
         );
         if (account?.id && account.user) {
-          const responseBody = { ...app_metadata, roles: [NETLIFY_ROLE] };
-          return hasValidRole(responseBody);
+          const metaData = { app_metadata: { ...app_metadata, roles: [NETLIFY_ROLE] }, user_metadata };
+          return hasValidRole(metaData);
         }
 
         throw Error('Fauna Did Not Register User');

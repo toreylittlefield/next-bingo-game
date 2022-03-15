@@ -1,4 +1,4 @@
-import type { AppMetaData, RandomPhotoUnsplash } from '../../types/types';
+import type { AppMetaData, RandomPhotoUnsplash, UserMetaData } from '../../types/types';
 import fetch from 'node-fetch';
 import { NETLIFY_ROLE } from '../../lib/constants/constants';
 import { HandlerResponse } from '@netlify/functions';
@@ -26,16 +26,16 @@ export const getUserAvatar = async (apiKey: string) => {
  * - if role is user_account then return statusCode 200 with any modify app_meta_data
  * - else return 401 for unauthorized
  */
-export function hasValidRole(app_metadata: AppMetaData): HandlerResponse {
-  console.dir(app_metadata, { colors: true });
-  if (!app_metadata?.roles?.includes(NETLIFY_ROLE))
+export function hasValidRole(metaData: { app_metadata: AppMetaData; user_metadata: UserMetaData }): HandlerResponse {
+  console.dir(metaData, { colors: true });
+  if (!metaData?.app_metadata.roles?.includes(NETLIFY_ROLE))
     return {
       statusCode: 401,
       body: 'Forbidden: Invalid Role',
     };
   return {
     statusCode: 200,
-    body: JSON.stringify({ response: { app_metadata: app_metadata } }),
+    body: JSON.stringify({ metaData }),
   };
 }
 
