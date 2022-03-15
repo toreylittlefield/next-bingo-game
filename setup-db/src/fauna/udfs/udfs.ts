@@ -112,9 +112,8 @@ export const registerCreateAccountUDF = CreateOrUpdateFunction({
             },
           }),
           account: Select(['ref'], Var('accountRef')),
-          login: Call(q.Function(loginAccountUDFname.name), [Var('id'), Var('password')]),
         },
-        Var('login')
+        { id: Var('id'), user: Select('data', Var('userRef')) }
       )
     )
   ),
