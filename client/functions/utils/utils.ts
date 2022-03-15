@@ -27,13 +27,12 @@ export const getUserAvatar = async (apiKey: string) => {
  * - else return 401 for unauthorized
  */
 export function hasValidRole(app_metadata: AppMetaData): HandlerResponse {
-  console.log(JSON.stringify(app_metadata, null, 2));
-  if (!app_metadata?.roles.includes(NETLIFY_ROLE))
+  console.dir(app_metadata, { colors: true });
+  if (!app_metadata?.roles?.includes(NETLIFY_ROLE))
     return {
       statusCode: 401,
       body: 'Forbidden: Invalid Role',
     };
-
   return {
     statusCode: 200,
     body: JSON.stringify({ response: app_metadata }),
