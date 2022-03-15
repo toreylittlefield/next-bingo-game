@@ -49,9 +49,20 @@ export const AuthContextProvider = ({ children }: Props) => {
 
   useEffect(() => {
     /** fires when users logs in or visits page or has gotrue in local storage */
-    netlifyIdentity.on('login', (u) => {
+    netlifyIdentity.on('login', async (u) => {
       console.log({ u }, 'user login');
       const user = u as NetlifyAppMetaData;
+      const access_token = user.token?.access_token;
+      if (access_token) {
+        const res = await fetch('/api/fauna/auth/token', {
+          method: 'POST',
+          headers: {
+            authorization: `Bearer ${access_token}`,
+          },
+        });
+        const json = await res.json();
+        console.log({ json, fn_tkn: Array.from(res.headers.entries()) });
+      }
       setUser(user);
       netlifyIdentity.close();
       // Router.push('/userprofile/me?userprofile' + user.user_metadata.full_name);
@@ -63,20 +74,9 @@ export const AuthContextProvider = ({ children }: Props) => {
     });
 
     //** fires when netlify is first initialize */
-    netlifyIdentity.on('init', async (u) => {
+    netlifyIdentity.on('init', (u) => {
       console.log({ user: u }, 'init user');
       const user = u as NetlifyAppMetaData;
-      const access_token = user.token?.access_token;
-      if (access_token) {
-        const res = await fetch('/api/fauna/auth/token', {
-          method: 'POST',
-          headers: {
-            authorization: `Bearer ${access_token}`,
-          },
-        });
-        const json = await res.json();
-        console.log({ json, fn_tkn: res.headers.get('fn_tkn') });
-      }
       setUser(user);
       setAuthReady(true);
       console.log('init event');
