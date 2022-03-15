@@ -56,16 +56,19 @@ const handler: Handler = async (event: HandlerEvent, context) => {
           userAvatarURL,
         );
         if (account?.id && account.user) {
-          if ('roles' in app_metadata) {
-            app_metadata.roles.push(NETLIFY_ROLE);
-          } else {
-            app_metadata.roles = [NETLIFY_ROLE];
-          }
+          const responseBody = { ...app_metadata, roles: [NETLIFY_ROLE] };
+          return hasValidRole(responseBody);
         }
 
-        return hasValidRole(app_metadata);
+        throw Error('Fauna Did Not Register User');
       } catch (error) {
         console.error(error);
+        if (error instanceof Error) {
+          return {
+            statusCode: 500,
+            body: JSON.stringify({ error: error.message }),
+          };
+        }
         return {
           statusCode: 500,
           body: 'Interval Server Error',

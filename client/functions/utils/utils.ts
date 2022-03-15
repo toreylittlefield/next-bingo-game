@@ -35,7 +35,7 @@ export function hasValidRole(app_metadata: AppMetaData): HandlerResponse {
     };
   return {
     statusCode: 200,
-    body: JSON.stringify({ response: app_metadata }),
+    body: JSON.stringify({ response: { app_metadata: app_metadata } }),
   };
 }
 
