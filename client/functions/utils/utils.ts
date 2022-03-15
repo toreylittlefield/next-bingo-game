@@ -1,13 +1,6 @@
-import {
-  AppMetaData,
-  FaunaLoggedInResponse,
-  RandomPhotoUnsplash,
-  UserAppMetaData,
-  UserLoginDataRes,
-  UserMetaData,
-} from '../../types/types';
+import type { AppMetaData, RandomPhotoUnsplash } from '../../types/types';
 import fetch from 'node-fetch';
-import { NETLIFY_ROLE, NETLIFY_SITE_URL } from '../../lib/constants/constants';
+import { NETLIFY_ROLE } from '../../lib/constants/constants';
 import { HandlerResponse } from '@netlify/functions';
 
 /** - fetchs a random thumbnail image of a boar from unsplash */
