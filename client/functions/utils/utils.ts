@@ -35,7 +35,7 @@ export function hasValidRole(metaData: { app_metadata: AppMetaData; user_metadat
     };
   return {
     statusCode: 200,
-    body: JSON.stringify({ metaData }),
+    body: JSON.stringify(metaData),
   };
 }
 
