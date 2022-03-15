@@ -27,6 +27,7 @@ const handler: Handler = async (event: HandlerEvent, context) => {
   if (event.body && res) {
     const payload = JSON.parse(event.body);
     const eventType = payload.event;
+    console.dir(payload, { colors: true, breakLength: 2 });
     const { app_metadata, user_metadata, id } = payload.user as NetlifyAppMetaData;
 
     /** account validation event */
