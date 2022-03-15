@@ -1,20 +1,28 @@
 // eslint-disable-next-line @next/next/no-server-import-in-page
 import { NextMiddleware, NextResponse } from 'next/server';
-import { getIdentitySession } from '../../lib/auth/getIdentitySession';
-import { NETLIFY_SITE_URL } from '../../lib/constants/constants';
+import { verifyIdentity } from '../../lib/auth/verifyIndentity';
+import { NETLIFY_ROLE } from '../../lib/constants/constants';
+
+function unAuthResponse(message: string = 'Token Required', status: number = 401) {
+  return new Response(message, {
+    status,
+  });
+}
 
 const authIdentityMiddleware: NextMiddleware = async (req, event) => {
-  const { user, localTestCookie } = await getIdentitySession(req);
+  const token = req.headers.get('authorization');
+  if (!token) return unAuthResponse();
 
-  let url = process.env.NODE_ENV === 'development' ? 'http://localhost:8888' : NETLIFY_SITE_URL;
-  if (!user) return NextResponse.redirect(`${url}/login`);
+  const [_, access_token] = token.split(' ');
+  let user = await verifyIdentity(access_token);
 
-  const res = NextResponse.next();
-  if (localTestCookie?.token) {
-    localTestCookie.set(res);
+  if (!user || !user.id || !user.app_metadata.roles.includes(NETLIFY_ROLE)) {
+    console.log('Not authorized, no user cookie!');
+    user = undefined;
   }
 
-  return res;
+  if (!user) return unAuthResponse('User Is Not Authorized');
+  return NextResponse.next();
 };
 
 export default authIdentityMiddleware;
