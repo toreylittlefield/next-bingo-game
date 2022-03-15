@@ -1,6 +1,6 @@
 import {
   AppMetaData,
-  LoggedInResponse,
+  FaunaLoggedInResponse,
   RandomPhotoUnsplash,
   UserAppMetaData,
   UserLoginDataRes,
@@ -29,45 +29,19 @@ export const getUserAvatar = async (apiKey: string) => {
   }
 };
 
-export function combineMetaData(prevAppMetaData: AppMetaData, prevUserMetaData?: UserMetaData) {
-  return function newMetaData({ user, tokens }: LoggedInResponse): UserAppMetaData {
-    return {
-      app_metadata: {
-        ...prevAppMetaData,
-        roles: [NETLIFY_ROLE],
-        faunadb_tokens: {
-          accessTokenData: {
-            accessToken: tokens.access.secret,
-            expiration: tokens.access.ttl.value,
-          },
-          refreshTokenData: {
-            refreshToken: tokens.refresh.secret,
-            expiration: tokens.refresh.ttl.value,
-          },
-        },
-      },
-    };
-  };
-}
-
 /**
- * - if faunadb_tokens then return statusCode 200
- * - else return 403 for unauthorized
+ * - if role is user_account then return statusCode 200 with any modify app_meta_data
+ * - else return 401 for unauthorized
  */
-export function hasValidFaunaTokens(app_metadata: UserLoginDataRes['app_metadata']): HandlerResponse {
-  if (!app_metadata?.faunadb_tokens)
+export function hasValidRole(app_metadata: AppMetaData): HandlerResponse {
+  if (!app_metadata?.roles.includes(NETLIFY_ROLE))
     return {
-      statusCode: 403,
-      body: 'Forbidden',
+      statusCode: 401,
+      body: 'Forbidden: Invalid Role',
     };
 
-  const maxAge = 1 * 60 * 60;
-  const domain = process.env.NODE_ENV === 'production' ? NETLIFY_SITE_URL : 'localhost';
   return {
     statusCode: 200,
-    headers: {
-      'set-cookie': `loginCookie=loginCookie; Secure, HttpOnly; Path=/; Domain=${domain}`,
-    },
     body: JSON.stringify({ app_metadata }),
   };
 }
