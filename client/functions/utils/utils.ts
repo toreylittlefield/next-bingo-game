@@ -7,7 +7,7 @@ import {
   UserMetaData,
 } from '../../types/types';
 import fetch from 'node-fetch';
-import { NETLIFY_ROLE } from '../../lib/constants/constants';
+import { NETLIFY_ROLE, NETLIFY_SITE_URL } from '../../lib/constants/constants';
 import { HandlerResponse } from '@netlify/functions';
 
 /** - fetchs a random thumbnail image of a boar from unsplash */
@@ -61,8 +61,13 @@ export function hasValidFaunaTokens(app_metadata: UserLoginDataRes['app_metadata
       body: 'Forbidden',
     };
 
+  const maxAge = 1 * 60 * 60;
+  const domain = process.env.NODE_ENV === 'production' ? NETLIFY_SITE_URL : 'localhost';
   return {
     statusCode: 200,
+    headers: {
+      'set-cookie': `loginCookie=loginCookie; Secure, HttpOnly; Path=/; Domain=${domain}`,
+    },
     body: JSON.stringify({ app_metadata }),
   };
 }
