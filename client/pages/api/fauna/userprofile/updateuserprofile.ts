@@ -74,7 +74,7 @@ const handler: NextApiHandler = async (req, res) => {
       '******************* END UPDATE USER PROFILE *******************',
     );
     //@ts-expect-error
-    return res.status(200).json({ message: JSON.stringify(req.netlifyFunctionParams) });
+    return res.status(200).json({ message: JSON.stringify(req.rawHeaders) });
   } catch (error) {
     console.log('error', error);
     res.status(400).json({ message: JSON.stringify(error) });
