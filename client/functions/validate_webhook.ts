@@ -2,9 +2,9 @@ import { Handler, HandlerEvent } from '@netlify/functions';
 import { verify } from 'jsonwebtoken';
 import { getUserAvatar, hasValidRole, notAuthorizedHandlerResponse } from './utils/utils';
 import { NETLIFY_ROLE, PWS, UNSPLASH_CLIENT_KEY } from '../lib/constants/constants';
-import { createAccount } from './faunaApi/registerAccount';
 import type { NetlifyAppMetaData } from '../types/types';
 import { getRandomUserName } from '../lib/utils/utils';
+import { createFaunaUserAccount } from '../lib/faunaApi/registerAccount';
 
 const handler: Handler = async (event: HandlerEvent, context) => {
   /** Check webhook signature && clientContext */
@@ -47,7 +47,13 @@ const handler: Handler = async (event: HandlerEvent, context) => {
       try {
         const userAvatarURL = user_metadata?.avatar_url || (await getUserAvatar(UNSPLASH_CLIENT_KEY));
 
-        const account = await createAccount(id, PWS, user_metadata.full_name || '', getRandomUserName(), userAvatarURL);
+        const account = await createFaunaUserAccount(
+          id,
+          PWS,
+          user_metadata.full_name || '',
+          getRandomUserName(),
+          userAvatarURL,
+        );
         if (account?.id && account.user) {
           app_metadata.roles.push(NETLIFY_ROLE);
         }
