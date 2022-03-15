@@ -131,16 +131,6 @@ export interface NetlifyAppMetaData extends netlifyIdentity.User {
   ['app_metadata']: {
     provider: string;
     roles: string[];
-    faunadb_tokens: {
-      accessTokenData: {
-        expiration: string | Date;
-        accessToken: string;
-      };
-      refreshTokenData: {
-        expiration: string | Date;
-        refreshToken: string;
-      };
-    };
   };
 }
 
@@ -152,7 +142,16 @@ export interface NetlifyUserMetaData extends netlifyIdentity.User {
   };
 }
 
-export interface LoggedInResponse {
+export interface FaunaCreateAccountResponse {
+  id: string;
+  user: {
+    name: string;
+    alias: string;
+    icon: string;
+  };
+}
+
+export interface FaunaLoggedInResponse {
   user: {
     name: string;
     alias: string;
@@ -177,7 +176,7 @@ export type UserAppMetaData = { app_metadata: AppMetaData };
 
 export type UserLoginDataRes = UserAppMetaData | { app_metadata: null };
 
-export type CombineMetaDataFunction = ({ user, tokens }: LoggedInResponse) => UserAppMetaData;
+export type CombineMetaDataFunction = ({ user, tokens }: FaunaLoggedInResponse) => UserAppMetaData;
 
 export interface CustomContext extends Context {
   ['clientContext']: {
