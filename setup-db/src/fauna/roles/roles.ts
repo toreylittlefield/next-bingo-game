@@ -100,27 +100,27 @@ export const CreateRoleFunctionBingoBoards = CreateOrUpdateRole({
 /** ACCOUNTS ROLE */
 export const CreateRoleAccountsBingoBoards = CreateOrUpdateRole({
   ...ROLE_ACCOUNTS_BINGO_BOARDS,
-  membership: [
-    {
-      resource: Collection(accountsCollection.name),
-      // If the token used is an access token or which we'll use a reusable snippet of FQL
-      // returned by 'IsCalledWithAccessToken'
-      predicate: Query(Lambda((ref) => IsCalledWithAccessToken())),
-    },
-  ],
+  // membership: [
+  //   {
+  //     resource: Collection(accountsCollection.name),
+  //     // If the token used is an access token or which we'll use a reusable snippet of FQL
+  //     // returned by 'IsCalledWithAccessToken'
+  //     predicate: Query(Lambda((ref) => IsCalledWithAccessToken())),
+  //   },
+  // ],
 });
 
 /** REFRESH ROLE */
 export const CreateRoleRefreshToken = CreateOrUpdateRole({
   ...ROLE_REFRESH_TOKENS,
-  membership: [
-    {
-      // The accounts collection gets access
-      resource: Collection(accountsCollection.name),
-      // If the token used is an refresh token
-      predicate: Query(Lambda((ref) => IsCalledWithRefreshToken())),
-    },
-  ],
+  // membership: [
+  //   {
+  //     // The accounts collection gets access
+  //     resource: Collection(accountsCollection.name),
+  //     // If the token used is an refresh token
+  //     predicate: Query(Lambda((ref) => IsCalledWithRefreshToken())),
+  //   },
+  // ],
 });
 
 /** Update Roles */
@@ -199,6 +199,14 @@ export const UpdateRoleFunctionBingoBoards = CreateOrUpdateRole({
 
 export const UpdateRoleAccountsBingoBoards = CreateOrUpdateRole({
   ...ROLE_ACCOUNTS_BINGO_BOARDS,
+  membership: [
+    {
+      resource: Collection(accountsCollection.name),
+      // If the token used is an access token or which we'll use a reusable snippet of FQL
+      // returned by 'IsCalledWithAccessToken'
+      predicate: Query(Lambda((ref) => IsCalledWithAccessToken())),
+    },
+  ],
 
   privileges: [
     /** ALLOW THE ACCOUNTS COLLECTION TO CALL UDFs */
@@ -291,6 +299,14 @@ export const UpdateRoleAccountsBingoBoards = CreateOrUpdateRole({
 
 export const UpdateRoleRefreshToken = CreateOrUpdateRole({
   ...ROLE_REFRESH_TOKENS,
+  membership: [
+    {
+      // The accounts collection gets access
+      resource: Collection(accountsCollection.name),
+      // If the token used is an refresh token
+      predicate: Query(Lambda((ref) => IsCalledWithRefreshToken())),
+    },
+  ],
   privileges: [
     // A refresh token can only refresh and there is value in restricting the functionality.
     // If a malicious actro was able to grab a refresh token from the httpOnly cookie due to some vulnerability:
