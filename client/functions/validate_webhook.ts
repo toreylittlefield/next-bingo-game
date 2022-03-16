@@ -4,7 +4,7 @@ import { getUserAvatar, hasValidRole, notAuthorizedHandlerResponse } from './uti
 import { NETLIFY_ROLE, PWS, UNSPLASH_CLIENT_KEY } from '../lib/constants/constants';
 import type { NetlifyAppMetaData } from '../types/types';
 import { getRandomUserName } from '../lib/utils/utils';
-import { createFaunaUserAccount } from '../lib/faunaApi/registerAccount';
+import { createFaunaUserAccount } from '../lib/faunaApi/udfs/createFaunaUserAccount';
 
 const handler: Handler = async (event: HandlerEvent, context) => {
   /** Check webhook signature && clientContext */
