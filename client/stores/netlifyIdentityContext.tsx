@@ -1,8 +1,9 @@
 import React, { createContext, useState, useEffect, useRef } from 'react';
 import netlifyIdentity from 'netlify-identity-widget';
-import type { NetlifyAppMetaData } from '../types/types';
+import type { FaunaLoggedInResponse, NetlifyAppMetaData } from '../types/types';
 import Router, { useRouter } from 'next/router';
 import { getRandomUserName } from '../lib/utils/utils';
+import { apiRequest } from '../lib/api/apiservice';
 interface AuthInterface {
   user: NetlifyAppMetaData | null;
   login: () => void;
@@ -21,16 +22,13 @@ interface Props {
   children: React.ReactNode;
 }
 
-interface UserType extends netlifyIdentity.User {
-  ['user_metadata']: {
-    username?: string;
-    avatar_url: string;
-    full_name: string;
-  };
+interface LoggedInUser extends NetlifyAppMetaData {
+  faunaUser?: FaunaLoggedInResponse['user'];
+  faunaTokens?: FaunaLoggedInResponse['tokens'];
 }
 
 export const AuthContextProvider = ({ children }: Props) => {
-  const [user, setUser] = useState<NetlifyAppMetaData | null>(null);
+  const [user, setUser] = useState<LoggedInUser | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const { push, isReady, asPath } = useRouter();
   const urlHistoryRef = useRef<string>();
@@ -54,16 +52,17 @@ export const AuthContextProvider = ({ children }: Props) => {
       const user = u as NetlifyAppMetaData;
       const access_token = user.token?.access_token;
       if (access_token) {
-        const res = await fetch('/api/fauna/auth/token', {
-          method: 'POST',
-          headers: {
-            authorization: `Bearer ${access_token}`,
-          },
+        const res = await apiRequest<FaunaLoggedInResponse>({
+          url: '/api/fauna/auth/token',
+          identityAccessToken: access_token,
+          searchParams: { grantType: 'access_token' },
         });
-        const json = await res.json();
-        console.log({ json, fn_tkn: Array.from(res.headers.entries()) });
+        if (res) {
+          setUser({ ...user, ...res });
+        } else {
+          setUser(user);
+        }
       }
-      setUser(user);
       netlifyIdentity.close();
       // Router.push('/userprofile/me?userprofile' + user.user_metadata.full_name);
     });
