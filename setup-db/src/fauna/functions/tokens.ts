@@ -24,8 +24,8 @@ const {
   Map,
 } = q;
 
-export const ACCESS_TOKEN_LIFETIME_SECONDS = 600; // 10 minutes
-export const REFRESH_TOKEN_LIFETIME_SECONDS = 604800; // 7 days, adapt if needed or remove ttl for eternal tokens
+export const ACCESS_TOKEN_LIFETIME_SECONDS = 3600; // 60 minutes
+export const REFRESH_TOKEN_LIFETIME_SECONDS = 86400; // 1 day(s), adapt if needed or remove ttl for eternal tokens
 
 export function CreateAccessToken(accountRef: faunadb.ExprArg, refreshTokenRef: faunadb.ExprArg, ttlSeconds: number) {
   return Create(Tokens(), {
