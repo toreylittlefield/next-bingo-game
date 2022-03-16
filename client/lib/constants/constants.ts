@@ -7,6 +7,9 @@ export const PWS = process.env.FAUNADB_PASSWORD as string;
 /** FAUNA SERVER  KEY*/
 export const FAUNADB_SERVER_KEY = process.env.FAUNADB_SERVER_KEY as string;
 
+/** FAUNA REFRESH COOKIE JWT SECRET */
+export const FAUNA_JWT_SECRET = process.env.FAUNA_JWT_SECRET as string;
+
 /** UNSPLASH KEY */
 export const UNSPLASH_CLIENT_KEY = process.env.UNSPLASH_CLIENT_KEY as string;
 
