@@ -1,6 +1,10 @@
 import { NETLIFY_SITE_URL } from '../constants/constants';
 
-export type TokenParams = { grantType: 'access_token' } | { grantType: 'refresh_token' } | { grantType: 'login' };
+export type TokenParams =
+  | { grantType: 'access_token' }
+  | { grantType: 'refresh_token' }
+  | { grantType: 'login' }
+  | { grantType: 'logout' };
 
 export type ApiRequestOptions = (
   | { url: '/api/fauna/auth/token'; method?: 'GET'; searchParams: TokenParams }
