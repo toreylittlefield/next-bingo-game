@@ -5,10 +5,10 @@ const { Call } = faunadb.query;
 type FaunaRefreshTokenRes = Exclude<FaunaLoggedInResponse, 'user'>;
 
 export async function getFaunaRefreshToken(
-  faunaLoggedInClient: faunadb.Client,
+  faunaRefreshClient: faunadb.Client,
 ): Promise<{ faunaTokens: FaunaRefreshTokenRes['tokens'] } | undefined> {
   try {
-    const { tokens } = (await faunaLoggedInClient.query(
+    const { tokens } = (await faunaRefreshClient.query(
       Call('create_refresh_and_access_token', []),
     )) as FaunaRefreshTokenRes;
     return { faunaTokens: tokens };
