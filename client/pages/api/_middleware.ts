@@ -4,9 +4,11 @@ import { verifyIdentity } from '../../lib/auth/verifyIndentity';
 import { NETLIFY_ROLE } from '../../lib/constants/constants';
 
 function unAuthResponse(message: string = 'Token Required', status: number = 401) {
-  return new Response(message, {
+  const res = new Response(message, {
     status,
   });
+  res.headers.set('set-cookie', 'nf_jwt=""; Max-Age=0; path=/;');
+  return res;
 }
 
 const authIdentityMiddleware: NextMiddleware = async (req, event) => {
