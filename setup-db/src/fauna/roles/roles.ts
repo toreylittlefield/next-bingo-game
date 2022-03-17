@@ -1,6 +1,11 @@
 import faunadb from 'faunadb';
 import { accountsCollection, bingoBoardCollections, usersCollection } from '../collections/collectionnames.js';
-import { indexAllBingoBoardsByRef } from '../indexes/faunaIndexesNames.js';
+import {
+  indexAccessTokenByRefreshToken,
+  indexAllAccountsById,
+  indexAllBingoBoardsByRef,
+  indexTokensByInstance,
+} from '../indexes/faunaIndexesNames.js';
 import { IsCalledWithAccessToken, IsCalledWithRefreshToken } from '../functions/tokens.js';
 import {
   createBoardUDFname,
@@ -11,6 +16,7 @@ import {
   createRefreshAndAccessTokenUDFname,
   updateBoardUDFname,
   updateUserUDFname,
+  createAccessTokenWithRefreshTokenUDFName,
 } from '../udfs/udfnames.js';
 import { functionsBingoBoardsRole, accountsBingoBoardRole, refreshTokenRole } from './rolenames.js';
 const q = faunadb.query;
@@ -48,6 +54,7 @@ type Privileges = {
     write?: true | faunadb.Expr;
     create?: true | faunadb.Expr;
     delete?: true | faunadb.Expr;
+    unrestricted_read?: true | faunadb.Expr;
   };
 };
 
@@ -212,6 +219,27 @@ export const UpdateRoleAccountsBingoBoards = CreateOrUpdateRole({
     /** ALLOW THE ACCOUNTS COLLECTION TO CALL UDFs */
     /** UDFS for USERs */
     {
+      resource: Index(indexAccessTokenByRefreshToken.name),
+      actions: {
+        read: true,
+        unrestricted_read: true,
+      },
+    },
+    {
+      resource: Index(indexTokensByInstance.name),
+      actions: {
+        read: true,
+        unrestricted_read: true,
+      },
+    },
+    {
+      resource: Index(indexAllAccountsById.name),
+      actions: {
+        read: true,
+        unrestricted_read: true,
+      },
+    },
+    {
       resource: q.Function(createUserUDFname.name),
       actions: {
         call: true,
@@ -316,6 +344,12 @@ export const UpdateRoleRefreshToken = CreateOrUpdateRole({
     // In essence, it reduces the ease of getting long-term access significantly if a refresh token does leak.
     {
       resource: q.Function(createRefreshAndAccessTokenUDFname.name),
+      actions: {
+        call: true,
+      },
+    },
+    {
+      resource: q.Function(createAccessTokenWithRefreshTokenUDFName.name),
       actions: {
         call: true,
       },
