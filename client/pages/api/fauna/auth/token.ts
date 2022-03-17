@@ -9,8 +9,9 @@ import faunadb from 'faunadb';
 import { getFaunaRefreshToken } from '../../../../lib/faunaApi/udfs/getFaunaRefreshToken';
 import { getFaunaAccessToken } from '../../../../lib/faunaApi/udfs/getFaunaAccessToken';
 import { serverClient } from '../../../../lib/faunaApi/server';
+import { logoutFaunaAccount } from '../../../../lib/faunaApi/udfs/logoutFaunaAccount';
 
-type GrantTypes = 'access_token' | 'refresh_token' | 'login';
+type GrantTypes = 'access_token' | 'refresh_token' | 'login' | 'logout';
 
 async function verifyFaunaRefreshToken(faunaRefreshToken: string) {
   if (faunaRefreshToken) {
@@ -36,6 +37,14 @@ async function createFaunaRefreshJWTCookie(refreshToken: string, ttl: string) {
   return fn_tknCookie;
 }
 
+function deleteCookie(cookieName: 'fn_tkn' | 'nf_jwt') {
+  const cookieToDelete = serialize(cookieName, '', {
+    path: '/',
+    maxAge: -1,
+  });
+  return cookieToDelete;
+}
+
 /* export our lambda function as named "handler" export */
 const handler: NextApiHandler = async (req, res) => {
   try {
@@ -52,6 +61,26 @@ const handler: NextApiHandler = async (req, res) => {
     if (!decoded) return res.status(400).send('Invalid Token');
 
     switch (grantType as GrantTypes) {
+      case 'logout': {
+        const { fn_tkn } = req.cookies;
+
+        const refreshToken = await verifyFaunaRefreshToken(fn_tkn);
+        if (!refreshToken) return res.status(401).send('Not Signed / Invalid Token');
+
+        const faunaRefreshClient = new faunadb.Client({
+          secret: refreshToken,
+          domain: 'db.fauna.com',
+          scheme: 'https',
+        });
+
+        const logoutRes = await logoutFaunaAccount(faunaRefreshClient);
+        if (!logoutRes) return res.status(400).send({ success: false });
+
+        return res
+          .setHeader('set-cookie', [deleteCookie('nf_jwt'), deleteCookie('fn_tkn')])
+          .status(200)
+          .json({ success: true });
+      }
       case 'login': {
         const { sub } = decoded;
 
