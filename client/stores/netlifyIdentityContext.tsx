@@ -24,7 +24,7 @@ interface Props {
 
 interface LoggedInUser extends NetlifyAppMetaData {
   faunaUser?: FaunaLoggedInResponse['user'];
-  faunaTokens?: FaunaLoggedInResponse['tokens'];
+  faunaTokens?: { access: FaunaLoggedInResponse['tokens']['access'] };
 }
 
 export const AuthContextProvider = ({ children }: Props) => {
@@ -55,7 +55,7 @@ export const AuthContextProvider = ({ children }: Props) => {
         const res = await apiRequest<FaunaLoggedInResponse>({
           url: '/api/fauna/auth/token',
           identityAccessToken: access_token,
-          searchParams: { grantType: 'access_token' },
+          searchParams: { grantType: 'login' },
         });
         if (res) {
           setUser({ ...user, ...res });
@@ -97,10 +97,12 @@ export const AuthContextProvider = ({ children }: Props) => {
     Router.push('/login');
   };
 
-  const logout = () => {
-    netlifyIdentity.logout();
-    netlifyIdentity;
+  const logout = async () => {
+    Router.push('/logout');
+    // netlifyIdentity.logout();
   };
+
+  const refreshFaunaToken = async () => {};
 
   const context = { user, login, logout, authReady };
 
