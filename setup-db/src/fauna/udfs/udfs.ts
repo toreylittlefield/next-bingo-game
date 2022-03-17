@@ -1,6 +1,7 @@
 import faunadb from 'faunadb';
 import { accountsCollection } from '../collections/collectionnames.js';
 import { LoginAccount } from '../functions/login.js';
+import { LogoutAccount } from '../functions/logout.js';
 import {
   ACCESS_TOKEN_LIFETIME_SECONDS,
   CreateAccessAndRefreshToken,
@@ -32,7 +33,6 @@ const {
   Exists,
   If,
   Update,
-  Logout,
   Select,
   Get,
   CreateFunction,
@@ -130,7 +130,7 @@ export const loginAccountAndCreateUserUDF = CreateOrUpdateFunction({
 //** LOGOUT ACCOUNT & DELETE TOKENS */
 export const logoutDeleteTokensAccountUDF = CreateOrUpdateFunction({
   name: logoutAndDeleteTokensAccountUDFname.name,
-  body: Query(Lambda(['all'], Logout(Var('all')))),
+  body: Query(Lambda(['all'], LogoutAccount(Var('all')))),
   role: serverAccountRole.name,
 });
 
