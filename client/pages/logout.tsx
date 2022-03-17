@@ -4,9 +4,10 @@ import AuthContext from '../stores/netlifyIdentityContext';
 import netlifyIdentity from 'netlify-identity-widget';
 import { Center, VStack, Spinner, Text } from '@chakra-ui/react';
 import Router from 'next/router';
+import { apiRequest } from '../lib/api/apiservice';
 
 const LogOut: NextPage = () => {
-  const { user, authReady, logout } = useContext(AuthContext);
+  const { user, authReady } = useContext(AuthContext);
   const [transition, setTransition] = useState(false);
 
   useEffect(() => {
@@ -15,6 +16,12 @@ const LogOut: NextPage = () => {
       if (netlifyIdentity.currentUser() == null && user?.token?.access_token == null) {
         Router.push('/login');
       } else {
+        if (!user?.token?.access_token) return;
+        apiRequest({
+          url: '/api/fauna/auth/token',
+          identityAccessToken: user.token.access_token,
+          searchParams: { grantType: 'logout' },
+        });
         setTransition(true);
         netlifyIdentity.logout();
         Router.push('/');
