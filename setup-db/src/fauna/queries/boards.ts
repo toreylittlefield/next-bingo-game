@@ -4,7 +4,12 @@ const q = faunadb.query;
 const { Var, Ref, Now, Select, Get, Delete, CurrentIdentity, Let, Create, Collection, Update, Paginate, Documents } = q;
 
 /** USER FUNCTIONS */
-export function createUser(name: faunadb.Expr, alias: faunadb.Expr, icon: faunadb.Expr): faunadb.Expr {
+export function createUser(
+  name: faunadb.Expr,
+  alias: faunadb.Expr,
+  icon: faunadb.Expr,
+  lastUpdated: faunadb.Expr
+): faunadb.Expr {
   const FQLStatement = Let(
     {
       // accountRef: CurrentIdentity(),
@@ -14,6 +19,7 @@ export function createUser(name: faunadb.Expr, alias: faunadb.Expr, icon: faunad
           name: name,
           alias: alias,
           icon: icon,
+          lastUpdated: lastUpdated,
         },
       }),
     },
@@ -22,7 +28,12 @@ export function createUser(name: faunadb.Expr, alias: faunadb.Expr, icon: faunad
   return FQLStatement;
 }
 
-export function UpdateUser(name: faunadb.Expr, alias: faunadb.Expr, icon: faunadb.Expr): faunadb.Expr {
+export function UpdateUser(
+  name: faunadb.Expr,
+  alias: faunadb.Expr,
+  icon: faunadb.Expr,
+  lastUpdated: faunadb.Expr
+): faunadb.Expr {
   const FQLStatement = Let(
     {
       accountRef: CurrentIdentity(),
@@ -32,6 +43,7 @@ export function UpdateUser(name: faunadb.Expr, alias: faunadb.Expr, icon: faunad
           name: name,
           alias: alias,
           icon: icon,
+          lastUpdated: Now(),
         },
       }),
     },
