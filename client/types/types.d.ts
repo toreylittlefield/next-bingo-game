@@ -11,8 +11,13 @@ declare module 'netlify-identity-widget' {
   export { gotrue };
 }
 
+export interface LoggedInUser extends NetlifyAppMetaData {
+  faunaUser?: FaunaLoggedInResponse['user'];
+  faunaTokens?: { access: FaunaLoggedInResponse['tokens']['access'] };
+}
+
 export type UserProfile = {
-  user: netlifyIdentity.User;
+  user: LoggedInUser;
 };
 
 export interface RandomPhotoUnsplash {
@@ -156,6 +161,7 @@ export interface FaunaLoggedInResponse {
     name: string;
     alias: string;
     icon: string;
+    lastUpdated: string;
   };
   tokens: {
     refresh: {

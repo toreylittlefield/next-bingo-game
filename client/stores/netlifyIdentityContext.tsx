@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useRef } from 'react';
 import netlifyIdentity from 'netlify-identity-widget';
-import type { FaunaLoggedInResponse, NetlifyAppMetaData } from '../types/types';
+import type { FaunaLoggedInResponse, LoggedInUser, NetlifyAppMetaData } from '../types/types';
 import Router, { useRouter } from 'next/router';
 import { getRandomUserName } from '../lib/utils/utils';
 import { apiRequest } from '../lib/api/apiservice';
@@ -20,11 +20,6 @@ const AuthContext = createContext<AuthInterface>({
 
 interface Props {
   children: React.ReactNode;
-}
-
-interface LoggedInUser extends NetlifyAppMetaData {
-  faunaUser?: FaunaLoggedInResponse['user'];
-  faunaTokens?: { access: FaunaLoggedInResponse['tokens']['access'] };
 }
 
 export const AuthContextProvider = ({ children }: Props) => {
