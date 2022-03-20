@@ -2,46 +2,46 @@
   "version": "0.2.0",
   "compounds": [
     {
-      "name": "Netlify Dev Chrome",
-      "configurations": ["Launch Chrome", "netlify dev"],
-      "stopAll": true
+      "name": "Chrome + Custom Netlify Dev ClientContext",
+      "configurations": ["Launch Chrome", "Custom Netlify Dev ClientContext Identity"],
+      "stopAll": true,
+      "presentation": {
+        "hidden": false,
+        "group": "Netlify Chrome",
+        "order": 1
+      }
     }
   ],
   "configurations": [
-    {
-      "type": "node",
-      "request": "launch",
-      "program": ".netlify/functions-serve/createUser/src/functions/createUser.js",
-      "sourceMaps": true,
-      "smartStep": true,
-      "internalConsoleOptions": "openOnSessionStart",
-      "name": "Create User Local",
-      "cwd": "${workspaceFolder}/client",
-      "skipFiles": ["<node_internals>/**"],
-      "envFile": ".env.local"
-    },
     {
       "name": "Launch Chrome",
       "request": "launch",
       "type": "pwa-chrome",
       "url": "http://localhost:8888",
-      "webRoot": "${workspaceFolder}"
+      "webRoot": "${workspaceFolder}/client"
     },
     {
-      "name": "netlify dev",
+      "name": "Custom Netlify Dev ClientContext Identity",
       "type": "node",
       "request": "launch",
       "skipFiles": ["<node_internals>/**"],
       "outFiles": [".netlify/functions-serve/**/*.js"],
-      "program": "node_modules/netlify-cli/bin/run",
-      "args": ["dev"],
+      "program": "node_modules/customized-netlify-cli/bin/run",
+      "args": [
+        "dev",
+        "--clientContext",
+        "./functions/events/customClientContext.json",
+        "--identity",
+        "./functions/events/token.json"
+      ],
       "cwd": "${workspaceFolder}/client",
       "console": "integratedTerminal",
       "env": { "BROWSER": "none" },
       "serverReadyAction": {
         "pattern": "Server now ready on (https?://[w:.-]+)",
-        "uriFormat": "%s",
-        "action": "debugWithChrome"
+        "uriFormat": "http://localhost:%s",
+        "action": "debugWithChrome",
+        "webRoot": "${workspaceFolder}/client"
       }
     },
     {
@@ -49,9 +49,33 @@
       "type": "node",
       "request": "launch",
       "skipFiles": ["<node_internals>/**"],
-      "outFiles": ["${workspaceFolder}/.netlify/functions-serve/**/*.js"],
-      "program": "${workspaceFolder}/node_modules/.bin/netlify",
-      "args": ["functions:serve"],
+      "outFiles": [".netlify/functions-serve/**/*.js"],
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run-script", "serve"],
+      "cwd": "${workspaceFolder}/client",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "custom netlify dev",
+      "type": "node",
+      "request": "launch",
+      "skipFiles": ["<node_internals>/**"],
+      "outFiles": [".netlify/functions-serve/**/*.js"],
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run-script", "custom:context"],
+      "cwd": "${workspaceFolder}/client",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "netlify functions:invoke",
+      "type": "node",
+      "request": "launch",
+      "skipFiles": ["<node_internals>/**"],
+      "restart": true,
+      "outFiles": [".netlify/functions-serve/**/*.js"],
+      "program": "functions:invoke",
+      "runtimeExecutable": "netlify",
+      // "args": ["--name fauna-user --port 9999 --identity"],
       "cwd": "${workspaceFolder}/client",
       "console": "integratedTerminal"
     },

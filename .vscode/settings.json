@@ -8,6 +8,8 @@
     "**/Thumbs.db": true,
     "**/node_modules": true,
     "setup-db/dist": true,
-    "setup-db": true
+    // "setup-db": true,
+    "**/.netlify": true,
+    "**/.next": true
   }
 }

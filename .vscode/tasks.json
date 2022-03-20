@@ -1,0 +1,72 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "npm",
+      "script": "netlify:dev:context-identity",
+      "path": "client/",
+      // "runOptions": { "runOn": "folderOpen" },
+      "problemMatcher": [],
+      "label": "npm: netlify:dev:context-identity - client",
+      "detail": "customized-netlify dev --clientContext ./functions/events/customClientContext.json --identity ./functions/events/token.json"
+    },
+    // {
+    //   "label": "Create terminals",
+    //   "dependsOn": ["Dev", "Second"],
+    //   // Mark as the default build task so cmd/ctrl+shift+b will create them
+    //   "group": {
+    //     "kind": "build",
+    //     "isDefault": true
+    //   },
+    //   // Try start the task on folder open
+    //   "runOptions": {
+    //     "runOn": "folderOpen"
+    //   }
+    // },
+    {
+      // The name that shows up in terminal tab
+      "label": "Dev",
+      // The task will launch a shell
+      "type": "shell",
+      "command": "",
+      // Set the shell type
+      "options": {
+        "shell": {
+          "executable": "bash.exe",
+          "args": []
+        }
+      },
+      // Mark as a background task to avoid the spinner animation on the terminal tab
+      "isBackground": true,
+      "problemMatcher": [],
+      // Create the tasks in a terminal group
+      "presentation": {
+        "group": "my-group"
+      }
+    },
+    {
+      "label": "Second",
+      "type": "shell",
+      "command": "",
+      "options": {
+        "shell": {
+          "executable": "bash.exe",
+          "args": []
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "group": "my-group"
+      }
+    },
+    {
+      "type": "npm",
+      "script": "netlify:serve:context-identity",
+      "path": "client/",
+      "problemMatcher": [],
+      "label": "npm: netlify:serve:context-identity - client",
+      "detail": "customized-netlify functions:serve --clientContext ./functions/events/customClientContext.json --identity ./functions/events/token.json"
+    }
+  ]
+}
