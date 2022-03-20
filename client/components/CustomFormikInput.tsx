@@ -16,6 +16,7 @@ import React, { FC } from 'react';
 interface BaseProps extends FormControlProps {
   name: string;
   label?: string;
+  value?: string | number;
   labelProps?: FormLabelProps;
   helperText?: string;
   helperTextProps?: HelpTextProps;
@@ -25,8 +26,9 @@ interface BaseProps extends FormControlProps {
 type InputControlProps = BaseProps & { inputProps?: InputProps };
 
 const CustomFormikInput: FC<InputControlProps> = (props: InputControlProps) => {
-  const { name, label, inputProps, labelProps, helperText, helperTextProps, errorMessageProps, ...rest } = props;
-  const [field, { error, touched }, helper] = useField(name);
+  const { name, value, label, inputProps, labelProps, helperText, helperTextProps, errorMessageProps, ...rest } = props;
+  const [field, { error, touched }, helper] = useField({ name, value });
+
   return (
     <FormControl isInvalid={!!error && touched} isRequired {...rest}>
       <FormLabel htmlFor={name} {...labelProps}>
