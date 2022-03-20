@@ -22,7 +22,7 @@ const UserProfile: NextPage = () => {
     );
   }, [isReady, user?.user_metadata.full_name, replace]);
 
-  if ((authReady && !user?.token?.access_token) || !transition)
+  if ((authReady && !user?.token?.access_token && user?.faunaTokens?.access.secret) || !transition)
     return <LoadingSpinner>Loading User Profile</LoadingSpinner>;
   else if (transition && user) {
     return <UserSettings user={user} />;
