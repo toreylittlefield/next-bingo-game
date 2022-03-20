@@ -1,25 +1,9 @@
-import {
-  Button,
-  ComponentWithAs,
-  FormControl,
-  FormControlProps,
-  FormErrorMessage,
-  FormErrorMessageProps,
-  FormHelperText,
-  FormLabel,
-  FormLabelProps,
-  Grid,
-  GridItem,
-  HelpTextProps,
-  Input,
-  InputProps,
-  Text,
-} from '@chakra-ui/react';
-import React, { FC, useReducer, useContext } from 'react';
-import netlifyIdentity from 'netlify-identity-widget';
-import { Formik, Form, useField, FormikProps, FieldHookConfig } from 'formik';
+import { Button, Grid, GridItem, Text } from '@chakra-ui/react';
+import React, { useReducer } from 'react';
+import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import { UserProfile } from '../types/types';
+import { CustomFormikInput } from './CustomFormikInput';
 
 type ActionType =
   | { type: 'LOADING' }
@@ -77,33 +61,6 @@ const UserSettings = ({ user }: UserProfile) => {
     dispatch({ type: 'UPDATE_USERNAME', payload: event.target.value });
   };
 
-  interface BaseProps extends FormControlProps {
-    name: string;
-    label?: string;
-    labelProps?: FormLabelProps;
-    helperText?: string;
-    helperTextProps?: HelpTextProps;
-    errorMessageProps?: FormErrorMessageProps;
-  }
-
-  type InputControlProps = BaseProps & { inputProps?: InputProps };
-
-  const CustomInput: FC<InputControlProps> = (props: InputControlProps) => {
-    const { name, label, inputProps, labelProps, helperText, helperTextProps, errorMessageProps, ...rest } = props;
-    const [field, { error, touched }, helper] = useField(name);
-    return (
-      <FormControl isInvalid={!!error && touched} isRequired {...rest}>
-        <FormLabel htmlFor={name} {...labelProps}>
-          {label}
-        </FormLabel>
-
-        <Input {...field} {...inputProps} label={label} name={name} />
-        {error && <FormErrorMessage {...errorMessageProps}>{error}</FormErrorMessage>}
-        {helperText && <FormHelperText {...helperTextProps}>{helperText}</FormHelperText>}
-      </FormControl>
-    );
-  };
-
   return (
     <Grid h="200px" templateRows="repeat(2, 1fr)" templateColumns="repeat(5, 1fr)" gap={4}>
       <GridItem rowSpan={2} colSpan={1} bg="tomato">
@@ -151,7 +108,10 @@ const UserSettings = ({ user }: UserProfile) => {
           }}
         >
           <Form>
-            <CustomInput placeholder="First name" label="First name" name="firstName" />
+            <CustomFormikInput placeholder="User Name" label="User name" name="userName" />
+            <CustomFormikInput placeholder="User Alias" label="User Alias" name="userAlias" />
+            <CustomFormikInput placeholder="User Icon" label="User Icon" name="userIcon" />
+            <CustomFormikInput placeholder="Last Updated" label="Last Updated" name="lastUpdated" />
             <Button type="submit">Save</Button>
           </Form>
         </Formik>
