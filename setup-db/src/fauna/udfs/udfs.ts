@@ -137,24 +137,14 @@ export const logoutDeleteTokensAccountUDF = CreateOrUpdateFunction({
 /** USER MANIPULATION */
 export const createUserUDF = CreateOrUpdateFunction({
   name: createUserUDFname.name,
-  body: Query(
-    Lambda(
-      ['name', 'alias', 'icon', 'lastUpdated'],
-      createUser(Var('name'), Var('alias'), Var('icon'), Var('lastUpdated'))
-    )
-  ),
+  body: Query(Lambda(['name', 'alias', 'icon'], createUser(Var('name'), Var('alias'), Var('icon')))),
   role: serverAccountRole.name,
   // only the server can create the account & user
 });
 
 export const updateUserUDF = CreateOrUpdateFunction({
   name: updateUserUDFname.name,
-  body: Query(
-    Lambda(
-      ['name', 'alias', 'icon', 'lastUpdated'],
-      UpdateUser(Var('name'), Var('alias'), Var('icon'), Var('lastUpdated'))
-    )
-  ),
+  body: Query(Lambda(['name', 'alias', 'icon', 'lastUpdated'], UpdateUser(Var('name'), Var('alias'), Var('icon')))),
   role: Role(functionsBingoBoardsRole.name),
 });
 

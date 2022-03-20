@@ -1,15 +1,32 @@
 import faunadb from 'faunadb';
 import { bingoBoardCollections, usersCollection } from '../collections/collectionnames.js';
 const q = faunadb.query;
-const { Var, Ref, Now, Select, Get, Delete, CurrentIdentity, Let, Create, Collection, Update, Paginate, Documents } = q;
+const {
+  IsBoolean,
+  ToDate,
+  Or,
+  TimeDiff,
+  TimeAdd,
+  TimeSubtract,
+  If,
+  LT,
+  Var,
+  Ref,
+  Now,
+  Select,
+  Get,
+  Delete,
+  CurrentIdentity,
+  Let,
+  Create,
+  Collection,
+  Update,
+  Paginate,
+  Documents,
+} = q;
 
 /** USER FUNCTIONS */
-export function createUser(
-  name: faunadb.Expr,
-  alias: faunadb.Expr,
-  icon: faunadb.Expr,
-  lastUpdated: faunadb.Expr
-): faunadb.Expr {
+export function createUser(name: faunadb.Expr, alias: faunadb.Expr, icon: faunadb.Expr): faunadb.Expr {
   const FQLStatement = Let(
     {
       // accountRef: CurrentIdentity(),
@@ -19,7 +36,7 @@ export function createUser(
           name: name,
           alias: alias,
           icon: icon,
-          lastUpdated: lastUpdated,
+          lastUpdated: false,
         },
       }),
     },
@@ -28,12 +45,30 @@ export function createUser(
   return FQLStatement;
 }
 
-export function UpdateUser(
-  name: faunadb.Expr,
-  alias: faunadb.Expr,
-  icon: faunadb.Expr,
-  lastUpdated: faunadb.Expr
-): faunadb.Expr {
+export function UpdateUser(name: faunadb.Expr, alias: faunadb.Expr, icon: faunadb.Expr): faunadb.Expr {
+  const FQLStatementUpdate = Let(
+    {
+      userRef: Ref(Collection('users'), '326203504610771537'),
+      userProfile: Get(Var('userRef')),
+      lastUpdated: Select(['data', 'lastUpdated'], Var('userProfile')),
+      isBool: IsBoolean(Var('lastUpdated')),
+      nowDate: ToDate(TimeAdd(Now(), 0, 'days')),
+      fakeUserDate: ToDate(TimeSubtract(Now(), 0, 'days')),
+      compareDates: TimeDiff(If(Var('isBool'), Var('fakeUserDate'), ToDate(Var('lastUpdated'))), Var('nowDate'), 'day'),
+    },
+    {
+      result: If(
+        Or(Var('isBool'), LT(120, Var('compareDates'))),
+        Update(Var('userRef'), {
+          data: {
+            lastUpdated: ToDate(Now()),
+          },
+        }),
+        false
+      ),
+      compareDates: Var('compareDates'),
+    }
+  );
   const FQLStatement = Let(
     {
       accountRef: CurrentIdentity(),
@@ -43,13 +78,13 @@ export function UpdateUser(
           name: name,
           alias: alias,
           icon: icon,
-          lastUpdated: Now(),
+          lastUpdated: ToDate(Now()),
         },
       }),
     },
     Var('updateUser')
   );
-  return FQLStatement;
+  return FQLStatementUpdate;
 }
 /** -----> END USER FUNCTIONS */
 
