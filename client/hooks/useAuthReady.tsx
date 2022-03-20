@@ -2,14 +2,14 @@ import Router from 'next/router';
 import { Dispatch, SetStateAction, useContext, useEffect, useState } from 'react';
 import AuthContext from '../stores/netlifyIdentityContext';
 import netlifyIdentity from 'netlify-identity-widget';
-import type { NetlifyAppMetaData } from '../types/types';
+import type { LoggedInUser } from '../types/types';
 
 const useAuthReady = (
   timer: number = 300,
 ): [
   transition: boolean,
   setTransition: Dispatch<SetStateAction<boolean>>,
-  user: NetlifyAppMetaData | null,
+  user: LoggedInUser | null,
   authReady: boolean,
 ] => {
   const { user, authReady } = useContext(AuthContext);
