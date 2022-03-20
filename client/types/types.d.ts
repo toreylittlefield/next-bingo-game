@@ -161,7 +161,7 @@ export interface FaunaLoggedInResponse {
     name: string;
     alias: string;
     icon: string;
-    lastUpdated: string;
+    lastUpdated: false | { value: string };
   };
   tokens: {
     refresh: {
