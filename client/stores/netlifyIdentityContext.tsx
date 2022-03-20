@@ -31,7 +31,7 @@ export const AuthContextProvider = ({ children }: Props) => {
   useEffect(() => {
     if (!user?.user_metadata.full_name || !user?.token?.access_token || !isReady) return;
 
-    if (asPath === '/' && urlHistoryRef.current === '/login') {
+    if (asPath === '/' && urlHistoryRef.current === '/login' && user.faunaUser?.lastUpdated === false) {
       push({
         pathname: '/userprofile/me/[me]',
         query: { userprofile: user.user_metadata.full_name },
