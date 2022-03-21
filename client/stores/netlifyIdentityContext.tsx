@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useRef } from 'react';
 import netlifyIdentity from 'netlify-identity-widget';
-import type { FaunaLoggedInResponse, LoggedInUser, NetlifyAppMetaData } from '../types/types';
+import type { FaunaLoggedInApiResponse, LoggedInUser, NetlifyAppMetaData } from '../types/types';
 import Router, { useRouter } from 'next/router';
 import { getRandomUserName } from '../lib/utils/utils';
 import { apiRequest } from '../lib/api/apiservice';
@@ -26,19 +26,6 @@ export const AuthContextProvider = ({ children }: Props) => {
   const [user, setUser] = useState<LoggedInUser | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const { push, isReady, asPath } = useRouter();
-  const urlHistoryRef = useRef<string>();
-
-  useEffect(() => {
-    if (!user?.user_metadata.full_name || !user?.token?.access_token || !isReady) return;
-
-    if (asPath === '/' && urlHistoryRef.current === '/login' && user.faunaUser?.lastUpdated === false) {
-      push({
-        pathname: '/userprofile/me/[me]',
-        query: { userprofile: user.user_metadata.full_name },
-      });
-    }
-    urlHistoryRef.current = asPath;
-  }, [isReady, push, asPath, user]);
 
   useEffect(() => {
     /** fires when users logs in or visits page or has gotrue in local storage */
@@ -47,15 +34,22 @@ export const AuthContextProvider = ({ children }: Props) => {
       const user = u as NetlifyAppMetaData;
       const access_token = user.token?.access_token;
       if (access_token) {
-        const res = await apiRequest<FaunaLoggedInResponse>({
+        const res = await apiRequest<FaunaLoggedInApiResponse>({
           url: '/api/fauna/auth/token',
           identityAccessToken: access_token,
           searchParams: { grantType: 'login' },
-        });
+        }).catch((err) => console.error('error #%d', err));
         if (res) {
           setUser({ ...user, ...res });
         } else {
           setUser(user);
+        }
+        if (res?.faunaUser?.lastUpdated === false) {
+          console.log('navigating to user settings...');
+          Router.push({
+            pathname: '/userprofile/me/[me]',
+            query: { userprofile: user.user_metadata.full_name },
+          });
         }
       }
       netlifyIdentity.close();
