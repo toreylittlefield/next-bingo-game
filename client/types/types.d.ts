@@ -156,6 +156,25 @@ export interface FaunaCreateAccountResponse {
   };
 }
 
+export type UpdateFaunaSuccess = {
+  data: {
+    name: string;
+    alias: string;
+    icon: string;
+    lastUpdated: { value: string };
+  };
+};
+
+export type UpdateFaunaUserResponse = {
+  result: false | UpdateFaunaSuccess;
+  compareDates: number;
+};
+
+export type FaunaUpdateUserApiResponse = UpdateFaunaUserResponse | undefined;
+
+export type FaunaLoggedInApiResponse =
+  | { faunaTokens: FaunaLoggedInResponse['tokens']; faunaUser: FaunaLoggedInResponse['user'] }
+  | undefined;
 export interface FaunaLoggedInResponse {
   user: {
     name: string;
@@ -262,4 +281,12 @@ interface RefreshTokenData {
 interface AccessTokenData {
   accessToken: string;
   expiration: string;
+}
+
+export interface FaunaUpdateUserReqBody {
+  user: string;
+  alias: string;
+  icon: string;
+  access_token: string;
+  lastUpdated: string | false;
 }
