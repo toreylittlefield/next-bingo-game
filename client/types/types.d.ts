@@ -161,7 +161,7 @@ export type UpdateFaunaSuccess = {
     name: string;
     alias: string;
     icon: string;
-    lastUpdated: { value: string };
+    lastUpdated: { '@date': string };
   };
 };
 
@@ -180,7 +180,7 @@ export interface FaunaLoggedInResponse {
     name: string;
     alias: string;
     icon: string;
-    lastUpdated: false | { value: string };
+    lastUpdated: false | { '@date': string };
   };
   tokens: {
     refresh: {
