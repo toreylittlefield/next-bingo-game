@@ -25,7 +25,7 @@ addMethod(mixed, 'isDayDiffGT120', function (message: string) {
 
 export const updateUserYupSchema = object().shape({
   name: string().min(3).max(30).required(),
-  alias: string().min(3).max(20).required(),
+  alias: string().min(3).max(30).required(),
   icon: string().url().required(),
   access_token: string().required(),
   lastUpdated: date().isDayDiffGT120('Day difference between dates must be >= 120 days').required(),
