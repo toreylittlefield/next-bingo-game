@@ -2,13 +2,28 @@ import { Button, Grid, GridItem, Text } from '@chakra-ui/react';
 import React from 'react';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
-import type { UserProfile } from '../types/types';
+import type { FaunaUpdateUserReqBody, UserProfile } from '../types/types';
 import { CustomFormikInput } from './CustomFormikInput';
 import Image from 'next/image';
+import { updateUserYupSchema } from '../lib/yup-schemas/yup-schemas';
 
 const UserSettings = ({ user }: UserProfile) => {
   if (!user.faunaUser) return null;
+
   const { name, alias, icon, lastUpdated } = user.faunaUser;
+
+  const allowEdit = () => {
+    if (lastUpdated && lastUpdated['@date']) {
+      const today = new Date().getTime();
+      const last = new Date(lastUpdated['@date']).getTime();
+      const diff = (last - today) / (1000 * 60 * 60 * 24);
+      return diff > 120;
+    }
+    return true;
+  };
+
+  const canEdit = allowEdit();
+
   return (
     <Grid h="200px" templateRows="repeat(2, 1fr)" templateColumns="repeat(5, 1fr)" gap={4}>
       <GridItem rowSpan={2} colSpan={1} bg="tomato">
@@ -20,23 +35,21 @@ const UserSettings = ({ user }: UserProfile) => {
             name,
             alias,
             icon,
-            lastUpdated: lastUpdated ? lastUpdated.value : 'Never',
+            lastUpdated: lastUpdated ? lastUpdated['@date'] : 'Never',
           }}
-          validationSchema={Yup.object({
-            user: Yup.string().min(5, 'Must be 15 characters or less').required('Required'),
-            alias: Yup.string().max(20, 'Must be 20 characters or less').required('Required'),
-            icon: Yup.string().url('Must Be A Valid Image URL').required('Required'),
-            lastUpdated: Yup.string().required('Required'),
-          })}
+          validationSchema={canEdit === true ? updateUserYupSchema : undefined}
           onSubmit={async (values, { setSubmitting }) => {
             console.log('submit!');
             alert(JSON.stringify(values, null, 2));
+            const payload: FaunaUpdateUserReqBody = { ...values, access_token: user.token?.access_token ?? '' };
             try {
               const res = await fetch('/api/fauna/updateuserprofile', {
                 headers: {
+                  'Content-Type': 'application/json',
                   Authorization: `Bearer ${user.token?.access_token}`,
                 },
                 method: 'PATCH',
+                body: JSON.stringify(payload),
               });
               if (res.ok) {
                 const json = await res.json();
@@ -51,11 +64,13 @@ const UserSettings = ({ user }: UserProfile) => {
           }}
         >
           <Form>
-            <CustomFormikInput placeholder="User Name" label="User name" name="user" />
-            <CustomFormikInput placeholder="User Alias" label="User Alias" name="alias" />
-            <CustomFormikInput placeholder="User Icon" label="User Icon" name="icon" />
-            <CustomFormikInput placeholder="Last Updated" label="Last Updated" name="lastUpdated" />
-            <Button type="submit">Save</Button>
+            <CustomFormikInput isReadOnly={!canEdit} placeholder="Full Name" label="Full name" name="name" />
+            <CustomFormikInput isReadOnly={!canEdit} placeholder="User Alias" label="User Alias" name="alias" />
+            <CustomFormikInput isReadOnly={!canEdit} placeholder="User Avatar" label="User Avatar" name="icon" />
+            <CustomFormikInput isReadOnly placeholder="Last Updated" label="Last Updated" name="lastUpdated" />
+            <Button disabled={!canEdit} type="submit">
+              Save
+            </Button>
           </Form>
         </Formik>
       </GridItem>
