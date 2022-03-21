@@ -1,5 +1,3 @@
-import { NETLIFY_SITE_URL } from '../constants/constants';
-
 export type TokenParams =
   | { grantType: 'access_token' }
   | { grantType: 'refresh_token' }
@@ -19,19 +17,19 @@ export async function apiRequest<ApiResponse>({
   options = {},
 }: ApiRequestOptions): Promise<ApiResponse | undefined> {
   try {
-    let newURL = new URL(url, process.env.NODE_ENV === 'production' ? NETLIFY_SITE_URL : 'http://localhost:8888');
+    let newURL: string = url;
     const reqOptions = {
       ...options,
       method: method,
     };
     if (searchParams) {
       const params = new URLSearchParams(searchParams);
-      newURL.search = params.toString();
+      newURL = `${newURL}?${params.toString()}`;
     }
     if (identityAccessToken) {
       reqOptions.headers = { ...reqOptions.headers, Authorization: `Bearer ${identityAccessToken}` };
     }
-    const res = await fetch(newURL.toString(), reqOptions);
+    const res = await fetch(newURL, reqOptions);
     if (res.ok) {
       const json = await res.json();
       return json;
