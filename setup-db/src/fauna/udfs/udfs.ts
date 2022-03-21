@@ -144,7 +144,7 @@ export const createUserUDF = CreateOrUpdateFunction({
 
 export const updateUserUDF = CreateOrUpdateFunction({
   name: updateUserUDFname.name,
-  body: Query(Lambda(['name', 'alias', 'icon', 'lastUpdated'], UpdateUser(Var('name'), Var('alias'), Var('icon')))),
+  body: Query(Lambda(['name', 'alias', 'icon'], UpdateUser(Var('name'), Var('alias'), Var('icon')))),
   role: Role(functionsBingoBoardsRole.name),
 });
 
