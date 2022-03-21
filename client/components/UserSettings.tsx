@@ -36,6 +36,7 @@ const UserSettings = ({ user }: UserProfile) => {
                 headers: {
                   Authorization: `Bearer ${user.token?.access_token}`,
                 },
+                method: 'PATCH',
               });
               if (res.ok) {
                 const json = await res.json();
