@@ -23,6 +23,7 @@ const LogOut: NextPage = () => {
           searchParams: { grantType: 'logout' },
         });
         setTransition(true);
+        localStorage.removeItem('gotrue');
         netlifyIdentity.logout();
         Router.push('/');
       }
