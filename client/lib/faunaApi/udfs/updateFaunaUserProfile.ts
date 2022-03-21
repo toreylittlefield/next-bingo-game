@@ -4,11 +4,11 @@ const { Call } = faunadb.query;
 
 export async function updateFaunaUserProfile(
   faunaAccessClient: faunadb.Client,
-  { user, alias, icon }: { user: string; alias: string; icon: string },
+  { name, alias, icon }: { name: string; alias: string; icon: string },
 ): Promise<FaunaUpdateUserApiResponse> {
   try {
     const { compareDates, result } = (await faunaAccessClient.query(
-      Call('update_user', [user, alias, icon]),
+      Call('update_user', [name, alias, icon]),
     )) as UpdateFaunaUserResponse;
     return { result, compareDates };
   } catch (error) {

@@ -284,7 +284,7 @@ interface AccessTokenData {
 }
 
 export interface FaunaUpdateUserReqBody {
-  user: string;
+  name: string;
   alias: string;
   icon: string;
   access_token: string;

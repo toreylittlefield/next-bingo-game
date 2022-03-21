@@ -24,7 +24,7 @@ addMethod(mixed, 'isDayDiffGT120', function (message: string) {
 });
 
 export const updateUserYupSchema = object().shape({
-  user: string().min(3).max(30).required(),
+  name: string().min(3).max(30).required(),
   alias: string().min(3).max(20).required(),
   icon: string().url().required(),
   access_token: string().required(),
