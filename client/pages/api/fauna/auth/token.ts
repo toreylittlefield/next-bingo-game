@@ -8,7 +8,6 @@ import { sign } from 'jsonwebtoken';
 import faunadb from 'faunadb';
 import { getFaunaRefreshToken } from '../../../../lib/faunaApi/udfs/getFaunaRefreshToken';
 import { getFaunaAccessToken } from '../../../../lib/faunaApi/udfs/getFaunaAccessToken';
-import { serverClient } from '../../../../lib/faunaApi/server';
 import { logoutFaunaAccount } from '../../../../lib/faunaApi/udfs/logoutFaunaAccount';
 import verifyFaunaRefreshToken from '../../../../lib/faunaApi/verifyFauna';
 
