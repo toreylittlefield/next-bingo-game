@@ -1,7 +1,7 @@
 // import yup from '../../types/yup-extend';
 import * as yup from 'yup';
 import { AnyObject, Maybe } from 'yup/lib/types';
-
+const { addMethod, mixed, object, string, date, array } = yup;
 declare module 'yup' {
   interface DateSchema<
     TType extends Maybe<Date> = Date | undefined,
@@ -11,8 +11,6 @@ declare module 'yup' {
     isDayDiffGT120(message: string): DateSchema<TType, TContext>;
   }
 }
-
-const { addMethod, mixed, object, string, date } = yup;
 
 addMethod(mixed, 'isDayDiffGT120', function (message: string) {
   return this.test('isDayDiffGT120', message, function (value) {
@@ -30,3 +28,10 @@ export const updateUserYupSchema = object().shape({
   access_token: string().required(),
   lastUpdated: date().isDayDiffGT120('Day difference between dates must be >= 120 days').required(),
 });
+
+export const createBoardYupSchema = object()
+  .strict(true)
+  .shape({
+    board: array().of(string().min(1).max(100)).length(25).required(),
+    title: string().min(3).max(50).required(),
+  });
