@@ -290,3 +290,14 @@ export interface FaunaUpdateUserReqBody {
   access_token: string;
   lastUpdated: string | false;
 }
+
+interface BoardPiece {
+  id: string;
+  text: string;
+  position: string;
+}
+export interface FaunaCreateBoardRequestBody {
+  access_token: string;
+  title: string;
+  board: Array<string>;
+}
