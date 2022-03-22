@@ -12,10 +12,10 @@ function unAuthResponse(message: string = 'Token Required', status: number = 401
 }
 
 const authIdentityMiddleware: NextMiddleware = async (req, event) => {
-  const token = req.headers.get('authorization');
-  if (!token) return unAuthResponse();
+  const netlifyIdentityAccessToken = req.headers.get('authorization');
+  if (!netlifyIdentityAccessToken) return unAuthResponse();
 
-  const [_, access_token] = token.split(' ');
+  const [_, access_token] = netlifyIdentityAccessToken.split(' ');
   let user = await verifyIdentity(access_token);
 
   if (!user || !user.id || !user.app_metadata.roles.includes(NETLIFY_ROLE)) {
