@@ -20,10 +20,6 @@ const handler: NextApiHandler = async (req, res) => {
     const isValidSchema = await createBoardYupSchema.validate(payload);
     if (!isValidSchema) return res.status(400).send('Not a valid board bitttchhhh');
 
-    // get board from payload
-    // verify board with the yup schema
-    // if valid call fauna db create board function (UDF)
-    // return res
     const faunaAccessClient = new faunadb.Client({
       secret: payload.access_token,
       domain: 'db.fauna.com',
