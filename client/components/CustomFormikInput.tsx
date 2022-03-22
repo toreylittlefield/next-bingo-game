@@ -9,12 +9,14 @@ import {
   FormLabelProps,
   HelpTextProps,
   InputProps,
+  forwardRef,
 } from '@chakra-ui/react';
 import { useField } from 'formik';
 import React, { FC } from 'react';
 
 interface BaseProps extends FormControlProps {
   name: string;
+  ref?: React.MutableRefObject<any>;
   label?: string;
   value?: string | number;
   labelProps?: FormLabelProps;
@@ -25,21 +27,24 @@ interface BaseProps extends FormControlProps {
 
 type InputControlProps = BaseProps & { inputProps?: InputProps };
 
-const CustomFormikInput: FC<InputControlProps> = (props: InputControlProps) => {
-  const { name, value, label, inputProps, labelProps, helperText, helperTextProps, errorMessageProps, ...rest } = props;
-  const [field, { error, touched }, helper] = useField({ name, value });
+const CustomFormikInput: FC<InputControlProps> = forwardRef<InputControlProps, 'div'>(
+  (props: InputControlProps, ref) => {
+    const { name, value, label, inputProps, labelProps, helperText, helperTextProps, errorMessageProps, ...rest } =
+      props;
+    const [field, { error, touched }, helper] = useField({ name, value });
 
-  return (
-    <FormControl isInvalid={!!error && touched} isRequired {...rest}>
-      <FormLabel htmlFor={name} {...labelProps}>
-        {label}
-      </FormLabel>
+    return (
+      <FormControl isInvalid={!!error && touched} {...rest}>
+        <FormLabel htmlFor={name} {...labelProps}>
+          {label}
+        </FormLabel>
 
-      <Input {...field} {...inputProps} label={label} name={name} />
-      {error && <FormErrorMessage {...errorMessageProps}>{error}</FormErrorMessage>}
-      {helperText && <FormHelperText {...helperTextProps}>{helperText}</FormHelperText>}
-    </FormControl>
-  );
-};
+        <Input ref={ref} {...field} {...inputProps} label={label} name={name} />
+        {error && <FormErrorMessage {...errorMessageProps}>{error}</FormErrorMessage>}
+        {helperText && <FormHelperText {...helperTextProps}>{helperText}</FormHelperText>}
+      </FormControl>
+    );
+  },
+);
 
 export { CustomFormikInput };
