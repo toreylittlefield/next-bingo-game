@@ -4,24 +4,15 @@ import { decodeNFJWTAccessToken } from '../../../../lib/auth/decodeAuthJWT';
 import { FAUNA_JWT_SECRET, PWS } from '../../../../lib/constants/constants';
 import { serialize } from 'cookie';
 import { loginFaunaAccount } from '../../../../lib/faunaApi/udfs/loginFaunaAccount';
-import { sign, verify } from 'jsonwebtoken';
+import { sign } from 'jsonwebtoken';
 import faunadb from 'faunadb';
 import { getFaunaRefreshToken } from '../../../../lib/faunaApi/udfs/getFaunaRefreshToken';
 import { getFaunaAccessToken } from '../../../../lib/faunaApi/udfs/getFaunaAccessToken';
 import { serverClient } from '../../../../lib/faunaApi/server';
 import { logoutFaunaAccount } from '../../../../lib/faunaApi/udfs/logoutFaunaAccount';
+import verifyFaunaRefreshToken from '../../../../lib/faunaApi/verifyFauna';
 
 type GrantTypes = 'access_token' | 'refresh_token' | 'login' | 'logout';
-
-async function verifyFaunaRefreshToken(faunaRefreshToken: string) {
-  if (faunaRefreshToken) {
-    var token = (await verify(faunaRefreshToken, FAUNA_JWT_SECRET, (error, payload) => {
-      if (error) return undefined;
-      return payload;
-    })) as string | undefined;
-  }
-  return token;
-}
 
 async function createFaunaRefreshJWTCookie(refreshToken: string, ttl: string) {
   const faunaRefreshJWT = await sign(refreshToken, FAUNA_JWT_SECRET);
@@ -54,16 +45,15 @@ const handler: NextApiHandler = async (req, res) => {
       return res.status(400).send('Missing Query String GrantType And/Or Must Be A GET OR POST Request');
     }
 
-    const token = req.headers.authorization;
-    if (!token) return res.status(401).send('No Access Token');
+    const netlifyIdentityAccessToken = req.headers.authorization;
+    if (!netlifyIdentityAccessToken) return res.status(401).send('No Access Token');
 
-    const decoded = decodeNFJWTAccessToken(token);
+    const decoded = decodeNFJWTAccessToken(netlifyIdentityAccessToken);
     if (!decoded) return res.status(400).send('Invalid Token');
 
     switch (grantType as GrantTypes) {
       case 'logout': {
         const { fn_tkn } = req.cookies;
-
         const refreshToken = await verifyFaunaRefreshToken(fn_tkn);
         if (!refreshToken) return res.status(401).send('Not Signed / Invalid Token');
 
