@@ -6,7 +6,7 @@ import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 
 const UserProfile: NextPage = () => {
-  const [transition, setTransition, user, authReady] = useAuthReady();
+  const [transition, setTransition, user, authReady, setUser] = useAuthReady();
   const router = useRouter();
   const { isReady, replace } = router;
 
@@ -22,10 +22,10 @@ const UserProfile: NextPage = () => {
     );
   }, [isReady, user?.user_metadata.full_name, replace]);
 
-  if ((authReady && !user?.token?.access_token && user?.faunaTokens?.access.secret) || !transition)
+  if ((authReady && !user?.token?.access_token && user?.fauna_access_token?.secret) || !transition)
     return <LoadingSpinner>Loading User Profile</LoadingSpinner>;
   else if (transition && user) {
-    return <UserSettings user={user} />;
+    return <UserSettings user={user} setUser={setUser} />;
   }
   return null;
 };
