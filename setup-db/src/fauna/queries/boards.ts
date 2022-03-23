@@ -62,6 +62,9 @@ export function UpdateUser(name: faunadb.Expr, alias: faunadb.Expr, icon: faunad
         Update(Var('userRef'), {
           data: {
             lastUpdated: ToDate(Now()),
+            name: Var('name'),
+            alias: Var('alias'),
+            icon: Var('icon'),
           },
         }),
         false
