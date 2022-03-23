@@ -13,7 +13,7 @@ declare module 'netlify-identity-widget' {
 
 export interface LoggedInUser extends NetlifyAppMetaData {
   faunaUser?: FaunaLoggedInResponse['user'];
-  faunaTokens?: { access: FaunaLoggedInResponse['tokens']['access'] };
+  fauna_access_token?: FaunaLoggedInResponse['tokens']['access'];
 }
 
 export type UserProfile = {
@@ -287,7 +287,7 @@ export interface FaunaUpdateUserReqBody {
   name: string;
   alias: string;
   icon: string;
-  access_token: string;
+  fauna_access_token: string;
   lastUpdated: string | false;
 }
 
