@@ -48,7 +48,8 @@ export function createUser(name: faunadb.Expr, alias: faunadb.Expr, icon: faunad
 export function UpdateUser(name: faunadb.Expr, alias: faunadb.Expr, icon: faunadb.Expr): faunadb.Expr {
   const FQLStatementUpdate = Let(
     {
-      userRef: Ref(Collection('users'), '326203504610771537'),
+      accountRef: CurrentIdentity(),
+      userRef: Select(['data', 'user'], Get(Var('accountRef'))),
       userProfile: Get(Var('userRef')),
       lastUpdated: Select(['data', 'lastUpdated'], Var('userProfile')),
       isBool: IsBoolean(Var('lastUpdated')),
