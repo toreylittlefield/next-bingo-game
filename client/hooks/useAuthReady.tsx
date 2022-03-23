@@ -18,11 +18,11 @@ const useAuthReady = (
   useEffect(() => {
     // if (!authReady) return;
     let timerID = setTimeout(() => {
-      if (netlifyIdentity.currentUser() === null || !user?.token?.access_token) {
+      if (netlifyIdentity.currentUser() === null || !user?.token?.access_token || !user.fauna_access_token?.secret) {
         Router.push('/');
         netlifyIdentity.open();
         return;
-      } else if (netlifyIdentity.currentUser() != null && user.token.access_token != null) {
+      } else if (netlifyIdentity.currentUser() && user.token.access_token && user.fauna_access_token?.secret) {
         setTransition(true);
       }
     }, timer);
