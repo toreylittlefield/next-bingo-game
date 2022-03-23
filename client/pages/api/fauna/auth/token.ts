@@ -87,7 +87,10 @@ const handler: NextApiHandler = async (req, res) => {
         return res
           .setHeader('set-cookie', fn_tknCookie)
           .status(200)
-          .json({ faunaUser, access_token: { secret: faunaTokens.access.secret, ttl: faunaTokens.access.ttl.value } });
+          .json({
+            faunaUser,
+            fauna_access_token: { secret: faunaTokens.access.secret, ttl: faunaTokens.access.ttl.value },
+          });
       }
       case 'access_token': {
         const { fn_tkn } = req.cookies;
@@ -106,7 +109,7 @@ const handler: NextApiHandler = async (req, res) => {
 
         const { access } = tokens.faunaTokens;
 
-        return res.status(200).json({ access_token: { secret: access.secret, ttl: access.ttl.value } });
+        return res.status(200).json({ fauna_access_token: { secret: access.secret, ttl: access.ttl.value } });
       }
       case 'refresh_token': {
         const { fn_tkn } = req.cookies;
@@ -132,7 +135,7 @@ const handler: NextApiHandler = async (req, res) => {
         return res
           .setHeader('set-cookie', fn_tknCookie)
           .status(200)
-          .json({ access_token: { secret: access.secret, ttl: access.ttl.value } });
+          .json({ fauna_access_token: { secret: access.secret, ttl: access.ttl.value } });
       }
       default: {
         return res.status(400).send('Not A Valid GrantType');
