@@ -2,7 +2,7 @@
 import faunadb from 'faunadb'; /* Import faunaDB sdk */
 import type { NextApiHandler } from 'next';
 import { updateFaunaUserProfile } from '../../../../lib/faunaApi/udfs/updateFaunaUserProfile';
-import { updateUserYupSchema } from '../../../../lib/yup-schemas/yup-schemas';
+import { updateUserYupSchemaFrontend } from '../../../../lib/yup-schemas/yup-schemas';
 import type { FaunaUpdateUserReqBody } from '../../../../types/types';
 
 /* export our lambda function as named "handler" export */
@@ -12,7 +12,7 @@ const handler: NextApiHandler = async (req, res) => {
 
     const payload: FaunaUpdateUserReqBody = req.body;
 
-    const faunaAccessToken = payload.access_token;
+    const faunaAccessToken = payload.fauna_access_token;
 
     if (req.method !== 'PATCH') return res.status(405).send('Method not allowed, use PATCH');
 
@@ -24,14 +24,14 @@ const handler: NextApiHandler = async (req, res) => {
     if (payload.lastUpdated === false) payload.lastUpdated = '2021/10/13';
     console.dir(payload);
 
-    const isValid = await updateUserYupSchema.validate(payload);
+    const isValid = await updateUserYupSchemaFrontend.validate(payload);
 
     if (!isValid) return res.status(418).send('Invalid payload items');
 
     const faunaAccessClient = new faunadb.Client({
       domain: 'db.fauna.com',
       scheme: 'https',
-      secret: payload.access_token,
+      secret: payload.fauna_access_token,
     });
 
     const faunaRes = await updateFaunaUserProfile(faunaAccessClient, payload);
