@@ -291,6 +291,20 @@ export interface FaunaUpdateUserReqBody {
   lastUpdated: string | false;
 }
 
+export interface FaunaUpdateSuccessResponse {
+  compareDates: number;
+  result: {
+    data: {
+      alias: string;
+      icon: string;
+      lastUpdated: {
+        '@date': string;
+      };
+      name: string;
+    };
+  };
+}
+
 interface BoardPiece {
   id: string;
   text: string;
