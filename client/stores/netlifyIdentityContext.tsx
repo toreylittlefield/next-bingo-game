@@ -5,7 +5,7 @@ import Router, { useRouter } from 'next/router';
 import { getRandomUserName } from '../lib/utils/utils';
 import { apiRequest } from '../lib/api/apiservice';
 interface AuthInterface {
-  user: NetlifyAppMetaData | null;
+  user: LoggedInUser | null;
   login: () => void;
   logout: () => void;
   authReady: boolean;
