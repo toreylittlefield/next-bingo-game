@@ -9,6 +9,7 @@ interface AuthInterface {
   login: () => void;
   logout: () => void;
   authReady: boolean;
+  setUser: (value: React.SetStateAction<LoggedInUser | null>) => void;
 }
 
 const AuthContext = createContext<AuthInterface>({
@@ -16,6 +17,7 @@ const AuthContext = createContext<AuthInterface>({
   login: () => {},
   logout: () => {},
   authReady: false,
+  setUser: () => {},
 });
 
 interface Props {
@@ -40,6 +42,7 @@ export const AuthContextProvider = ({ children }: Props) => {
           searchParams: { grantType: 'login' },
         }).catch((err) => console.error('error #%d', err));
         if (res) {
+          console.dir(res, { colors: true });
           setUser({ ...user, ...res });
         } else {
           setUser(user);
@@ -93,7 +96,7 @@ export const AuthContextProvider = ({ children }: Props) => {
 
   const refreshFaunaToken = async () => {};
 
-  const context = { user, login, logout, authReady };
+  const context = { user, login, logout, authReady, setUser };
 
   return <AuthContext.Provider value={context}>{children}</AuthContext.Provider>;
 };
