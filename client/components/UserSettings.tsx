@@ -1,29 +1,59 @@
 import {
   Button,
   Grid,
-  GridItem,
   Text,
   Flex,
   FormControl,
   FormLabel,
   Heading,
-  Input,
   Stack,
   useColorModeValue,
-  HStack,
   Avatar,
   AvatarBadge,
   IconButton,
   Center,
+  ButtonProps,
+  Alert,
+  AlertIcon,
 } from '@chakra-ui/react';
 import React, { useRef, useState } from 'react';
-import { Formik, Form, FormikHelpers, FormikValues } from 'formik';
-import type { FaunaUpdateUserReqBody, LoggedInUser } from '../types/types';
+import { Formik, Form, FormikHelpers } from 'formik';
+import type { FaunaUpdateSuccessResponse, FaunaUpdateUserReqBody, LoggedInUser } from '../types/types';
 import { CustomFormikInput } from './CustomFormikInput';
-import Image from 'next/image';
 import { updateUserYupSchemaFrontend } from '../lib/yup-schemas/yup-schemas';
 import { AiFillCloseCircle } from 'react-icons/ai';
 import LoadingSpinner from './LoadingSpinner';
+import { PopoverMenu } from './PopoverMenu';
+
+type GenericButtonProps = {
+  buttonText?: string;
+  buttonProps?: ButtonProps;
+};
+
+type FormValues = { lastUpdated: string; name: string; alias: string; icon: string };
+
+const ButtonClose = ({ buttonProps, buttonText }: GenericButtonProps) => (
+  <Button {...buttonProps} variant="outline">
+    {buttonText ?? 'Cancel'}
+  </Button>
+);
+
+const ButtonSubmit = ({ buttonProps, buttonText }: GenericButtonProps) => (
+  <Button {...buttonProps} colorScheme="red">
+    {buttonText ?? 'Apply'}
+  </Button>
+);
+
+const ConfirmationMessage = () => {
+  return (
+    <>
+      <Text fontStyle={'normal'}>Are you sure you want to update your profile?</Text>
+      <Text as="em">
+        You can only do this once every <strong>120 days</strong>
+      </Text>
+    </>
+  );
+};
 
 const UserSettings = ({
   user,
@@ -35,17 +65,29 @@ const UserSettings = ({
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const initialFormState = user.faunaUser ? { ...user.faunaUser } : undefined;
   const [formState, setFormState] = useState(initialFormState);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   if (!formState?.name) return null;
 
-  const { name, alias, icon, lastUpdated } = formState;
+  const { icon, lastUpdated } = formState;
 
-  const allowEdit = () => {
+  const countDays = (() => {
     if (lastUpdated && lastUpdated['@date']) {
       const today = new Date().getTime();
       const last = new Date(lastUpdated['@date']).getTime();
       const diff = (last - today) / (1000 * 60 * 60 * 24);
-      return diff > 120;
+      return diff;
+    }
+    return 121;
+  })();
+
+  const daysRemaining = parseInt((120 - countDays).toString(), 10);
+
+  const allowEdit = () => {
+    if (lastUpdated && lastUpdated['@date']) {
+      return countDays > 120;
     }
     return true;
   };
@@ -90,18 +132,19 @@ const UserSettings = ({
     }
   };
 
-  type FormValues = { lastUpdated: string; name: string; alias: string; icon: string };
+  const handleOpenPopover = () => setIsOpen((prev) => !prev);
+  const handleClosePopover = () => setIsOpen(false);
 
   const handleFormSubmit: (
     values: FormValues,
     formikHelpers: FormikHelpers<FormValues>,
   ) => void | Promise<any> = async (values, { setSubmitting }) => {
-    console.dir(user, { colors: true });
+    if (isError) setIsError(false);
+    if (isSuccess) setIsError(false);
     const payload: FaunaUpdateUserReqBody = {
       ...values,
       fauna_access_token: user.fauna_access_token?.secret ?? '',
     };
-    console.dir(payload, { colors: true });
     try {
       const res = await fetch('/api/fauna/userprofile/updateuserprofile', {
         headers: {
@@ -112,162 +155,194 @@ const UserSettings = ({
         body: JSON.stringify(payload),
       });
       if (res.ok) {
-        const json = await res.json();
+        const json: FaunaUpdateSuccessResponse = await res.json();
+        setFormState({ ...json.result.data });
+        setIsSuccess(true);
         setUser((prev) => {
           if (!prev?.faunaUser) return prev;
           return {
             ...prev,
             faunaUser: {
-              ...prev.faunaUser,
+              ...json.result.data,
             },
           };
         });
-        console.log({ json });
       } else {
         const { status, statusText } = res;
         throw Error(JSON.stringify({ status, statusText }));
       }
     } catch (error) {
       console.error(error);
+      setIsError(true);
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    // <Grid h="200px" templateRows="repeat(1, 1fr)" templateColumns="repeat(1, 1fr)" gap={4}>
-    <Formik
-      initialValues={{
-        ...formState,
-        lastUpdated: formState.lastUpdated ? formState.lastUpdated['@date'] : '2021/01/01',
-      }}
-      validationSchema={canEdit === true ? updateUserYupSchemaFrontend : undefined}
-      onSubmit={handleFormSubmit}
-    >
-      {({ setFieldValue, isSubmitting }) => (
-        <Form>
-          {isSubmitting ? (
-            <LoadingSpinner
-              centerProps={{ position: 'fixed', w: 'full', top: 0, display: 'grid', placeItems: 'center', zIndex: 100 }}
-              spinnerProps={{ speed: '0.2s' }}
-            >
-              <Text>Submitting...</Text>
-            </LoadingSpinner>
-          ) : null}
-          <Flex minH={'80vh'} align={'flex-start'} justify={'center'} bg={useColorModeValue('gray.50', 'gray.800')}>
-            <Stack
-              spacing={4}
-              w={'full'}
-              maxW={'2xl'}
-              bg={useColorModeValue('white', 'gray.700')}
-              rounded={'xl'}
-              boxShadow={'lg'}
-              p={6}
-              my={6}
-            >
-              <Heading lineHeight={1.1} fontSize={{ base: '2xl', sm: '3xl' }}>
-                User Profile Edit
-              </Heading>
-              <FormControl id="userName">
-                <FormLabel>User Avatar</FormLabel>
-                <Stack direction={['column', 'row']} spacing={6}>
-                  <Center>
-                    <Avatar size="xl" src={icon}>
-                      <AvatarBadge
-                        as={IconButton}
-                        size="sm"
-                        rounded="full"
-                        top="-10px"
-                        colorScheme="red"
-                        aria-label="remove Image"
-                        icon={<AiFillCloseCircle />}
-                      />
-                    </Avatar>
-                  </Center>
-                  <Center w="full">
-                    <Button onClick={handleClickChangeAvatar} disabled={!canEdit || isSubmitting} w="full">
-                      Change Icon
-                    </Button>
-                  </Center>
-                </Stack>
-              </FormControl>
-              <CustomFormikInput
-                isReadOnly={!canEdit}
-                _placeholder={{ color: 'gray.500' }}
-                inputProps={{ type: 'text' }}
-                placeholder="Full Name"
-                label="Full name"
-                name="name"
-                helperText="Enter Your Full Name"
-                isRequired
-                isDisabled={isSubmitting}
-              />
-              <CustomFormikInput
-                _placeholder={{ color: 'gray.500' }}
-                inputProps={{ type: 'text' }}
-                isReadOnly={!canEdit}
-                placeholder="User Alias"
-                label="User Alias"
-                name="alias"
-                isRequired
-                isDisabled={isSubmitting}
-              />
-              <CustomFormikInput
-                ref={avatarInputRef}
-                hidden
-                _placeholder={{ color: 'gray.500' }}
-                inputProps={{
-                  type: 'file',
-                  value: '',
-                  onChange: (event) => handleReadFileChange(event, setFieldValue),
-                  accept: 'image/*',
+    <Grid templateRows="repeat(1, 1fr)" templateColumns="repeat(1, 1fr)" gap={4}>
+      <Formik
+        initialValues={{
+          ...formState,
+          lastUpdated: formState.lastUpdated ? formState.lastUpdated['@date'] : '2021/01/01',
+        }}
+        validationSchema={canEdit === true ? updateUserYupSchemaFrontend : undefined}
+        onSubmit={handleFormSubmit}
+      >
+        {({ setFieldValue, isSubmitting, errors, setValues, initialValues, submitForm }) => (
+          <Form>
+            {isSubmitting ? (
+              <LoadingSpinner
+                centerProps={{
+                  position: 'fixed',
+                  w: 'full',
+                  top: 0,
+                  display: 'grid',
+                  placeItems: 'center',
+                  zIndex: 100,
                 }}
-                isReadOnly={!canEdit}
-                placeholder="User Avatar"
-                label="User Avatar"
-                name="icon"
-              />
-
-              <CustomFormikInput
-                _placeholder={{ color: 'gray.500' }}
-                inputProps={{ type: 'text' }}
-                isReadOnly
-                placeholder="Last Updated"
-                label="Last Updated"
-                name="lastUpdated"
-              />
-
-              <Stack spacing={6} direction={['column', 'row']}>
-                <Button
-                  bg={'red.400'}
-                  color={'white'}
-                  w="full"
-                  _hover={{
-                    bg: 'red.500',
+                spinnerProps={{ speed: '0.2s' }}
+              >
+                <Text>Submitting...</Text>
+              </LoadingSpinner>
+            ) : null}
+            <Flex minH={'80vh'} align={'flex-start'} justify={'center'} bg={useColorModeValue('gray.50', 'gray.800')}>
+              <Stack
+                spacing={4}
+                w={'full'}
+                maxW={'2xl'}
+                bg={useColorModeValue('white', 'gray.700')}
+                rounded={'xl'}
+                boxShadow={'lg'}
+                p={6}
+                my={6}
+              >
+                <Heading lineHeight={1.1} fontSize={{ base: '2xl', sm: '3xl' }}>
+                  User Profile Edit
+                </Heading>
+                <FormControl id="userName">
+                  <FormLabel>User Avatar</FormLabel>
+                  <Stack direction={['column', 'row']} spacing={6}>
+                    <Center>
+                      <Avatar size="2xl" src={icon}>
+                        <AvatarBadge
+                          as={IconButton}
+                          size="sm"
+                          rounded="full"
+                          top="-10px"
+                          colorScheme="red"
+                          aria-label="remove Image"
+                          icon={<AiFillCloseCircle />}
+                        />
+                      </Avatar>
+                    </Center>
+                    <Center w="full">
+                      <Button onClick={handleClickChangeAvatar} disabled={!canEdit || isSubmitting} w="xs">
+                        Change Icon
+                      </Button>
+                    </Center>
+                  </Stack>
+                </FormControl>
+                <CustomFormikInput
+                  isReadOnly={!canEdit}
+                  _placeholder={{ color: 'gray.500' }}
+                  inputProps={{ type: 'text' }}
+                  placeholder="Full Name"
+                  label="Full name"
+                  name="name"
+                  helperText="Enter Your Full Name"
+                  isRequired
+                  isDisabled={isSubmitting}
+                />
+                <CustomFormikInput
+                  _placeholder={{ color: 'gray.500' }}
+                  inputProps={{ type: 'text' }}
+                  isReadOnly={!canEdit}
+                  placeholder="User Alias"
+                  label="User Alias"
+                  name="alias"
+                  isRequired
+                  isDisabled={isSubmitting}
+                />
+                <CustomFormikInput
+                  ref={avatarInputRef}
+                  hidden
+                  _placeholder={{ color: 'gray.500' }}
+                  inputProps={{
+                    type: 'file',
+                    value: '',
+                    onChange: (event) => handleReadFileChange(event, setFieldValue),
+                    accept: 'image/*',
                   }}
-                  isDisabled={isSubmitting || !canEdit}
+                  isReadOnly={!canEdit}
+                  placeholder="User Avatar"
+                  label="User Avatar"
+                  name="icon"
+                />
+
+                <CustomFormikInput
+                  _placeholder={{ color: 'gray.500' }}
+                  inputProps={{ type: 'text' }}
+                  helperText={!canEdit ? `You can update your profile in ${daysRemaining} days` : ''}
+                  isReadOnly
+                  placeholder="Last Updated"
+                  label="Last Updated"
+                  name="lastUpdated"
+                />
+                <PopoverMenu
+                  popOverBodyText={<ConfirmationMessage />}
+                  buttonCancel={<ButtonClose buttonProps={{ onClick: handleClosePopover }} />}
+                  buttonSubmit={<ButtonSubmit buttonProps={{ type: 'submit', onClick: handleClosePopover }} />}
+                  close={handleClosePopover}
+                  isOpen={isOpen}
                 >
-                  Cancel
-                </Button>
-                <Button
-                  bg={'blue.400'}
-                  color={'white'}
-                  w="full"
-                  _hover={{
-                    bg: 'blue.500',
-                  }}
-                  type="submit"
-                  isDisabled={isSubmitting || !canEdit}
-                >
-                  Submit
-                </Button>
+                  <Stack spacing={6} direction={['column', 'row']}>
+                    <Button
+                      bg={'red.400'}
+                      color={'white'}
+                      w="full"
+                      _hover={{
+                        bg: 'red.500',
+                      }}
+                      isDisabled={isSubmitting || !canEdit}
+                      onClick={() => setValues(initialValues)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      bg={'blue.400'}
+                      color={'white'}
+                      w="full"
+                      _hover={{
+                        bg: 'blue.500',
+                      }}
+                      onClick={handleOpenPopover}
+                      // type="submit"
+                      type="button"
+                      isDisabled={isSubmitting || !canEdit}
+                    >
+                      Submit
+                    </Button>
+                  </Stack>
+                </PopoverMenu>
+                {isError ? (
+                  <Alert status="error">
+                    <AlertIcon />
+                    There was an error updating your profile
+                  </Alert>
+                ) : null}
+                {isSuccess ? (
+                  <Alert status="success">
+                    <AlertIcon />
+                    Profile Successfully Updated!
+                  </Alert>
+                ) : null}
               </Stack>
-            </Stack>
-          </Flex>
-        </Form>
-      )}
-    </Formik>
-    // </Grid>
+            </Flex>
+          </Form>
+        )}
+      </Formik>
+    </Grid>
   );
 };
 
