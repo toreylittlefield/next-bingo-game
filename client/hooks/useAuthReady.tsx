@@ -11,8 +11,9 @@ const useAuthReady = (
   setTransition: Dispatch<SetStateAction<boolean>>,
   user: LoggedInUser | null,
   authReady: boolean,
+  setUser: (value: React.SetStateAction<LoggedInUser | null>) => void,
 ] => {
-  const { user, authReady } = useContext(AuthContext);
+  const { user, authReady, setUser } = useContext(AuthContext);
   const [transition, setTransition] = useState(false);
   useEffect(() => {
     // if (!authReady) return;
@@ -30,7 +31,7 @@ const useAuthReady = (
     };
   }, [user, authReady, timer]);
 
-  return [transition, setTransition, user, authReady];
+  return [transition, setTransition, user, authReady, setUser];
 };
 
 export { useAuthReady };
