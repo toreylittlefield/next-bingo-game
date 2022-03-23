@@ -22,7 +22,6 @@ const handler: NextApiHandler = async (req, res) => {
 
     /** when the user first registers and hasn't updated their user profile the lastUpdate will be false */
     if (payload.lastUpdated === false) payload.lastUpdated = '2021/10/13';
-    console.dir(payload);
 
     const isValid = await updateUserYupSchemaFrontend.validate(payload);
 
