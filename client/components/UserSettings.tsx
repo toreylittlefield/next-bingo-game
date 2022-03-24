@@ -18,7 +18,7 @@ import {
 } from '@chakra-ui/react';
 import React, { useRef, useState } from 'react';
 import { Formik, Form, FormikHelpers } from 'formik';
-import type { FaunaUpdateSuccessResponse, FaunaUpdateUserReqBody, LoggedInUser } from '../types/types';
+import type { FaunaUpdateExistingUserApiResponse, FaunaUpdateUserReqBody, LoggedInUser } from '../types/types';
 import { CustomFormikInput } from './CustomFormikInput';
 import { updateUserYupSchemaFrontend } from '../lib/yup-schemas/yup-schemas';
 import { AiFillCloseCircle } from 'react-icons/ai';
@@ -30,7 +30,14 @@ type GenericButtonProps = {
   buttonProps?: ButtonProps;
 };
 
-type FormValues = { lastUpdated: string; name: string; alias: string; icon: string };
+type FormValues = {
+  lastUpdated: string;
+  name: string;
+  alias: string;
+  icon: string;
+  imageFile: File | string;
+  initialIcon: string;
+};
 
 const ButtonClose = ({ buttonProps, buttonText }: GenericButtonProps) => (
   <Button {...buttonProps} variant="outline">
@@ -55,6 +62,14 @@ const ConfirmationMessage = () => {
   );
 };
 
+function getInitialFormState(faunaUser: LoggedInUser['faunaUser']) {
+  let lastUpdated;
+  if (faunaUser.lastUpdated) {
+    lastUpdated = faunaUser.lastUpdated;
+  } else lastUpdated = '2021/01/01';
+  return { ...faunaUser, lastUpdated, imageFile: '', initialIcon: faunaUser.icon };
+}
+
 const UserSettings = ({
   user,
   setUser,
@@ -63,8 +78,7 @@ const UserSettings = ({
   setUser: (value: React.SetStateAction<LoggedInUser | null>) => void;
 }) => {
   const avatarInputRef = useRef<HTMLInputElement>(null);
-  const initialFormState = user.faunaUser ? { ...user.faunaUser } : undefined;
-  const [formState, setFormState] = useState(initialFormState);
+  const [formState, setFormState] = useState<FormValues>(getInitialFormState(user.faunaUser));
   const [isOpen, setIsOpen] = useState(false);
   const [isError, setIsError] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -74,22 +88,16 @@ const UserSettings = ({
   const { icon, lastUpdated } = formState;
 
   const countDays = (() => {
-    if (lastUpdated && lastUpdated['@date']) {
-      const today = new Date().getTime();
-      const last = new Date(lastUpdated['@date']).getTime();
-      const diff = (last - today) / (1000 * 60 * 60 * 24);
-      return diff;
-    }
-    return 121;
+    const today = new Date().getTime();
+    const last = new Date(lastUpdated).getTime();
+    const diff = (today - last) / (1000 * 60 * 60 * 24);
+    return diff;
   })();
 
   const daysRemaining = parseInt((120 - countDays).toString(), 10);
 
   const allowEdit = () => {
-    if (lastUpdated && lastUpdated['@date']) {
-      return countDays > 120;
-    }
-    return true;
+    return countDays > 120;
   };
 
   const canEdit = allowEdit();
@@ -101,10 +109,7 @@ const UserSettings = ({
     event.preventDefault();
   };
 
-  const handleReadFileChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-    setFieldValue: (field: string, value: any, shouldValidate?: boolean | undefined) => void,
-  ) => {
+  const handleReadFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     event.preventDefault();
 
     if (!event.target.files?.length || !avatarInputRef.current) return;
@@ -117,11 +122,7 @@ const UserSettings = ({
       function () {
         // convert image file to base64 string
         if (reader.result) {
-          setFormState((prev) => {
-            if (!prev) return prev;
-            return { ...prev, icon: reader.result as string };
-          });
-          setFieldValue('icon', reader.result);
+          setFormState((prev) => ({ ...prev, icon: reader.result as string, imageFile: file }));
         }
       },
       false,
@@ -135,16 +136,81 @@ const UserSettings = ({
   const handleOpenPopover = () => setIsOpen((prev) => !prev);
   const handleClosePopover = () => setIsOpen(false);
 
+  async function getSignature(payload: object) {
+    try {
+      const response = await fetch('/api/cloudinary/sign', {
+        headers: {
+          Authorization: `Bearer ${user.token?.access_token}`,
+        },
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const { signature, timestamp } = data;
+        return { signature, timestamp };
+      }
+      throw Error(response.status.toString());
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function postImageToCloudinary(file: File | string, name: string) {
+    try {
+      const url = `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/upload`;
+      // https://res.cloudinary.com/<cloud-name>/image/upload/
+      // s--z9i0YeSZ--/c_thumb,g_face:center,q_auto:good,w_256/sample.jpg
+      const normalizeName = name.replace(/\s+/g, '-');
+      const payload = { public_id: `public-thumb-${normalizeName}`, folder: normalizeName, type: 'private' };
+
+      const singatureRes = await getSignature(payload);
+      if (!singatureRes) throw Error('Failed to create signature');
+      const { signature, timestamp } = singatureRes;
+
+      const formData = new FormData();
+
+      formData.append('file', file);
+      formData.append('signature', signature);
+      formData.append('timestamp', timestamp);
+      Object.entries(payload).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+      formData.append('api_key', process.env.NEXT_PUBLIC_CLOUDINARY_KEY as string);
+
+      console.log(Array.from(formData.entries()));
+
+      const response = await fetch(url, {
+        method: 'post',
+        body: formData,
+      });
+      if (response.ok) {
+        const json = await response.json();
+        console.dir(json, { colors: true });
+        return json;
+      }
+      throw Error(
+        JSON.stringify({ message: 'Failed to post to cloudinary', response: JSON.stringify(response, null, 2) }),
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   const handleFormSubmit: (
     values: FormValues,
     formikHelpers: FormikHelpers<FormValues>,
   ) => void | Promise<any> = async (values, { setSubmitting }) => {
     if (isError) setIsError(false);
     if (isSuccess) setIsError(false);
+    const cloudinaryData = await postImageToCloudinary(values.icon, values.name);
+    console.dir(cloudinaryData, { colors: true });
     const payload: FaunaUpdateUserReqBody = {
       ...values,
+      icon: values.icon as string,
       fauna_access_token: user.fauna_access_token?.secret ?? '',
     };
+
     try {
       const res = await fetch('/api/fauna/userprofile/updateuserprofile', {
         headers: {
@@ -155,18 +221,24 @@ const UserSettings = ({
         body: JSON.stringify(payload),
       });
       if (res.ok) {
-        const json: FaunaUpdateSuccessResponse = await res.json();
-        setFormState({ ...json.result.data });
-        setIsSuccess(true);
+        const json: FaunaUpdateExistingUserApiResponse = await res.json();
+        if (!json?.result) throw Error(`Failed To Update User: ${JSON.stringify(json, null, 2)}`);
+
+        const { alias, icon, lastUpdated, name } = json.result.data;
+        setFormState({ alias, icon, lastUpdated, name, imageFile: '', initialIcon: '' });
         setUser((prev) => {
           if (!prev?.faunaUser) return prev;
           return {
             ...prev,
             faunaUser: {
-              ...json.result.data,
+              alias,
+              icon,
+              lastUpdated,
+              name,
             },
           };
         });
+        setIsSuccess(true);
       } else {
         const { status, statusText } = res;
         throw Error(JSON.stringify({ status, statusText }));
@@ -182,14 +254,11 @@ const UserSettings = ({
   return (
     <Grid templateRows="repeat(1, 1fr)" templateColumns="repeat(1, 1fr)" gap={4}>
       <Formik
-        initialValues={{
-          ...formState,
-          lastUpdated: formState.lastUpdated ? formState.lastUpdated['@date'] : '2021/01/01',
-        }}
+        initialValues={formState}
         validationSchema={canEdit === true ? updateUserYupSchemaFrontend : undefined}
         onSubmit={handleFormSubmit}
       >
-        {({ setFieldValue, isSubmitting, errors, setValues, initialValues, submitForm }) => (
+        {({ isSubmitting, errors, initialValues, handleReset }) => (
           <Form>
             {isSubmitting ? (
               <LoadingSpinner
@@ -271,7 +340,7 @@ const UserSettings = ({
                   inputProps={{
                     type: 'file',
                     value: '',
-                    onChange: (event) => handleReadFileChange(event, setFieldValue),
+                    onChange: handleReadFileChange,
                     accept: 'image/*',
                   }}
                   isReadOnly={!canEdit}
@@ -305,7 +374,11 @@ const UserSettings = ({
                         bg: 'red.500',
                       }}
                       isDisabled={isSubmitting || !canEdit}
-                      onClick={() => setValues(initialValues)}
+                      onClick={() => {
+                        console.log(initialValues);
+                        handleReset();
+                        setFormState((prev) => ({ ...prev, icon: prev.initialIcon, imageFile: '' }));
+                      }}
                     >
                       Cancel
                     </Button>
