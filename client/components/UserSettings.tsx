@@ -308,14 +308,15 @@ const UserSettings = ({
               minH={'80vh'}
               align={'flex-start'}
               justify={'center'}
-              bg={isConfirmed ? useColorModeValue('gray.300', 'gray.300') : useColorModeValue('gray.50', 'gray.800')}
+              // eslint-disable-next-line react-hooks/rules-of-hooks
+              bg={useColorModeValue('gray.50', 'gray.800')}
             >
               <Stack
                 spacing={4}
                 w={'full'}
                 maxW={'2xl'}
-                bg={isConfirmed ? useColorModeValue('gray.300', 'gray.300') : useColorModeValue('gray.50', 'gray.800')}
-                // bg={useColorModeValue('white', 'gray.700')}
+                // eslint-disable-next-line react-hooks/rules-of-hooks
+                bg={useColorModeValue('white', 'gray.700')}
                 rounded={'xl'}
                 boxShadow={'lg'}
                 p={6}
