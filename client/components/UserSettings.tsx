@@ -18,12 +18,19 @@ import {
 } from '@chakra-ui/react';
 import React, { useRef, useState } from 'react';
 import { Formik, Form, FormikHelpers } from 'formik';
-import type { FaunaUpdateExistingUserApiResponse, FaunaUpdateUserReqBody, LoggedInUser } from '../types/types';
+import type {
+  CloudinaryUploadUserImageResponse,
+  FaunaUpdateExistingUserApiResponse,
+  FaunaUpdateUserReqBody,
+  LoggedInUser,
+} from '../types/types';
 import { CustomFormikInput } from './CustomFormikInput';
 import { updateUserYupSchemaFrontend } from '../lib/yup-schemas/yup-schemas';
 import { AiFillCloseCircle } from 'react-icons/ai';
 import LoadingSpinner from './LoadingSpinner';
 import { PopoverMenu } from './PopoverMenu';
+import Image from 'next/image';
+import { FAUNADB_SERVER_KEY } from '../lib/constants/constants';
 
 type GenericButtonProps = {
   buttonText?: string;
@@ -67,7 +74,7 @@ function getInitialFormState(faunaUser: LoggedInUser['faunaUser']) {
   if (faunaUser.lastUpdated) {
     lastUpdated = faunaUser.lastUpdated;
   } else lastUpdated = '2021/01/01';
-  return { ...faunaUser, lastUpdated, imageFile: '', initialIcon: faunaUser.icon };
+  return { ...faunaUser, lastUpdated, imageFile: faunaUser.icon, initialIcon: faunaUser.icon };
 }
 
 const UserSettings = ({
@@ -82,8 +89,9 @@ const UserSettings = ({
   const [isOpen, setIsOpen] = useState(false);
   const [isError, setIsError] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isConfirmed, setIsConfirmed] = useState(false);
 
-  if (!formState?.name) return null;
+  // if (!formState?.name) return null;
 
   const { icon, lastUpdated } = formState;
 
@@ -158,11 +166,15 @@ const UserSettings = ({
 
   async function postImageToCloudinary(file: File | string, name: string) {
     try {
+      if (!file) return;
       const url = `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/upload`;
-      // https://res.cloudinary.com/<cloud-name>/image/upload/
-      // s--z9i0YeSZ--/c_thumb,g_face:center,q_auto:good,w_256/sample.jpg
+
       const normalizeName = name.replace(/\s+/g, '-');
-      const payload = { public_id: `public-thumb-${normalizeName}`, folder: normalizeName, type: 'private' };
+      const payload = {
+        public_id: `public-thumb-${normalizeName}`,
+        folder: normalizeName,
+        transformation: 'c_thumb,f_auto,q_auto,w_256',
+      };
 
       const singatureRes = await getSignature(payload);
       if (!singatureRes) throw Error('Failed to create signature');
@@ -178,15 +190,12 @@ const UserSettings = ({
       });
       formData.append('api_key', process.env.NEXT_PUBLIC_CLOUDINARY_KEY as string);
 
-      console.log(Array.from(formData.entries()));
-
       const response = await fetch(url, {
         method: 'post',
         body: formData,
       });
       if (response.ok) {
         const json = await response.json();
-        console.dir(json, { colors: true });
         return json;
       }
       throw Error(
@@ -201,17 +210,27 @@ const UserSettings = ({
     values: FormValues,
     formikHelpers: FormikHelpers<FormValues>,
   ) => void | Promise<any> = async (values, { setSubmitting }) => {
-    if (isError) setIsError(false);
-    if (isSuccess) setIsError(false);
-    const cloudinaryData = await postImageToCloudinary(values.icon, values.name);
-    console.dir(cloudinaryData, { colors: true });
-    const payload: FaunaUpdateUserReqBody = {
-      ...values,
-      icon: values.icon as string,
-      fauna_access_token: user.fauna_access_token?.secret ?? '',
-    };
-
+    if (isConfirmed === false) {
+      setIsConfirmed(true);
+      setSubmitting(false);
+      return;
+    }
     try {
+      if (isError) setIsError(false);
+      if (isSuccess) setIsError(false);
+      const cloudinaryData: CloudinaryUploadUserImageResponse = await postImageToCloudinary(
+        formState.imageFile,
+        values.name,
+      );
+      if (!cloudinaryData) throw Error('Error Uploading To Image');
+
+      const payload: FaunaUpdateUserReqBody = {
+        name: values.name,
+        alias: values.alias,
+        lastUpdated: values.lastUpdated,
+        icon: cloudinaryData.secure_url,
+        fauna_access_token: user.fauna_access_token.secret,
+      };
       const res = await fetch('/api/fauna/userprofile/updateuserprofile', {
         headers: {
           'Content-Type': 'application/json',
@@ -225,16 +244,20 @@ const UserSettings = ({
         if (!json?.result) throw Error(`Failed To Update User: ${JSON.stringify(json, null, 2)}`);
 
         const { alias, icon, lastUpdated, name } = json.result.data;
-        setFormState({ alias, icon, lastUpdated, name, imageFile: '', initialIcon: '' });
+
+        const updatedFaunaUserState = { alias, icon, lastUpdated, name };
+
+        setFormState({
+          ...updatedFaunaUserState,
+          imageFile: updatedFaunaUserState.icon,
+          initialIcon: updatedFaunaUserState.icon,
+        });
         setUser((prev) => {
           if (!prev?.faunaUser) return prev;
           return {
             ...prev,
             faunaUser: {
-              alias,
-              icon,
-              lastUpdated,
-              name,
+              ...updatedFaunaUserState,
             },
           };
         });
@@ -248,7 +271,13 @@ const UserSettings = ({
       setIsError(true);
     } finally {
       setSubmitting(false);
+      setIsConfirmed(false);
     }
+  };
+
+  const handleCloseConfirmation = () => {
+    setIsConfirmed(false);
+    handleClosePopover();
   };
 
   return (
@@ -258,7 +287,7 @@ const UserSettings = ({
         validationSchema={canEdit === true ? updateUserYupSchemaFrontend : undefined}
         onSubmit={handleFormSubmit}
       >
-        {({ isSubmitting, errors, initialValues, handleReset }) => (
+        {({ isSubmitting, errors, initialValues, handleReset, submitForm }) => (
           <Form>
             {isSubmitting ? (
               <LoadingSpinner
@@ -272,15 +301,21 @@ const UserSettings = ({
                 }}
                 spinnerProps={{ speed: '0.2s' }}
               >
-                <Text>Submitting...</Text>
+                Submitting...
               </LoadingSpinner>
             ) : null}
-            <Flex minH={'80vh'} align={'flex-start'} justify={'center'} bg={useColorModeValue('gray.50', 'gray.800')}>
+            <Flex
+              minH={'80vh'}
+              align={'flex-start'}
+              justify={'center'}
+              bg={isConfirmed ? useColorModeValue('gray.300', 'gray.300') : useColorModeValue('gray.50', 'gray.800')}
+            >
               <Stack
                 spacing={4}
                 w={'full'}
                 maxW={'2xl'}
-                bg={useColorModeValue('white', 'gray.700')}
+                bg={isConfirmed ? useColorModeValue('gray.300', 'gray.300') : useColorModeValue('gray.50', 'gray.800')}
+                // bg={useColorModeValue('white', 'gray.700')}
                 rounded={'xl'}
                 boxShadow={'lg'}
                 p={6}
@@ -296,6 +331,9 @@ const UserSettings = ({
                       <Avatar size="2xl" src={icon}>
                         <AvatarBadge
                           as={IconButton}
+                          onClick={() =>
+                            setFormState((prev) => ({ ...prev, icon: prev.initialIcon, imageFile: prev.initialIcon }))
+                          }
                           size="sm"
                           rounded="full"
                           top="-10px"
@@ -315,7 +353,7 @@ const UserSettings = ({
                 <CustomFormikInput
                   isReadOnly={!canEdit}
                   _placeholder={{ color: 'gray.500' }}
-                  inputProps={{ type: 'text' }}
+                  inputProps={{ type: 'text', autoFocus: true }}
                   placeholder="Full Name"
                   label="Full name"
                   name="name"
@@ -360,8 +398,23 @@ const UserSettings = ({
                 />
                 <PopoverMenu
                   popOverBodyText={<ConfirmationMessage />}
-                  buttonCancel={<ButtonClose buttonProps={{ onClick: handleClosePopover }} />}
-                  buttonSubmit={<ButtonSubmit buttonProps={{ type: 'submit', onClick: handleClosePopover }} />}
+                  handlePopoverCloseButton={handleCloseConfirmation}
+                  buttonCancel={
+                    <ButtonClose
+                      buttonProps={{
+                        onClick: handleCloseConfirmation,
+                      }}
+                    />
+                  }
+                  buttonSubmit={
+                    <ButtonSubmit
+                      buttonProps={{
+                        type: 'submit',
+                        // onClick: submitForm,
+                        onClick: handleClosePopover,
+                      }}
+                    />
+                  }
                   close={handleClosePopover}
                   isOpen={isOpen}
                 >
@@ -375,9 +428,8 @@ const UserSettings = ({
                       }}
                       isDisabled={isSubmitting || !canEdit}
                       onClick={() => {
-                        console.log(initialValues);
                         handleReset();
-                        setFormState((prev) => ({ ...prev, icon: prev.initialIcon, imageFile: '' }));
+                        setFormState((prev) => ({ ...prev, icon: prev.initialIcon, imageFile: prev.initialIcon }));
                       }}
                     >
                       Cancel
@@ -390,8 +442,7 @@ const UserSettings = ({
                         bg: 'blue.500',
                       }}
                       onClick={handleOpenPopover}
-                      // type="submit"
-                      type="button"
+                      type="submit"
                       isDisabled={isSubmitting || !canEdit}
                     >
                       Submit
