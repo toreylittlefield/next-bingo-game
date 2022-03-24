@@ -322,6 +322,10 @@ export type FaunaLoggedInApiResponse =
   | { faunaTokens: FaunaLoggedInResponse['tokens']; faunaUser: FaunaLoggedInResponse['user'] }
   | undefined;
 
+export type APIServiceLoggedInResponse =
+  | { fauna_access_token: FaunaLoggedInResponse['tokens']['access']; faunaUser: FaunaLoggedInResponse['user'] }
+  | undefined;
+
 export interface FaunaUpdateSuccessResponse {
   compareDates: number;
   result: {
