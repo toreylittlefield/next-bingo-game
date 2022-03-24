@@ -16,6 +16,7 @@ type PopOverMenuProps = {
   buttonCancel: React.ReactNode;
   popOverBodyText?: string | React.ReactNode;
   children?: React.ReactNode;
+  handlePopoverCloseButton?: () => void;
   close: () => void;
   isOpen: boolean;
 };
@@ -27,6 +28,7 @@ const PopoverMenu = ({
   popOverBodyText = defaultText,
   buttonCancel,
   isOpen,
+  handlePopoverCloseButton = () => {},
   close,
   children,
 }: PopOverMenuProps) => {
@@ -45,7 +47,7 @@ const PopoverMenu = ({
       <PopoverContent>
         <PopoverHeader fontWeight="semibold">Confirmation</PopoverHeader>
         <PopoverArrow />
-        <PopoverCloseButton />
+        <PopoverCloseButton onClick={handlePopoverCloseButton} />
         <PopoverBody fontStyle={'italic'}>{popOverBodyText}</PopoverBody>
         <PopoverFooter d="flex" justifyContent="flex-end">
           <ButtonGroup size="lg">
