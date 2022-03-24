@@ -13,8 +13,8 @@ export async function updateFaunaUserProfile(
     if (result === false) {
       return { result, compareDates };
     }
-    if (result && result.data.lastUpdated !== false) {
-      const setDate = result.data.lastUpdated['@date'];
+    if (result.data.lastUpdated) {
+      const [setDate] = Object.values(result.data.lastUpdated);
       const data = { ...result.data, lastUpdated: setDate };
       return { compareDates, result: { data } };
     }
