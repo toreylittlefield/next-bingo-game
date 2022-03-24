@@ -28,7 +28,7 @@ const Nav = () => {
         <NextLink href={'/'} passHref shallow>
           <Box w={{ base: '40%', md: 'auto' }} cursor="pointer">
             <Image
-              src="/boar-coders-assets/boarcoders-tshirt_oshejd.png"
+              src="https://res.cloudinary.com/boar-images/image/upload/v1639182352/boar-coders-assets/boarcoders-tshirt_oshejd.png"
               alt="boar coders logo"
               width={80}
               height={80}
