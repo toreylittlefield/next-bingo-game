@@ -12,8 +12,8 @@ declare module 'netlify-identity-widget' {
 }
 
 export interface LoggedInUser extends NetlifyAppMetaData {
-  faunaUser?: FaunaLoggedInResponse['user'];
-  fauna_access_token?: FaunaLoggedInResponse['tokens']['access'];
+  faunaUser: FaunaLoggedInResponse['user'];
+  fauna_access_token: FaunaLoggedInResponse['tokens']['access'];
 }
 
 export type UserProfile = {
@@ -147,40 +147,12 @@ export interface NetlifyUserMetaData extends netlifyIdentity.User {
   };
 }
 
-export interface FaunaCreateAccountResponse {
-  id: string;
-  user: {
-    name: string;
-    alias: string;
-    icon: string;
-  };
-}
-
-export type UpdateFaunaSuccess = {
-  data: {
-    name: string;
-    alias: string;
-    icon: string;
-    lastUpdated: { '@date': string };
-  };
-};
-
-export type UpdateFaunaUserResponse = {
-  result: false | UpdateFaunaSuccess;
-  compareDates: number;
-};
-
-export type FaunaUpdateUserApiResponse = UpdateFaunaUserResponse | undefined;
-
-export type FaunaLoggedInApiResponse =
-  | { faunaTokens: FaunaLoggedInResponse['tokens']; faunaUser: FaunaLoggedInResponse['user'] }
-  | undefined;
 export interface FaunaLoggedInResponse {
   user: {
     name: string;
     alias: string;
     icon: string;
-    lastUpdated: false | { '@date': string };
+    lastUpdated: false | string;
   };
   tokens: {
     refresh: {
@@ -291,15 +263,72 @@ export interface FaunaUpdateUserReqBody {
   lastUpdated: string | false;
 }
 
+export interface FaunaCreateAccountResponse {
+  id: string;
+  user: {
+    name: string;
+    alias: string;
+    icon: string;
+  };
+}
+
+export type UpdateFaunaSuccessRes = {
+  result:
+    | false
+    | {
+        data: {
+          name: string;
+          alias: string;
+          icon: string;
+          lastUpdated: { '@date': string } | false;
+        };
+      };
+  compareDates: number;
+};
+
+export type UpdateFaunaSuccessNormal = {
+  data: {
+    name: string;
+    alias: string;
+    icon: string;
+    lastUpdated: string | false;
+  };
+};
+
+export type UpdateFaunaSuccessNormalExistingUser = {
+  data: {
+    name: string;
+    alias: string;
+    icon: string;
+    lastUpdated: string;
+  };
+};
+
+export type UpdateFaunaUserResponse = {
+  result: UpdateFaunaSuccessNormal | false;
+  compareDates: number;
+};
+
+export type UpdateFaunaExistingUserResponse = {
+  result: UpdateFaunaSuccessNormalExistingUser | false;
+  compareDates: number;
+};
+
+export type FaunaUpdateExistingUserApiResponse = UpdateFaunaExistingUserResponse | undefined;
+
+export type FaunaNewUserApiResponse = UpdateFaunaUserResponse | undefined;
+
+export type FaunaLoggedInApiResponse =
+  | { faunaTokens: FaunaLoggedInResponse['tokens']; faunaUser: FaunaLoggedInResponse['user'] }
+  | undefined;
+
 export interface FaunaUpdateSuccessResponse {
   compareDates: number;
   result: {
     data: {
       alias: string;
       icon: string;
-      lastUpdated: {
-        '@date': string;
-      };
+      lastUpdated: string | false;
       name: string;
     };
   };
