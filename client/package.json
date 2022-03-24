@@ -15,6 +15,7 @@
     "@chakra-ui/react": "^1.7.3",
     "@emotion/react": "^11.7.0",
     "@emotion/styled": "^11.6.0",
+    "cloudinary": "^1.28.1",
     "cookie": "^0.4.2",
     "faunadb": "^4.4.1",
     "formik": "^2.2.9",
