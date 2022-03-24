@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useRef } from 'react';
 import netlifyIdentity from 'netlify-identity-widget';
-import type { FaunaLoggedInApiResponse, LoggedInUser, NetlifyAppMetaData } from '../types/types';
+import type { APIServiceLoggedInResponse, LoggedInUser, NetlifyAppMetaData } from '../types/types';
 import Router, { useRouter } from 'next/router';
 import { getRandomUserName } from '../lib/utils/utils';
 import { apiRequest } from '../lib/api/apiservice';
@@ -35,27 +35,29 @@ export const AuthContextProvider = ({ children }: Props) => {
       console.log({ u }, 'user login');
       const user = u as NetlifyAppMetaData;
       const access_token = user.token?.access_token;
-      if (access_token) {
-        const res = await apiRequest<FaunaLoggedInApiResponse>({
-          url: '/api/fauna/auth/token',
-          identityAccessToken: access_token,
-          searchParams: { grantType: 'login' },
-        }).catch((err) => console.error('error #%d', err));
-        if (res) {
-          console.dir(res, { colors: true });
-          setUser({ ...user, ...res });
-        } else {
-          setUser(user);
+      try {
+        if (access_token) {
+          const res = await apiRequest<APIServiceLoggedInResponse>({
+            url: '/api/fauna/auth/token',
+            identityAccessToken: access_token,
+            searchParams: { grantType: 'login' },
+          }).catch((err) => console.error('error #%d', err));
+          if (res) {
+            console.dir(res, { colors: true });
+            setUser({ ...user, ...res });
+          }
+          if (res?.faunaUser?.lastUpdated === false) {
+            console.log('navigating to user settings...');
+            Router.push({
+              pathname: '/userprofile/me/[me]',
+              query: { userprofile: user.user_metadata.full_name },
+            });
+          }
         }
-        if (res?.faunaUser?.lastUpdated === false) {
-          console.log('navigating to user settings...');
-          Router.push({
-            pathname: '/userprofile/me/[me]',
-            query: { userprofile: user.user_metadata.full_name },
-          });
-        }
+        netlifyIdentity.close();
+      } catch (error) {
+        console.error(error);
       }
-      netlifyIdentity.close();
       // Router.push('/userprofile/me?userprofile' + user.user_metadata.full_name);
     });
     netlifyIdentity.on('logout', () => {
@@ -67,8 +69,6 @@ export const AuthContextProvider = ({ children }: Props) => {
     //** fires when netlify is first initialize */
     netlifyIdentity.on('init', (u) => {
       console.log({ user: u }, 'init user');
-      const user = u as NetlifyAppMetaData;
-      setUser(user);
       setAuthReady(true);
       console.log('init event');
     });
