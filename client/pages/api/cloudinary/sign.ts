@@ -1,7 +1,6 @@
 import type { NextApiHandler } from 'next';
 
 import { v2 as cloudinary } from 'cloudinary';
-import { string } from 'yup';
 
 interface CloudinarySignaturePayload {
   folder: string;
