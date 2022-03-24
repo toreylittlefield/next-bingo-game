@@ -39,6 +39,7 @@ const PopoverMenu = ({
       closeOnEsc
       placement="auto"
       closeOnBlur={false}
+      autoFocus
     >
       <PopoverTrigger>{children}</PopoverTrigger>
       <PopoverContent>
