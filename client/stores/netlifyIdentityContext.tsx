@@ -1,9 +1,9 @@
-import React, { createContext, useState, useEffect, useRef } from 'react';
 import netlifyIdentity from 'netlify-identity-widget';
-import type { APIServiceLoggedInResponse, LoggedInUser, NetlifyAppMetaData } from '../types/types';
-import Router, { useRouter } from 'next/router';
-import { getRandomUserName } from '../lib/utils/utils';
+import Router from 'next/router';
+import React, { createContext, useEffect, useState } from 'react';
 import { apiRequest } from '../lib/api/apiservice';
+import { getRandomUserName } from '../lib/utils/utils';
+import type { APIServiceLoggedInResponse, LoggedInUser, NetlifyAppMetaData } from '../types/types';
 interface AuthInterface {
   user: LoggedInUser | null;
   login: () => void;
@@ -27,13 +27,11 @@ interface Props {
 export const AuthContextProvider = ({ children }: Props) => {
   const [user, setUser] = useState<LoggedInUser | null>(null);
   const [authReady, setAuthReady] = useState(false);
-  const { push, isReady, asPath } = useRouter();
 
   useEffect(() => {
     /** fires when users logs in or visits page or has gotrue in local storage */
-    netlifyIdentity.on('login', async (u) => {
-      console.log({ u }, 'user login');
-      const user = u as NetlifyAppMetaData;
+    netlifyIdentity.on('login', async (user: NetlifyAppMetaData) => {
+      console.log({ u: user }, 'user login');
       const access_token = user.token?.access_token;
       try {
         if (access_token) {
