@@ -30,7 +30,7 @@ import { AiFillCloseCircle } from 'react-icons/ai';
 import LoadingSpinner from './LoadingSpinner';
 import { PopoverMenu } from './PopoverMenu';
 import Image from 'next/image';
-import { FAUNADB_SERVER_KEY } from '../lib/constants/constants';
+import { useFileReader } from '../hooks/useFileReader';
 
 type GenericButtonProps = {
   buttonText?: string;
@@ -91,9 +91,12 @@ const UserSettings = ({
   const [isSuccess, setIsSuccess] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
 
-  // if (!formState?.name) return null;
-
   const { icon, lastUpdated } = formState;
+
+  const [readerResult, error, file, loading, setFile] = useFileReader({
+    readType: 'readAsDataURL',
+    onloadCB: (result, file) => setFormState((prev) => ({ ...prev, icon: result as string, imageFile: file })),
+  });
 
   const countDays = (() => {
     const today = new Date().getTime();
@@ -123,22 +126,26 @@ const UserSettings = ({
     if (!event.target.files?.length || !avatarInputRef.current) return;
 
     const file = event.target.files[0];
-    const reader = new FileReader();
-
-    reader.addEventListener(
-      'load',
-      function () {
-        // convert image file to base64 string
-        if (reader.result) {
-          setFormState((prev) => ({ ...prev, icon: reader.result as string, imageFile: file }));
-        }
-      },
-      false,
-    );
 
     if (file) {
-      reader.readAsDataURL(file);
+      setFile(file);
     }
+    // const reader = new FileReader();
+
+    // reader.addEventListener(
+    //   'load',
+    //   function () {
+    //     // convert image file to base64 string
+    //     if (reader.result) {
+    //       setFormState((prev) => ({ ...prev, icon: reader.result as string, imageFile: file }));
+    //     }
+    //   },
+    //   false,
+    // );
+
+    // if (file) {
+    //   reader.readAsDataURL(file);
+    // }
   };
 
   const handleOpenPopover = () => setIsOpen((prev) => !prev);
