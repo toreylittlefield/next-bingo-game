@@ -1,5 +1,3 @@
-import type { Handler } from '@netlify/functions';
-import type { Context } from '@netlify/functions/dist/function/context';
 import * as netlifyIdentity from 'netlify-identity-widget';
 import GoTrue from './gotrue';
 
@@ -11,6 +9,12 @@ declare module 'netlify-identity-widget' {
   export { gotrue };
 }
 
+export interface NetlifyAppMetaData extends netlifyIdentity.User {
+  ['app_metadata']: {
+    provider: string;
+    roles: string[];
+  };
+}
 export interface LoggedInUser extends NetlifyAppMetaData {
   faunaUser: UpdateFaunaSuccessNormal['data'];
   fauna_access_token: FaunaLoggedInResponse['tokens']['access'];
@@ -132,20 +136,13 @@ export interface Social {
   paypalEmail?: null;
 }
 
-export interface NetlifyAppMetaData extends netlifyIdentity.User {
-  ['app_metadata']: {
-    provider: string;
-    roles: string[];
-  };
-}
-
-export interface NetlifyUserMetaData extends netlifyIdentity.User {
-  ['user_metadata']: {
-    avatar_url: string;
-    full_name: string;
-    [key: string]: any;
-  };
-}
+// export interface NetlifyUserMetaData extends netlifyIdentity.User {
+//   ['user_metadata']: {
+//     avatar_url: string;
+//     full_name: string;
+//     [key: string]: any;
+//   };
+// }
 
 export interface FaunaLoggedInResponse {
   user: {
@@ -168,19 +165,6 @@ export interface FaunaLoggedInResponse {
 
 export type AppMetaData = NetlifyAppMetaData['app_metadata'];
 export type UserMetaData = NetlifyUserMetaData['user_metadata'];
-
-export type UserAppMetaData = { app_metadata: AppMetaData };
-
-export type UserLoginDataRes = UserAppMetaData | { app_metadata: null };
-
-export type CombineMetaDataFunction = ({ user, tokens }: FaunaLoggedInResponse) => UserAppMetaData;
-
-export interface CustomContext extends Context {
-  ['clientContext']: {
-    identity: Identity;
-    user: ClientContextUser;
-  };
-}
 
 interface ClientContextUser {
   exp: number;
@@ -269,6 +253,7 @@ export interface FaunaCreateAccountResponse {
     name: string;
     alias: string;
     icon: string;
+    lastUpdated: false;
   };
 }
 
@@ -332,7 +317,7 @@ export type FaunaLoggedInApiResponse =
   | undefined;
 
 export type APIServiceLoggedInResponse =
-  | { fauna_access_token: FaunaLoggedInResponse['tokens']['access']; faunaUser: FaunaLoggedInResponse['user'] }
+  | { fauna_access_token: FaunaLoggedInResponse['tokens']['access']; faunaUser: FaunaUpdateUserReqBody }
   | undefined;
 
 export interface FaunaUpdateSuccessResponse {
@@ -356,28 +341,4 @@ export interface FaunaCreateBoardRequestBody {
   access_token: string;
   title: string;
   board: Array<string>;
-}
-
-interface CloudinaryUploadUserImageResponse {
-  asset_id: string;
-  public_id: string;
-  version: number;
-  version_id: string;
-  signature: string;
-  width: number;
-  height: number;
-  format: string;
-  resource_type: string;
-  created_at: string;
-  tags: any[];
-  bytes: number;
-  type: string;
-  etag: string;
-  placeholder: boolean;
-  url: string;
-  secure_url: string;
-  overwritten: boolean;
-  original_filename: string;
-  original_extension: string;
-  api_key: string;
 }
