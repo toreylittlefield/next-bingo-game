@@ -12,7 +12,7 @@ declare module 'netlify-identity-widget' {
 }
 
 export interface LoggedInUser extends NetlifyAppMetaData {
-  faunaUser: FaunaLoggedInResponse['user'];
+  faunaUser: UpdateFaunaSuccessNormal['data'];
   fauna_access_token: FaunaLoggedInResponse['tokens']['access'];
 }
 
@@ -152,7 +152,7 @@ export interface FaunaLoggedInResponse {
     name: string;
     alias: string;
     icon: string;
-    lastUpdated: false | string;
+    lastUpdated: false | { '@date': string };
   };
   tokens: {
     refresh: {
@@ -272,6 +272,15 @@ export interface FaunaCreateAccountResponse {
   };
 }
 
+export type LoginFaunaSuccessRes = {
+  user: {
+    name: string;
+    alias: string;
+    icon: string;
+    lastUpdated: { '@date': string } | false;
+  };
+};
+
 export type UpdateFaunaSuccessRes = {
   result:
     | false
@@ -319,7 +328,7 @@ export type FaunaUpdateExistingUserApiResponse = UpdateFaunaExistingUserResponse
 export type FaunaNewUserApiResponse = UpdateFaunaUserResponse | undefined;
 
 export type FaunaLoggedInApiResponse =
-  | { faunaTokens: FaunaLoggedInResponse['tokens']; faunaUser: FaunaLoggedInResponse['user'] }
+  | { faunaTokens: FaunaLoggedInResponse['tokens']; faunaUser: UpdateFaunaSuccessNormal['data'] }
   | undefined;
 
 export type APIServiceLoggedInResponse =
