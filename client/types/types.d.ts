@@ -308,8 +308,6 @@ export type UpdateFaunaExistingUserResponse = {
   compareDates: number;
 };
 
-export type FaunaUpdateExistingUserApiResponse = UpdateFaunaExistingUserResponse | undefined;
-
 export type FaunaNewUserApiResponse = UpdateFaunaUserResponse | undefined;
 
 export type FaunaLoggedInApiResponse =
