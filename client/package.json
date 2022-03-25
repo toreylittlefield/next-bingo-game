@@ -6,6 +6,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "types": "tsc --noEmit",
     "netlify:dev": "customized-netlify dev",
     "netlify:dev:context-identity": "customized-netlify dev --clientContext ./functions/events/customClientContext.json --identity ./functions/events/token.json",
     "netlify:serve": "customized-netlify functions:serve",
