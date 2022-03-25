@@ -3,7 +3,6 @@ import faunadb, { Collection, Create } from 'faunadb'; /* Import faunaDB sdk */
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 /* configure faunaDB Client with our secret */
-const q = faunadb.query;
 const client = new faunadb.Client({
   domain: 'db.fauna.com',
   scheme: 'https',
