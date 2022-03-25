@@ -11,5 +11,6 @@
     // "setup-db": true,
     "**/.netlify": true,
     "**/.next": true
-  }
+  },
+  "eslint.workingDirectories": ["./client", "./setup-db"]
 }
