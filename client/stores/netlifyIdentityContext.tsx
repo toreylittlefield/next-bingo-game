@@ -19,11 +19,9 @@ const AuthContext = createContext<AuthInterface>({
   authReady: false,
   setUser: () => {},
 });
-
 interface Props {
   children: React.ReactNode;
 }
-
 export const AuthContextProvider = ({ children }: Props) => {
   const [user, setUser] = useState<LoggedInUser | null>(null);
   const [authReady, setAuthReady] = useState(false);
