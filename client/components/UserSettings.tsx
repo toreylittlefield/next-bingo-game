@@ -20,9 +20,10 @@ import { Form, Formik, FormikHelpers } from 'formik';
 import React, { useCallback, useRef, useState } from 'react';
 import { AiFillCloseCircle } from 'react-icons/ai';
 import { useFileReader } from '../hooks/useFileReader';
+import { postProfilePictureToCloudinary, updateUserProfile } from '../lib/api/fetch-functions';
 import { updateUserYupSchemaFrontend } from '../lib/yup-schemas/yup-schemas';
 import type { CloudinaryUploadUserImageResponse } from '../types/cloudinary';
-import type { FaunaUpdateExistingUserApiResponse, FaunaUpdateUserReqBody, LoggedInUser } from '../types/types';
+import type { LoggedInUser } from '../types/types';
 import { CustomFormikInput } from './CustomFormikInput';
 import LoadingSpinner from './LoadingSpinner';
 import { PopoverMenu } from './PopoverMenu';
@@ -127,88 +128,10 @@ const UserSettings = ({
     if (file) {
       setFile(file);
     }
-    // const reader = new FileReader();
-
-    // reader.addEventListener(
-    //   'load',
-    //   function () {
-    //     // convert image file to base64 string
-    //     if (reader.result) {
-    //       setFormState((prev) => ({ ...prev, icon: reader.result as string, imageFile: file }));
-    //     }
-    //   },
-    //   false,
-    // );
-
-    // if (file) {
-    //   reader.readAsDataURL(file);
-    // }
   };
 
   const handleOpenPopover = () => setIsOpen((prev) => !prev);
   const handleClosePopover = () => setIsOpen(false);
-
-  async function getSignature(payload: object) {
-    try {
-      const response = await fetch('/api/cloudinary/sign', {
-        headers: {
-          Authorization: `Bearer ${user.token?.access_token}`,
-        },
-        method: 'POST',
-        body: JSON.stringify(payload),
-      });
-      if (response.ok) {
-        const data = await response.json();
-        const { signature, timestamp } = data;
-        return { signature, timestamp };
-      }
-      throw Error(response.status.toString());
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  async function postImageToCloudinary(file: File | string, name: string) {
-    try {
-      if (!file) return;
-      const url = `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/upload`;
-
-      const normalizeName = name.replace(/\s+/g, '-');
-      const payload = {
-        public_id: `public-thumb-${normalizeName}`,
-        folder: normalizeName,
-        transformation: 'c_thumb,f_auto,q_auto,w_256',
-      };
-
-      const singatureRes = await getSignature(payload);
-      if (!singatureRes) throw Error('Failed to create signature');
-      const { signature, timestamp } = singatureRes;
-
-      const formData = new FormData();
-
-      formData.append('file', file);
-      formData.append('signature', signature);
-      formData.append('timestamp', timestamp);
-      Object.entries(payload).forEach(([key, value]) => {
-        formData.append(key, value);
-      });
-      formData.append('api_key', process.env.NEXT_PUBLIC_CLOUDINARY_KEY as string);
-
-      const response = await fetch(url, {
-        method: 'post',
-        body: formData,
-      });
-      if (response.ok) {
-        const json = await response.json();
-        return json;
-      }
-      throw Error(
-        JSON.stringify({ message: 'Failed to post to cloudinary', response: JSON.stringify(response, null, 2) }),
-      );
-    } catch (error) {
-      console.error(error);
-    }
-  }
 
   const handleFormSubmit: (
     values: FormValues,
@@ -222,54 +145,55 @@ const UserSettings = ({
     try {
       if (isError) setIsError(false);
       if (isSuccess) setIsError(false);
-      const cloudinaryData: CloudinaryUploadUserImageResponse = await postImageToCloudinary(
+      if (!user.token?.access_token) throw Error('No Identity Access Token Found');
+
+      const { access_token } = user.token;
+
+      const normalizeName = values.name.trim().replace(/\s+/g, '-');
+      const cloudinaryPayload = {
+        public_id: `public-thumb-${normalizeName}`,
+        folder: normalizeName,
+        transformation: 'c_thumb,f_auto,q_auto,w_256',
+      };
+
+      const cloudinaryData: CloudinaryUploadUserImageResponse = await postProfilePictureToCloudinary(
         formState.imageFile,
-        values.name,
+        access_token,
+        cloudinaryPayload,
       );
       if (!cloudinaryData) throw Error('Error Uploading To Image');
 
-      const payload: FaunaUpdateUserReqBody = {
+      const userProfilePayload = {
         name: values.name,
         alias: values.alias,
         lastUpdated: values.lastUpdated,
         icon: cloudinaryData.secure_url,
         fauna_access_token: user.fauna_access_token.secret,
       };
-      const res = await fetch('/api/fauna/userprofile/updateuserprofile', {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.token?.access_token}`,
-        },
-        method: 'PATCH',
-        body: JSON.stringify(payload),
-      });
-      if (res.ok) {
-        const json: FaunaUpdateExistingUserApiResponse = await res.json();
-        if (!json?.result) throw Error(`Failed To Update User: ${JSON.stringify(json, null, 2)}`);
 
-        const updatedFaunaUserState = json.result.data;
-
-        setFieldValue('lastUpdated', updatedFaunaUserState.lastUpdated);
-        setFormState({
-          ...updatedFaunaUserState,
-          lastUpdated: updatedFaunaUserState.lastUpdated,
-          imageFile: updatedFaunaUserState.icon,
-          initialIcon: updatedFaunaUserState.icon,
-        });
-        setUser((prev) => {
-          if (!prev) return prev;
-          return {
-            ...prev,
-            faunaUser: {
-              ...updatedFaunaUserState,
-            },
-          };
-        });
-        setIsSuccess(true);
-      } else {
-        const { status, statusText } = res;
-        throw Error(JSON.stringify({ status, statusText }));
+      const resUpdate = await updateUserProfile(userProfilePayload, access_token);
+      if (!resUpdate?.result) {
+        throw Error('Failed To Update User Profile');
       }
+      const { data: updatedUser } = resUpdate.result;
+
+      setFieldValue('lastUpdated', updatedUser.lastUpdated);
+      setFormState({
+        ...updatedUser,
+        lastUpdated: updatedUser.lastUpdated,
+        imageFile: updatedUser.icon,
+        initialIcon: updatedUser.icon,
+      });
+      setUser((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          faunaUser: {
+            ...updatedUser,
+          },
+        };
+      });
+      setIsSuccess(true);
     } catch (error) {
       console.error(error);
       setIsError(true);
