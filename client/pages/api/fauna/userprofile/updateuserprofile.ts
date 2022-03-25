@@ -10,7 +10,7 @@ const handler: NextApiHandler = async (req, res) => {
   try {
     const netlifyIdentityToken = req.headers.authorization;
 
-    const payload: FaunaUpdateUserReqBody = req.body;
+    const payload: FaunaUpdateUserReqBody = JSON.parse(req.body);
 
     const faunaAccessToken = payload.fauna_access_token;
 
