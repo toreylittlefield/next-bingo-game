@@ -16,7 +16,7 @@ import {
   Alert,
   AlertIcon,
 } from '@chakra-ui/react';
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Formik, Form, FormikHelpers } from 'formik';
 import type {
   CloudinaryUploadUserImageResponse,
@@ -95,7 +95,9 @@ const UserSettings = ({
 
   const [readerResult, error, file, loading, setFile] = useFileReader({
     readType: 'readAsDataURL',
-    onloadCB: (result, file) => setFormState((prev) => ({ ...prev, icon: result as string, imageFile: file })),
+    onloadCB: useCallback((result, file) => {
+      setFormState((prev) => ({ ...prev, icon: result, imageFile: file }));
+    }, []),
   });
 
   const countDays = (() => {
@@ -216,7 +218,7 @@ const UserSettings = ({
   const handleFormSubmit: (
     values: FormValues,
     formikHelpers: FormikHelpers<FormValues>,
-  ) => void | Promise<any> = async (values, { setSubmitting }) => {
+  ) => void | Promise<any> = async (values, { setSubmitting, setFieldValue, setFieldTouched }) => {
     if (isConfirmed === false) {
       setIsConfirmed(true);
       setSubmitting(false);
@@ -250,17 +252,17 @@ const UserSettings = ({
         const json: FaunaUpdateExistingUserApiResponse = await res.json();
         if (!json?.result) throw Error(`Failed To Update User: ${JSON.stringify(json, null, 2)}`);
 
-        const { alias, icon, lastUpdated, name } = json.result.data;
+        const updatedFaunaUserState = json.result.data;
 
-        const updatedFaunaUserState = { alias, icon, lastUpdated, name };
-
+        setFieldValue('lastUpdated', updatedFaunaUserState.lastUpdated);
         setFormState({
           ...updatedFaunaUserState,
+          lastUpdated: updatedFaunaUserState.lastUpdated,
           imageFile: updatedFaunaUserState.icon,
           initialIcon: updatedFaunaUserState.icon,
         });
         setUser((prev) => {
-          if (!prev?.faunaUser) return prev;
+          if (!prev) return prev;
           return {
             ...prev,
             faunaUser: {
@@ -294,7 +296,7 @@ const UserSettings = ({
         validationSchema={canEdit === true ? updateUserYupSchemaFrontend : undefined}
         onSubmit={handleFormSubmit}
       >
-        {({ isSubmitting, errors, initialValues, handleReset, submitForm }) => (
+        {({ isSubmitting, errors, handleReset }) => (
           <Form>
             {isSubmitting ? (
               <LoadingSpinner
@@ -398,6 +400,7 @@ const UserSettings = ({
                 <CustomFormikInput
                   _placeholder={{ color: 'gray.500' }}
                   inputProps={{ type: 'text' }}
+                  isInvalid={false}
                   helperText={!canEdit ? `You can update your profile in ${daysRemaining} days` : ''}
                   isReadOnly
                   placeholder="Last Updated"
