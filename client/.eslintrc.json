@@ -2,10 +2,8 @@
   // ...
   "extends": [
     "next/core-web-vitals",
-    // "next/babel",
     "plugin:@next/next/recommended",
     "prettier" // Add "prettier" last. This will turn off eslint rules conflicting with prettier. This is not what will format our code.
   ],
   "plugins": ["@typescript-eslint"]
-  // ...
 }
