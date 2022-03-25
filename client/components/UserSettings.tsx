@@ -1,36 +1,31 @@
 import {
+  Alert,
+  AlertIcon,
+  Avatar,
+  AvatarBadge,
   Button,
-  Grid,
-  Text,
+  ButtonProps,
+  Center,
   Flex,
   FormControl,
   FormLabel,
+  Grid,
   Heading,
-  Stack,
-  useColorModeValue,
-  Avatar,
-  AvatarBadge,
   IconButton,
-  Center,
-  ButtonProps,
-  Alert,
-  AlertIcon,
+  Stack,
+  Text,
+  useColorModeValue,
 } from '@chakra-ui/react';
+import { Form, Formik, FormikHelpers } from 'formik';
 import React, { useCallback, useRef, useState } from 'react';
-import { Formik, Form, FormikHelpers } from 'formik';
-import type {
-  CloudinaryUploadUserImageResponse,
-  FaunaUpdateExistingUserApiResponse,
-  FaunaUpdateUserReqBody,
-  LoggedInUser,
-} from '../types/types';
-import { CustomFormikInput } from './CustomFormikInput';
-import { updateUserYupSchemaFrontend } from '../lib/yup-schemas/yup-schemas';
 import { AiFillCloseCircle } from 'react-icons/ai';
+import { useFileReader } from '../hooks/useFileReader';
+import { updateUserYupSchemaFrontend } from '../lib/yup-schemas/yup-schemas';
+import type { CloudinaryUploadUserImageResponse } from '../types/cloudinary';
+import type { FaunaUpdateExistingUserApiResponse, FaunaUpdateUserReqBody, LoggedInUser } from '../types/types';
+import { CustomFormikInput } from './CustomFormikInput';
 import LoadingSpinner from './LoadingSpinner';
 import { PopoverMenu } from './PopoverMenu';
-import Image from 'next/image';
-import { useFileReader } from '../hooks/useFileReader';
 
 type GenericButtonProps = {
   buttonText?: string;
