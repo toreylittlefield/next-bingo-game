@@ -6,7 +6,13 @@ export type TokenParams =
 
 export type ApiRequestOptions = (
   | { url: '/api/fauna/auth/token'; method?: 'GET'; searchParams: TokenParams }
-  | { url: '/api/fauna/userprofile/me/update'; method: 'PATCH'; searchParams?: '' }
+  | {
+      url: '/api/fauna/userprofile/updateuserprofile';
+      method: 'PATCH';
+      searchParams?: '';
+      options: { body: string };
+    }
+  | { url: '/api/cloudinary/sign'; method: 'POST'; searchParams?: ''; options: { body: string } }
 ) & { options?: RequestInit; identityAccessToken: string };
 
 export async function apiRequest<ApiResponse>({
