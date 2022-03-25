@@ -11,6 +11,5 @@
     // "setup-db": true,
     "**/.netlify": true,
     "**/.next": true
-  },
-  "eslint.enable": false
+  }
 }
