@@ -152,17 +152,13 @@ const UserSettings = ({
         transformation: 'c_thumb,f_auto,q_auto,w_256',
       };
 
-      const cloudinaryData: CloudinaryUploadUserImageResponse = await postProfilePictureToCloudinary(
-        file,
-        access_token,
-        cloudinaryPayload,
-      );
+      const cloudinaryData = await postProfilePictureToCloudinary(file, access_token, cloudinaryPayload);
 
       const userProfilePayload = {
         name: values.name,
         alias: values.alias,
         lastUpdated: values.lastUpdated,
-        icon: cloudinaryData.secure_url ?? values.icon,
+        icon: cloudinaryData?.secure_url ?? values.icon,
         fauna_access_token: user.fauna_access_token.secret,
       };
 
