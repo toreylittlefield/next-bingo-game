@@ -8,11 +8,12 @@ type ErrorType = ProgressEvent<FileReader> | null | unknown;
 
 type SetFileType = (value: React.SetStateAction<FileType>) => void;
 
+type ResetFileReaderType = (image?: string, file?: File) => void;
+
 type FileType = File | null;
 
 type UseFileReaderOptions = {
   readType: ReadAsType;
-  onloadCB: (result: ReaderResultType, ...args: any[]) => void;
 };
 
 type ReturnType = [
@@ -21,10 +22,11 @@ type ReturnType = [
   file: FileType,
   loading: boolean,
   setFile: SetFileType,
+  reset: ResetFileReaderType,
 ];
 
 const useFileReader = (options: Partial<UseFileReaderOptions>): ReturnType => {
-  const { readType = 'readAsDataURL', onloadCB = () => {} } = options;
+  const { readType = 'readAsDataURL' } = options;
   const [file, setFile] = useState<FileType>(null);
   const [error, setError] = useState<ErrorType>(null);
   const [readerResult, setReaderResult] = useState<ReaderResultType>(undefined);
@@ -42,7 +44,6 @@ const useFileReader = (options: Partial<UseFileReaderOptions>): ReturnType => {
     fileReader.onload = (event) => {
       const result = event.target?.result;
       setReaderResult(result);
-      onloadCB(result, file);
     };
 
     fileReader.onloadend = () => {
@@ -62,9 +63,15 @@ const useFileReader = (options: Partial<UseFileReaderOptions>): ReturnType => {
     return () => {
       fileReader = null;
     };
-  }, [file, onloadCB, readType]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [file?.name, readType]);
 
-  return [readerResult, error, file, loading, setFile];
+  function resetFileReader(image?: string, file?: File) {
+    setFile(file ?? null);
+    setReaderResult(image);
+  }
+
+  return [readerResult, error, file, loading, setFile, resetFileReader];
 };
 
 export { useFileReader };
