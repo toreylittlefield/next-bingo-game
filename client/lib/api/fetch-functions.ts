@@ -1,3 +1,4 @@
+import { CloudinaryUploadUserImageResponse } from '../../types/cloudinary';
 import type { FaunaUpdateUserReqBody, UpdateFaunaExistingUserResponse } from '../../types/types';
 import { apiRequest } from './apiservice';
 
@@ -42,13 +43,15 @@ type PayloadCloudinary = {
   transform: string;
 };
 
+type CloudinaryResponseType = CloudinaryUploadUserImageResponse | undefined;
+
 export async function postProfilePictureToCloudinary(
-  file: File | string,
+  file: File | null,
   access_token: string,
   cloudinaryPayload: Partial<PayloadCloudinary>,
-) {
+): Promise<CloudinaryResponseType> {
   try {
-    if (!file) throw Error('Error, no file to Upload');
+    if (!file) return;
 
     const url = `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/upload`;
 
