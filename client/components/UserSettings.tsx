@@ -159,7 +159,7 @@ const UserSettings = ({
       const cloudinaryData = await cloudinaryDataRef.current;
 
       if (!cloudinaryData || cloudinaryData.error) {
-        return;
+        throw Error(cloudinaryData?.message ?? 'Cloudinary Upload Error');
       }
 
       const userProfilePayload = {
