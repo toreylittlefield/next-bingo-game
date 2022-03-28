@@ -17,12 +17,11 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import { Form, Formik, FormikHelpers } from 'formik';
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { AiFillCloseCircle } from 'react-icons/ai';
 import { useFileReader } from '../hooks/useFileReader';
 import { postProfilePictureToCloudinary, updateUserProfile } from '../lib/api/fetch-functions';
 import { updateUserYupSchemaFrontend } from '../lib/yup-schemas/yup-schemas';
-import type { CloudinaryUploadUserImageResponse } from '../types/cloudinary';
 import type { LoggedInUser } from '../types/types';
 import { CustomFormikInput } from './CustomFormikInput';
 import LoadingSpinner from './LoadingSpinner';
@@ -80,9 +79,33 @@ const UserSettings = ({
   const [isError, setIsError] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const cloudinaryDataRef = useRef<ReturnType<typeof postProfilePictureToCloudinary>>();
+
+  const access_token = user.token?.access_token;
+  const userId = user.id;
+
+  const postToCloudinaryCallback = useCallback(
+    async (file: File) => {
+      try {
+        if (!access_token) return;
+
+        const cloudinaryPayload = {
+          public_id: `public-thumb-${userId}`,
+          folder: userId,
+          transformation: 'c_thumb,f_auto,q_auto,w_256',
+        };
+
+        cloudinaryDataRef.current = postProfilePictureToCloudinary(file, access_token, cloudinaryPayload);
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    [access_token, userId],
+  );
 
   const [handleInputChangeFile, readerResult, file, error, loading, resetFileReader] = useFileReader({
     readType: 'readAsDataURL',
+    onResultCallback: postToCloudinaryCallback,
   });
 
   const userCanEditDates = function closure(faunaUser: LoggedInUser['faunaUser']) {
@@ -133,14 +156,7 @@ const UserSettings = ({
 
       const { access_token } = user.token;
 
-      const whiteSpaceToDash = values.name.trim().replace(/\s+/g, '-');
-      const cloudinaryPayload = {
-        public_id: `public-thumb-${whiteSpaceToDash}`,
-        folder: whiteSpaceToDash,
-        transformation: 'c_thumb,f_auto,q_auto,w_256',
-      };
-
-      const cloudinaryData = await postProfilePictureToCloudinary(file, access_token, cloudinaryPayload);
+      const cloudinaryData = await cloudinaryDataRef.current;
 
       const userProfilePayload = {
         name: values.name,
@@ -171,6 +187,7 @@ const UserSettings = ({
         };
       });
       setIsSuccess(true);
+      cloudinaryDataRef.current = undefined;
     } catch (error) {
       console.error(error);
       setIsError(true);
