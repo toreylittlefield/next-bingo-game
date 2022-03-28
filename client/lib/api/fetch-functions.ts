@@ -43,7 +43,17 @@ type PayloadCloudinary = {
   transform: string;
 };
 
-type CloudinaryResponseType = CloudinaryUploadUserImageResponse | undefined;
+type SuccessCloudinary = {
+  error: false;
+  data: CloudinaryUploadUserImageResponse | null;
+};
+
+type FailedCloudinary = {
+  error: true;
+  message: string;
+};
+
+type CloudinaryResponseType = SuccessCloudinary | FailedCloudinary;
 
 export async function postProfilePictureToCloudinary(
   file: File | null,
@@ -51,7 +61,7 @@ export async function postProfilePictureToCloudinary(
   cloudinaryPayload: Partial<PayloadCloudinary>,
 ): Promise<CloudinaryResponseType> {
   try {
-    if (!file) return;
+    if (!file) return { error: false, data: null };
 
     const url = `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/upload`;
 
@@ -75,12 +85,16 @@ export async function postProfilePictureToCloudinary(
     });
     if (response.ok) {
       const json = await response.json();
-      return json;
+      return { error: false, data: { ...json } };
     }
     throw Error(
       JSON.stringify({ message: 'Failed to post to cloudinary', response: JSON.stringify(response, null, 2) }),
     );
   } catch (error) {
     console.error(error);
+    return {
+      error: true,
+      message: error instanceof Error ? error.message : 'Failed To Post To Cloudinary: Unknown Reason',
+    };
   }
 }
