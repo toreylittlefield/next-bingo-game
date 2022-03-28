@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Heading, Stack, Text, Tooltip } from '@chakra-ui/react';
+import { Box, Button, Flex, Heading, Stack } from '@chakra-ui/react';
 import Image from 'next/image';
 import React, { Fragment, useContext } from 'react';
 import AuthContext from '../stores/netlifyIdentityContext';
