@@ -158,11 +158,15 @@ const UserSettings = ({
 
       const cloudinaryData = await cloudinaryDataRef.current;
 
+      if (!cloudinaryData || cloudinaryData.error) {
+        return;
+      }
+
       const userProfilePayload = {
         name: values.name,
         alias: values.alias,
         lastUpdated: values.lastUpdated,
-        icon: cloudinaryData?.secure_url ?? values.icon,
+        icon: cloudinaryData.data?.secure_url ?? values.icon,
         fauna_access_token: user.fauna_access_token.secret,
       };
 
