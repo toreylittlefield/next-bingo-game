@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 type ReadAsType = keyof Pick<FileReader, 'readAsArrayBuffer' | 'readAsBinaryString' | 'readAsText' | 'readAsDataURL'>;
 
@@ -12,8 +12,11 @@ type ResetFileReaderType = (image?: string, file?: File) => void;
 
 type FileType = File | null;
 
+type OnResultCallbackType = (file: File, ...args: any[]) => void;
+
 type UseFileReaderOptions = {
   readType: ReadAsType;
+  onResultCallback: OnResultCallbackType;
 };
 
 type InputChangeFile = (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -29,13 +32,22 @@ type ReturnType = [
 ];
 
 const useFileReader = (options: Partial<UseFileReaderOptions>): ReturnType => {
-  const { readType = 'readAsDataURL' } = options;
+  const { readType = 'readAsDataURL', onResultCallback } = options;
   const [file, setFile] = useState<FileType>(null);
   const [error, setError] = useState<ErrorType>(null);
   const [readerResult, setReaderResult] = useState<ReaderResultType>(undefined);
   const [loading, setLoading] = useState(false);
 
   const memoReadType = useMemo(() => readType, [readType]);
+
+  const onResCallback = useCallback(
+    (file: File, readerResult: string | ArrayBuffer, ...args: any[]) => {
+      if (typeof onResultCallback === 'function') {
+        onResultCallback(file, ...args);
+      }
+    },
+    [onResultCallback],
+  );
 
   const handleInputChangeFile = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,7 +69,9 @@ const useFileReader = (options: Partial<UseFileReaderOptions>): ReturnType => {
 
         fileReader.onload = (event) => {
           const result = event.target?.result;
+          if (!result) throw Error('No Result from File Reader on Load Event');
           setReaderResult(result);
+          onResCallback(fileFromReader, result);
         };
 
         fileReader.onloadend = () => {
@@ -76,7 +90,7 @@ const useFileReader = (options: Partial<UseFileReaderOptions>): ReturnType => {
         setError(error);
       }
     },
-    [memoReadType],
+    [memoReadType, onResCallback],
   );
 
   function resetFileReader(image?: string, file?: File) {
