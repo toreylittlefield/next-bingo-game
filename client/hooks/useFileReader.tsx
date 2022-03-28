@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 type ReadAsType = keyof Pick<FileReader, 'readAsArrayBuffer' | 'readAsBinaryString' | 'readAsText' | 'readAsDataURL'>;
 
@@ -16,13 +16,16 @@ type UseFileReaderOptions = {
   readType: ReadAsType;
 };
 
+type InputChangeFile = (event: React.ChangeEvent<HTMLInputElement>) => void;
+
 type ReturnType = [
+  handleInputChangeFile: InputChangeFile,
   readerResult: ReaderResultType,
-  error: ErrorType,
   file: FileType,
+  error: ErrorType,
   loading: boolean,
+  resetFileReader: ResetFileReaderType,
   setFile: SetFileType,
-  reset: ResetFileReaderType,
 ];
 
 const useFileReader = (options: Partial<UseFileReaderOptions>): ReturnType => {
@@ -32,46 +35,56 @@ const useFileReader = (options: Partial<UseFileReaderOptions>): ReturnType => {
   const [readerResult, setReaderResult] = useState<ReaderResultType>(undefined);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (!file) return;
+  const memoReadType = useMemo(() => readType, [readType]);
 
-    let fileReader: FileReader | null = new FileReader();
+  const handleInputChangeFile = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      event.preventDefault();
 
-    fileReader.onloadstart = () => {
-      setLoading(true);
-    };
+      if (!event.target.files?.length) return;
+      const fileFromReader = event.target.files[0];
 
-    fileReader.onload = (event) => {
-      const result = event.target?.result;
-      setReaderResult(result);
-    };
+      if (fileFromReader) {
+        setFile(fileFromReader);
+      }
+      let fileReader: FileReader | null = new FileReader();
+      try {
+        fileReader[memoReadType](fileFromReader);
 
-    fileReader.onloadend = () => {
-      setLoading(false);
-    };
+        fileReader.onloadstart = () => {
+          setLoading(true);
+        };
 
-    fileReader.onerror = (event) => {
-      setError(event);
-    };
+        fileReader.onload = (event) => {
+          const result = event.target?.result;
+          setReaderResult(result);
+        };
 
-    try {
-      fileReader[readType](file);
-    } catch (error) {
-      setError(error);
-    }
+        fileReader.onloadend = () => {
+          setLoading(false);
+        };
 
-    return () => {
-      fileReader = null;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [file?.name, readType]);
+        fileReader.onerror = (event) => {
+          setError(event);
+        };
+
+        fileReader.onabort = () => {
+          setError(false);
+          setLoading(false);
+        };
+      } catch (error) {
+        setError(error);
+      }
+    },
+    [memoReadType],
+  );
 
   function resetFileReader(image?: string, file?: File) {
     setFile(file ?? null);
     setReaderResult(image);
   }
 
-  return [readerResult, error, file, loading, setFile, resetFileReader];
+  return [handleInputChangeFile, readerResult, file, error, loading, resetFileReader, setFile];
 };
 
 export { useFileReader };

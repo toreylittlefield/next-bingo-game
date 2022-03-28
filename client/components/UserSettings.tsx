@@ -81,7 +81,7 @@ const UserSettings = ({
   const [isSuccess, setIsSuccess] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
 
-  const [readerResult, error, file, loading, setFile, resetFileReader] = useFileReader({
+  const [handleInputChangeFile, readerResult, file, error, loading, resetFileReader] = useFileReader({
     readType: 'readAsDataURL',
   });
 
@@ -113,18 +113,6 @@ const UserSettings = ({
       avatarInputRef.current.click();
     }
     event.preventDefault();
-  };
-
-  const handleReadFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    event.preventDefault();
-
-    if (!event.target.files?.length || !avatarInputRef.current) return;
-
-    const fileFromReader = event.target.files[0];
-
-    if (fileFromReader) {
-      setFile(fileFromReader);
-    }
   };
 
   const handleOpenPopover = () => setIsOpen((prev) => !prev);
@@ -295,7 +283,7 @@ const UserSettings = ({
                     inputProps={{
                       type: 'file',
                       value: '',
-                      onChange: handleReadFileChange,
+                      onChange: handleInputChangeFile,
                       accept: 'image/*',
                     }}
                     isReadOnly={!canEdit}
