@@ -22,7 +22,12 @@ export default function NavBar() {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
-    <Box position={{ base: 'fixed', md: 'static' }} bottom={{ base: 0 }} width={{ base: '100%', md: 'full' }}>
+    <Box
+      zIndex={{ base: 5, md: 'auto' }}
+      position={{ base: 'fixed', md: 'static' }}
+      bottom={{ base: 0 }}
+      width={{ base: '100%', md: 'full' }}
+    >
       {/* Sliding Drawer On Mobile Or Links On Medium Up Screens */}
       <Drawer
         autoFocus={false}
