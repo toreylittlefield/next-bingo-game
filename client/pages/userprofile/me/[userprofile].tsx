@@ -11,16 +11,15 @@ const UserProfile: NextPage = () => {
   const { isReady, replace } = router;
 
   useEffect(() => {
-    if (!isReady || !user?.user_metadata.full_name) return;
-    if (decodeURIComponent(location.pathname) === decodeURIComponent(`/userprofile/me/${user.user_metadata.full_name}`))
-      return;
+    if (!isReady || !user?.faunaUser.name) return;
+    if (decodeURIComponent(location.pathname) === decodeURIComponent(`/userprofile/me/${user.faunaUser.name}`)) return;
     replace(
       {
-        query: { userprofile: user.user_metadata.full_name },
+        query: { userprofile: encodeURIComponent(user.faunaUser.name) },
       },
       undefined,
     );
-  }, [isReady, user?.user_metadata.full_name, replace]);
+  }, [isReady, user?.faunaUser.name, replace]);
 
   if ((authReady && !user?.token?.access_token && user?.fauna_access_token?.secret) || !transition)
     return <LoadingSpinner>Loading User Profile</LoadingSpinner>;
