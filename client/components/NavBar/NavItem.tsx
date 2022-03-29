@@ -22,9 +22,9 @@ const NavItem = ({ icon, href, children, ...rest }: NavItemProps) => {
           cursor="pointer"
           _hover={{
             bg: 'whiteAlpha.300',
-            color: { base: '#831F3B', md: 'whiteAlpha.900' },
+            color: { base: 'whiteAlpha.900', md: 'whiteAlpha.900' },
           }}
-          color={{ base: 'blackAlpha.900', md: 'whiteAlpha.800' }}
+          color={{ base: 'whiteAlpha.900', md: 'whiteAlpha.800' }}
           {...rest}
         >
           {icon && (
@@ -32,7 +32,7 @@ const NavItem = ({ icon, href, children, ...rest }: NavItemProps) => {
               mr="4"
               fontSize={{ base: 20, lg: 18, xl: 24 }}
               _groupHover={{
-                color: { base: '#831F3B', md: 'whiteAlpha.900' },
+                color: { base: 'whiteAlpha.900', md: 'whiteAlpha.900' },
               }}
               as={icon}
             />
@@ -45,4 +45,3 @@ const NavItem = ({ icon, href, children, ...rest }: NavItemProps) => {
 };
 
 export { NavItem };
-
