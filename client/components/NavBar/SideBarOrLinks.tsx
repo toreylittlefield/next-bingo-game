@@ -1,6 +1,7 @@
-import { Box, BoxProps, CloseButton, Flex, Text, useColorModeValue } from '@chakra-ui/react';
+import { Box, BoxProps, Flex, IconButton, Text, useColorModeValue } from '@chakra-ui/react';
 import Image from 'next/image';
 import NextLink from 'next/link';
+import { AiOutlineClose } from 'react-icons/ai';
 import { LinkItems } from './LinkItems';
 import { NavItem } from './NavItem';
 
@@ -14,9 +15,12 @@ const SideBarOrLinks = ({ onClose, ...rest }: SidebarProps) => {
       transition="3s ease"
       borderRight="1px"
       borderRightColor={useColorModeValue('gray.200', 'gray.700')}
-      w={{ base: 'xs', lg: 60 }}
+      w={{ base: 'full', lg: 60 }}
       pos="fixed"
       h="full"
+      display={{ base: 'flex', md: 'block' }}
+      flexDir={{ base: 'column', md: 'row' }}
+      justifyContent={{ base: 'space-between', md: 'center' }}
       {...rest}
     >
       <Flex h="28" alignItems="center" mx="8" gap={{ base: '0', md: 5 }} justifyContent="space-between">
@@ -32,30 +36,45 @@ const SideBarOrLinks = ({ onClose, ...rest }: SidebarProps) => {
         </NextLink>
         <Text
           fontWeight="bold"
+          color={'whiteAlpha.800'}
           fontSize={{ base: 'md', md: 'sm', lg: 'lg' }}
           letterSpacing={{ base: '0rem', lg: '-.1rem' }}
         >
           Boar Coders Bingo
         </Text>
-        <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose} />
       </Flex>
       <Flex
-        display={{ base: 'block', md: 'flex' }}
-        h={{ base: '', lg: 'auto' }}
+        display={{ base: 'flex', md: 'flex' }}
+        h={{ base: undefined, md: undefined, lg: 'auto' }}
         alignItems="center"
-        justifyContent="space-evenly"
+        justifyContent={{ base: 'center', md: 'space-evenly' }}
+        alignContent={{ base: 'center' }}
         flexWrap={'wrap'}
-        flex="auto"
+        py={{ base: 4, md: 0 }}
+        pr={{ base: 0, md: 3 }}
+        gap={{ base: 6, md: 0 }}
+        flexBasis={{ base: undefined, md: '60%' }}
       >
         {LinkItems.map((link) => (
           <NavItem key={link.name} href={link.href} icon={link.icon}>
             {link.name}
           </NavItem>
         ))}
+        <Box width={'full'} display={{ base: 'grid', md: 'none' }} placeContent={'center'}>
+          <IconButton
+            aria-label="Close Drawer"
+            display={{ base: 'flex', md: 'none' }}
+            size="lg"
+            onClick={onClose}
+            icon={<AiOutlineClose size={'75%'} />}
+            isRound
+            color={'whiteAlpha.800'}
+            variant="outline"
+          />
+        </Box>
       </Flex>
     </Box>
   );
 };
 
 export { SideBarOrLinks };
-
