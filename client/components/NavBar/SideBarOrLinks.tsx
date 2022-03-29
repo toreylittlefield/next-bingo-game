@@ -16,8 +16,8 @@ const SideBarOrLinks = ({ onClose, ...rest }: SidebarProps) => {
       borderRight="1px"
       borderRightColor={useColorModeValue('gray.200', 'gray.700')}
       w={{ base: 'full', lg: 60 }}
+      h="inherit"
       pos="fixed"
-      h="95vh"
       display={{ base: 'flex', md: 'block' }}
       flexDir={{ base: 'column', md: 'row' }}
       justifyContent={{ base: 'space-between', md: 'center' }}
@@ -44,9 +44,10 @@ const SideBarOrLinks = ({ onClose, ...rest }: SidebarProps) => {
         </Text>
       </Flex>
       <Flex
-        display={{ base: 'flex', md: 'flex' }}
+        display={{ base: 'flex', md: 'grid' }}
         h={{ base: undefined, md: undefined, lg: 'auto' }}
         alignItems="center"
+        gridTemplateColumns={{ base: undefined, md: '1fr 1fr', lg: 'repeat(auto-fit, minmax(150px, 1fr))' }}
         justifyContent={{ base: 'center', md: 'space-evenly' }}
         alignContent={{ base: 'center' }}
         flexWrap={'wrap'}

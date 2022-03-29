@@ -29,13 +29,13 @@ export default function NavBar() {
         isOpen={isOpen}
         placement="right"
         onClose={onClose}
-        isFullHeight
         returnFocusOnClose={false}
         onOverlayClick={onClose}
         size="full"
         closeOnEsc
       >
         <DrawerContent
+          h="full"
           bg={'whiteAlpha.50'}
           bgGradient="linear(to-l,#313084be, #831f3bbe)"
           backdropFilter={'saturate(10%) blur(3px)'}
