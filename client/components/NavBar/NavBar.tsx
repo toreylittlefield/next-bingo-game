@@ -22,27 +22,28 @@ export default function NavBar() {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
-    <Box>
+    <Box position={{ base: 'fixed', md: 'static' }} bottom={{ base: 0 }} width={{ base: '100%', md: 'full' }}>
+      {/* Sliding Drawer On Mobile Or Links On Medium Up Screens */}
       <Drawer
         autoFocus={false}
         isOpen={isOpen}
-        placement="left"
+        placement="right"
         onClose={onClose}
         returnFocusOnClose={false}
         onOverlayClick={onClose}
-        size="xs"
+        size="full"
+        closeOnEsc
       >
-        <DrawerContent>
+        <DrawerContent
+          bg={'whiteAlpha.50'}
+          bgGradient="linear(to-l,#313084be, #831f3bbe)"
+          backdropFilter={'saturate(10%) blur(3px)'}
+        >
           <SideBarOrLinks onClose={onClose} />
         </DrawerContent>
       </Drawer>
 
-      <NavigationBar
-        onOpen={onOpen}
-        onClose={onClose}
-        color="whiteAlpha.900"
-        bgGradient="linear(to-l,#313084, #831F3B)"
-      />
+      <NavigationBar onOpen={onOpen} onClose={onClose} />
     </Box>
   );
 }
@@ -58,9 +59,10 @@ const NavigationBar = ({ onOpen, onClose, ...rest }: NavigationBarProps) => {
       ml={{ base: 0, lg: 0 }}
       pr={{ base: 4, lg: 4 }}
       pl={{ base: 4, lg: 0 }}
-      py={{ base: '', md: 2, lg: 0 }}
+      py={{ base: 4, md: 3, lg: 2 }}
       alignItems="center"
-      // bg={useColorModeValue('white', 'gray.900')}
+      color="whiteAlpha.900"
+      bgGradient="linear(to-l,#313084, #831F3B)"
       borderBottomWidth="1px"
       borderBottomColor={useColorModeValue('gray.200', 'gray.700')}
       justifyContent={{ base: 'space-between', lg: 'flex-end' }}
@@ -76,15 +78,17 @@ const NavigationBar = ({ onOpen, onClose, ...rest }: NavigationBarProps) => {
         justifyContent={'space-between'}
       />
 
+      {/* Mobile Logo Only */}
+      <Logo />
+
       <IconButton
         display={{ base: 'flex', md: 'none' }}
         onClick={onOpen}
         variant="outline"
         aria-label="open menu"
+        size={'md'}
         icon={<FiMenu />}
       />
-
-      <Logo />
 
       <HStack spacing={{ base: '0', md: '6' }} flexDirection={{ base: 'row', md: 'column', lg: 'row' }}>
         {!user && (
