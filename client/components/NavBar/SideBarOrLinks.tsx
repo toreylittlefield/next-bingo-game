@@ -17,7 +17,6 @@ const SideBarOrLinks = ({ onClose, ...rest }: SidebarProps) => {
       borderRightColor={useColorModeValue('gray.200', 'gray.700')}
       w={{ base: 'full', lg: 60 }}
       h="inherit"
-      pos="fixed"
       display={{ base: 'flex', md: 'block' }}
       flexDir={{ base: 'column', md: 'row' }}
       justifyContent={{ base: 'space-between', md: 'center' }}
@@ -61,15 +60,16 @@ const SideBarOrLinks = ({ onClose, ...rest }: SidebarProps) => {
             {link.name}
           </NavItem>
         ))}
-        <Box width={'full'} display={{ base: 'grid', md: 'none' }} placeContent={'center'}>
+        <Box width={'100%'} display={{ base: 'grid', md: 'none' }} placeContent={'center'}>
           <IconButton
             aria-label="Close Drawer"
             display={{ base: 'flex', md: 'none' }}
             size="lg"
             onClick={onClose}
-            icon={<AiOutlineClose size={'75%'} />}
+            icon={<AiOutlineClose size={'35px'} />}
             isRound
-            color={'whiteAlpha.800'}
+            color={'orange.200'}
+            colorScheme={'orange'}
             variant="outline"
           />
         </Box>
