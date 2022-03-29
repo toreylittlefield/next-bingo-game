@@ -29,6 +29,7 @@ export default function NavBar() {
         isOpen={isOpen}
         placement="right"
         onClose={onClose}
+        isFullHeight
         returnFocusOnClose={false}
         onOverlayClick={onClose}
         size="full"

@@ -17,7 +17,7 @@ const SideBarOrLinks = ({ onClose, ...rest }: SidebarProps) => {
       borderRightColor={useColorModeValue('gray.200', 'gray.700')}
       w={{ base: 'full', lg: 60 }}
       pos="fixed"
-      h="full"
+      h="95vh"
       display={{ base: 'flex', md: 'block' }}
       flexDir={{ base: 'column', md: 'row' }}
       justifyContent={{ base: 'space-between', md: 'center' }}
