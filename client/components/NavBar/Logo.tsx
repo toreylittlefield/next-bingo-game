@@ -12,7 +12,6 @@ const Logo = () => {
         justifyContent={'center'}
         gap={2}
         cursor="pointer"
-        flex={'auto'}
       >
         <Image
           src="https://res.cloudinary.com/boar-images/image/upload/v1639182352/boar-coders-assets/boarcoders-tshirt_oshejd.png"
