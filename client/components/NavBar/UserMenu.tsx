@@ -13,6 +13,7 @@ import {
   useColorModeValue,
   VStack,
 } from '@chakra-ui/react';
+import NextLink from 'next/link';
 import React from 'react';
 import { FiChevronDown } from 'react-icons/fi';
 import { LoggedInUser } from '../../types/types';
@@ -43,7 +44,9 @@ const UserMenu = ({ name, alias, icon, lastUpdated, userEmail }: LoggedInUser['f
           color={'ButtonText'}
           borderColor={useColorModeValue('gray.200', 'gray.700')}
         >
-          <MenuItem>Profile</MenuItem>
+          <NextLink replace href={`userprofile/me/${encodeURIComponent(name)}`}>
+            <MenuItem>Profile</MenuItem>
+          </NextLink>
           <MenuItem>Settings</MenuItem>
           <MenuItem>Billing</MenuItem>
           <MenuDivider />
