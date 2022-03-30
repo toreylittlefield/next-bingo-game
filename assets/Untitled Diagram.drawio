@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2022-03-30T02:41:15.957Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.88 Safari/537.36" etag="DP4NPfDEcrregRvUCqef" version="16.6.6" type="github">
+<mxfile host="app.diagrams.net" modified="2022-03-30T03:02:42.353Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.88 Safari/537.36" etag="VgxwJOtt9ha00bZn0Cug" version="16.6.6" type="github">
   <diagram name="Page-1" id="74b105a0-9070-1c63-61bc-23e55f88626e">
     <mxGraphModel dx="2906.5" dy="612" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1.5" pageWidth="1169" pageHeight="826" background="none" math="0" shadow="0">
       <root>
@@ -320,6 +320,23 @@
         </mxCell>
         <mxCell id="6SLtEYj7phE97JPhrf0Y-170" value="" style="shape=image;html=1;verticalAlign=top;verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;imageAspect=0;aspect=fixed;image=https://cdn2.iconfinder.com/data/icons/boxicons-regular-vol-1/24/bx-cookie-128.png;fillColor=#67AB9F;imageBackground=#CC99FF;" vertex="1" parent="1">
           <mxGeometry x="-189" y="485.8" width="58" height="58" as="geometry" />
+        </mxCell>
+        <mxCell id="6SLtEYj7phE97JPhrf0Y-177" style="edgeStyle=elbowEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;fontColor=default;startArrow=none;startFill=0;endArrow=none;endFill=0;strokeColor=#333333;strokeWidth=1;" edge="1" parent="1" source="6SLtEYj7phE97JPhrf0Y-173" target="6SLtEYj7phE97JPhrf0Y-127">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6SLtEYj7phE97JPhrf0Y-173" value="Local Storage" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;labelBackgroundColor=none;fontSize=11;strokeColor=#9673a6;strokeWidth=1;fillColor=#e1d5e7;" vertex="1" parent="1">
+          <mxGeometry x="860" y="520" width="150" height="120" as="geometry">
+            <mxRectangle x="-730" y="200" width="220" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6SLtEYj7phE97JPhrf0Y-174" value="{Netlify Access Token, TTL}" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;labelBackgroundColor=none;fontSize=11;fontColor=default;" vertex="1" parent="6SLtEYj7phE97JPhrf0Y-173">
+          <mxGeometry y="30" width="150" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="6SLtEYj7phE97JPhrf0Y-175" value="{Fauna Access Token, TTL}" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;labelBackgroundColor=none;fontSize=11;fontColor=default;" vertex="1" parent="6SLtEYj7phE97JPhrf0Y-173">
+          <mxGeometry y="60" width="150" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="6SLtEYj7phE97JPhrf0Y-176" value="Netlify App / User Metadata" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;labelBackgroundColor=none;fontSize=11;fontColor=default;" vertex="1" parent="6SLtEYj7phE97JPhrf0Y-173">
+          <mxGeometry y="90" width="150" height="30" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
